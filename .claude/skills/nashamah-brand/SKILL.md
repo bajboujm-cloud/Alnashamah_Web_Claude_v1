@@ -5,7 +5,7 @@ description: Al Nashamah (النشامى) brand and UI taste guide. Load before 
 
 # Al Nashamah — brand & taste skill
 
-Source of truth: `docs/brand/brand-kit.pdf` (21 pages) and `docs/brand/logo-horizontal.png`.
+Source of truth: `docs/brand/brand-kit.pdf` (21 pages) and `docs/brand/logo-horizontal-transparent.png` (transparent PNG, current approved web logo).
 Brand promise: **"أصالة السوق المحلي، بمعايير تجارة عصرية"** — *A trusted, modern identity for livestock trading in the UAE.*
 Values: Trust (الثقة) · Heritage (الأصالة) · Quality (الجودة) · Accessibility (القرب).
 The identity draws on sheep/halal trading, **not** generic farm imagery. No cartoon farm clip-art.

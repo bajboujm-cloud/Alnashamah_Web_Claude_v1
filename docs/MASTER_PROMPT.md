@@ -1,193 +1,244 @@
 # Al Nashamah — Master Build Prompt
 
-> How to use: open Claude Code inside this repository (on your machine, or at claude.ai/code) and paste
-> everything between the two `=====` lines. Fill in the `[[...]]` placeholders first, or leave them —
-> Claude will put sensible defaults and list them as open questions.
-> Run it once to create the foundation (Phase 0–1). Afterwards build each later phase with the
-> Software Factory (`/factory run` on labelled GitHub issues) — see section 9 of the prompt.
+> How to use: on your laptop, open this repository folder in a terminal, start `claude`, and paste
+> everything between the two `=====` lines. Claude builds Phase 0–1 and tells you what to test.
+> Later phases are built one GitHub issue at a time with the Software Factory (section 10).
 
 =====
 
 You are a senior full-stack engineer and product designer. Build **Al Nashamah (النشامى)**, a bilingual
-(English + Arabic, full RTL) e-commerce web app for selling livestock in the UAE. It must later become a
-mobile app, so design the backend as a clean, versioned API that a React Native (Expo) app can reuse.
+(English + Arabic, full RTL) web app for ordering livestock in the UAE. Domain: **alnashamah.ae**.
+It will become a mobile app later, so expose the business logic through a clean, versioned API
+(`/api/v1/...`) that a React Native (Expo) app can reuse.
 
-Before writing code, read: `AGENTS.md` (create it if missing), `.claude/skills/nashamah-brand/SKILL.md`,
-`docs/brand/brand-kit.pdf`, `docs/brand/logo-horizontal.png`, and `docs/SETUP_GUIDE.md`.
+Read first: `AGENTS.md` (create it if missing), `.claude/skills/nashamah-brand/SKILL.md`,
+`docs/brand/brand-kit.pdf`, `docs/brand/logo-horizontal-transparent.png`, `docs/COMPETITOR_ANALYSIS.md`,
+`docs/SETUP_GUIDE.md`.
 
-## 1. Tech stack (fixed — do not substitute without asking)
+## 0. Budget rule — this phase is 100% free and runs only on my laptop
 
-- **Next.js (App Router) + React + TypeScript (strict)**, hosted on **Vercel**.
-- **Neon Postgres** with **Drizzle ORM** + drizzle-kit migrations (committed SQL migrations).
-- **Vercel Blob** for images (breed photos, logos) and generated PDF invoices (private access, signed URLs).
-- **Tailwind CSS** + shadcn/ui (Radix) themed with brand tokens; logical (RTL-safe) utilities only.
-- **next-intl** for i18n with `/en` and `/ar` routes; Arabic is default for `ar-*` browsers.
-- **Better Auth** (phone-number OTP plugin + email OTP/magic link + admin plugin), sessions in Neon.
-- **Twilio Verify** for SMS / WhatsApp OTP (handles UAE sender-ID rules and SMS-pumping fraud guard).
-- **Payments: [[Stripe | Tap Payments | Telr | Network International N-Genius]]** — default Stripe
-  (Checkout / Payment Element with cards, Apple Pay, Google Pay). Keep a `PaymentProvider` interface so
-  another UAE gateway or Tabby/Tamara (BNPL) can be added later.
-- **Resend** + React Email for transactional email; **@react-pdf/renderer** for bilingual PDF invoices
-  (embed Noto Kufi Arabic / Noto Sans Arabic fonts so Arabic shapes correctly).
-- **Zod** for all input validation (shared between client and server), **TanStack Query** on the client.
-- **Vitest** (unit), **Playwright** (e2e in EN and AR), **ESLint + Prettier**, **Sentry** (errors).
-- Cloudflare **Turnstile** (bot check) on OTP request and checkout; **Upstash Redis** rate limiting.
+We are in planning/design/implementation. **No paid subscriptions and nothing deployed online.**
+The testing environment is my laptop only. Every external service sits behind an interface with a
+free **local** implementation now and a **production** implementation that is switched on later by
+environment variables only (no code changes):
 
-## 2. Environments
+| Concern | Local now (free, on laptop) | Production later |
+|---|---|---|
+| Database | PostgreSQL 16 in Docker (`docker compose up`) | Neon Postgres |
+| File storage (photos, illustrations, invoices) | `LocalDiskStorage` → `./.storage/`, served by a route | Vercel Blob |
+| Payments | `MockPaymentProvider`: a fake card page with "Pay / Fail" buttons that calls the same webhook handler | Stripe or a UAE gateway (Tap / Telr / N-Genius) + Tabby/Tamara |
+| OTP SMS | `ConsoleOtpProvider`: prints the code in the terminal and shows it on screen in dev only | Twilio Verify (SMS + WhatsApp) |
+| Email | SMTP to **Mailpit** in Docker (inbox at http://localhost:8025) | Resend |
+| Bot check | Cloudflare Turnstile **test keys** (always pass) | Turnstile real keys |
+| Rate limiting | in-memory | Upstash Redis |
+| Hosting | `pnpm dev` / `pnpm build && pnpm start` on localhost | Vercel |
 
-- `local` — your machine: `.env.local`, Neon branch `dev`, Stripe test mode, Twilio test credentials.
-- `preview/staging` — every pull request gets a Vercel Preview deployment connected to a Neon
-  branch created per PR (Neon ↔ Vercel integration). This doubles as the testing/backup environment.
-- `production` — `main` branch on Vercel, Neon `main` branch (point-in-time restore enabled),
-  Stripe live mode.
-- Provide `.env.example` listing every variable with a comment; never commit secrets.
-- Seed script (`pnpm db:seed`) with demo categories, breeds, sizes, cutting and packaging options.
+Provide `docker-compose.yml` (postgres + mailpit), `.env.example` with every variable explained,
+`pnpm setup` (install, start Docker services, migrate, seed) and `pnpm dev`. The app must run with only
+Docker Desktop + Node.js installed and **zero accounts**. Never commit secrets.
 
-## 3. Catalogue model (all admin-editable, bilingual)
+## 1. Tech stack (fixed)
 
-`Category` (Sheep / غنم, Goats / ماعز; future: camels, cattle…) → `Breed` (e.g. Naeimi نعيمي,
-Najdi نجدي, Harri حري, Barbari, Omani, Somali, Australian, Syrian/Awassi — exact list from admin)
-→ `Size` (3–4 per breed, e.g. Small / Medium / Large / Extra-large).
+Next.js (App Router) + React + TypeScript (strict) · Tailwind CSS + shadcn/ui themed with brand tokens,
+RTL-safe logical utilities only · next-intl (`/en`, `/ar`; Arabic default for Arabic browsers) ·
+PostgreSQL + Drizzle ORM with committed migrations · Better Auth (phone-OTP + email + admin plugins) ·
+Zod validation shared client/server · TanStack Query · @react-pdf/renderer with embedded Noto Kufi
+Arabic / Noto Sans Arabic for invoices · React Email · Vitest · Playwright (EN + AR) · ESLint + Prettier.
 
-- Category: name_en, name_ar, slug, image, sort order, `is_active` toggle.
-- Breed: name_en/ar, description_en/ar, origin_en/ar, images (Blob), sort order, `is_active` toggle,
-  optional "badge" (Best seller, Local, Imported).
-- Size: label_en/ar, live weight range (kg, min–max), approximate meat yield (kg), price (AED, stored as
-  integer fils), compare-at price (optional), stock quantity or "unlimited", `is_active` toggle.
-- **One-tap availability toggle** (switch icon) on every breed and size in the admin list; toggling is
-  instant (optimistic UI), audited, and unavailable items show "Sold out / نفدت الكمية" to customers
-  instead of disappearing.
-- `CuttingOption` (to be provided later — build the table and admin UI now with placeholders such as
-  Whole carcass, Halves, Quarters, Medium pieces, Small pieces, Mandi cut, Kabsa cut, Minced portion):
-  name_en/ar, description, extra price (default 0), `is_active`, sort order, and which categories it applies to.
-- `SlaughterExtras` (optional add-ons, admin-managed): keep head, keep offal (liver/heart/kidney),
-  keep tripe/stomach, keep skin, remove fat, vacuum-pack — each with price and toggle.
-- `PackagingOption`: Normal bag (كيس عادي), Carton box with bag (كرتون مع كيس), Foam box with ice
-  (صندوق فلين مع ثلج) — name_en/ar, description, price, image, `is_active`.
-- Every price, weight and description is editable from the admin panel. Price changes never alter
-  existing orders: order lines store a **snapshot** of names and prices.
+## 2. Catalogue (everything admin-editable, bilingual EN/AR)
 
-## 4. Customer flow
+### Categories (each has an illustration / vector image)
+| Category | Status at launch |
+|---|---|
+| Sheep — غنم | active |
+| Goats — ماعز | active |
+| Cattle — أبقار | created, shown as **"Coming soon / قريباً"** (toggle) |
+| Camels — إبل | created, shown as **"Coming soon / قريباً"** (toggle) |
 
-1. Home: hero, categories, featured breeds, how-it-works (choose → cut → pack → deliver), trust
-   section (halal, licensed slaughterhouse, weight guarantee), occasions (Eid al-Adha / Udhiyah,
-   Aqiqah, Sadaqah, weddings, Ramadan), FAQ, WhatsApp button.
-2. Category → Breed list (photo, from-price, availability) → Breed detail with size picker (weight,
-   price, availability).
-3. **Step-by-step order builder** (stepper, back/next, summary always visible):
-   category → breed → size → cutting option → extras → packaging → quantity → occasion/notes
-   (e.g. "Udhiyah on behalf of …", Aqiqah name) → add to cart.
-4. Cart: edit lines, quantity, remove, promo/coupon code, price breakdown.
-5. Account step: **Log in / Sign up with mobile number (OTP)** or **Continue as guest**.
-   Guests give name + mobile (verified by OTP — needed for delivery calls) and an *optional* email
-   with a checkbox "Email me the invoice".
-6. Delivery: saved addresses for members; address form (Emirate dropdown: Abu Dhabi, Dubai, Sharjah,
-   Ajman, Umm Al Quwain, Ras Al Khaimah, Fujairah; area, street/building/villa, landmark, Google Maps
-   pin with "use my location"), delivery date + time slot (admin-managed slots, cut-off times,
-   blackout dates, per-slot capacity), delivery fee per emirate/zone, optional free-delivery threshold.
-   Option: "Pick up from shop" if enabled by admin.
-7. Review & pay: full summary with **UAE VAT 5%** shown, accept terms, pay online. Cash/card on
-   delivery is an admin toggle (default off).
-8. Confirmation page + email + SMS/WhatsApp message with order number and invoice link.
-9. Order tracking page (members and guests via order number + mobile): Received → Confirmed →
-   Slaughtering → Cutting & packing → Out for delivery → Delivered (or Cancelled / Refunded).
+Fields: name_en/ar, slug, **illustration (SVG/PNG)**, short description, sort order, status
+(`active` / `coming_soon` / `hidden`). New categories can be added any time from the admin.
 
-## 5. Payments, invoices and email
+### Seasonal collections (each has its own illustration / vector image)
+- **Eid Al-Adha Sacrifice / Qurban — أضحية عيد الأضحى / قربان** (first seasonal option; more can be added,
+  e.g. Aqiqah — عقيقة).
+- Fields: name_en/ar, description, illustration, on/off toggle, visible-from / visible-until dates,
+  pre-booking window, which breeds/age options are eligible (and optional seasonal price override),
+  delivery day choice (e.g. Eid day 1 / 2 / 3), "on behalf of" name field, banner on the home page
+  while active.
 
-- Create the order as `pending_payment` **before** redirecting to payment; confirm only from the
-  verified payment webhook (signature check, idempotent), never from the browser redirect.
-- Totals are always recomputed on the server from the database; never trust client prices.
-- On payment success generate a **bilingual Tax Invoice PDF** matching the brand kit invoice
-  template (green header bar, "INVOICE | فاتورة", gold hairlines): company legal name, address,
-  **TRN** [[company TRN]], invoice number (sequential, gap-free per year), date, customer, delivery
-  address, lines (breed, size, weight range, cutting, extras, packaging), subtotal, delivery,
-  discount, VAT 5%, total in AED. Store it in Vercel Blob (private) and link it from the account.
-- Email the invoice (attachment + secure link) to logged-in users with an email, or to guests who
-  ticked "email me the invoice". Always allow downloading the PDF from the confirmation page.
-- Refunds (full/partial) from the admin panel via the payment provider; credit-note PDF.
+### Breeds (each has ONE photo — photos are per breed, not per age/weight)
+| Category | Breeds (EN — AR) |
+|---|---|
+| Sheep | Naeemi — نعيمي · Najdi — نجدي · Herri — حري · Somali — صومالي · Local — محلي |
+| Goats | Local — محلي · Somali — صومالي · Kashmiri — كشميري |
 
-## 6. Authentication and security
+Fields: name_en/ar, description_en/ar (origin, taste, best for), **photo** (uploaded in admin; use a
+neutral branded placeholder until provided), sort order, **availability toggle**.
 
-- Primary login: **mobile number + one-time code** (SMS, WhatsApp fallback) via Twilio Verify.
-  Phone numbers in E.164, default country +971.
-- Risks of phone login and the required mitigations — implement all:
-  - SMS pumping / toll fraud → Turnstile on "send code", per-number + per-IP rate limits, allow-list
-    of countries (UAE + GCC by default), Twilio Fraud Guard on.
-  - OTP brute force → 6-digit codes, 5-minute expiry, max 5 attempts, lockout with back-off.
-  - SIM swap / number recycling → users can add a verified email as a second factor and recovery
-    method; sensitive actions (change phone, view all invoices after long inactivity) re-verify.
-  - Session safety → httpOnly, Secure, SameSite cookies; rotate on login; logout everywhere.
-- **Admin/staff accounts never use SMS-only login**: email + password + TOTP (authenticator app) or
-  passkey, role-based access (owner, manager, order-staff, content-editor), audit log of every change.
-- OWASP Top 10: CSRF protection, strict CSP and security headers, input validation with Zod,
-  parameterised queries (Drizzle), no secrets in client bundles, signed URLs for invoices, PII minimised,
-  UAE PDPL-friendly privacy policy, cookie consent, data export/delete on request.
+### Age / weight options (per breed)
+Each option = **Age range + Weight range + Price** — values are **placeholders for now** (show "—" /
+"Price on request" style placeholder in the admin, not fake numbers to customers).
+- Fields: label_en/ar (optional, e.g. "Option 1"), age (from–to, months), live weight (from–to, kg),
+  price (AED, stored as integer fils), optional compare-at price, sort order, **availability toggle**.
+- Seed **3 options per breed**; the admin can add a 4th or 5th option to specific breeds (no hard limit,
+  UI designed for 3–5) and delete/reorder options.
 
-## 7. Admin panel (`/admin`, bilingual, mobile-friendly)
+### Availability toggles — the most important admin feature
+- One-tap switch icon next to every **breed** and every **age/weight option** in the admin list
+  (and inside the breed edit page). Instant save with optimistic UI and an undo toast; every change is
+  written to an audit log (who/when).
+- Turning a **breed off** → the breed card stays visible with an **"Out of stock / نفدت الكمية"**
+  label and all its options are unselectable. Turning **one option off** → that row stays visible,
+  greyed, with the same label. **Never hide** out-of-stock items. Ordering an unavailable item is
+  blocked on the server too (and re-checked at checkout and at payment).
+- Same toggle pattern for cutting options, extras and packaging.
 
-- Dashboard: today's orders, revenue, orders by status, low stock, upcoming delivery slots.
-- Catalogue CRUD for categories, breeds, sizes, cutting options, extras, packaging (drag to reorder,
-  image upload to Blob, EN/AR fields side by side, availability toggles).
-- Orders: list/filter/search, detail, change status (sends customer notification), print packing slip
-  and invoice, assign driver, refunds, internal notes.
-- Customers: list, order history, block/unblock.
-- Delivery: zones/emirates with fees, time slots, capacity, cut-off, holidays/blackout dates,
-  Eid pre-booking window.
-- Promotions: coupon codes (percent/fixed, expiry, usage limits, minimum order).
-- Content: homepage banners, FAQ, terms, privacy, about — EN/AR.
-- Settings: company info, TRN, VAT rate, contact numbers, WhatsApp number, payment methods on/off.
-- Reports: sales by day/breed/size, CSV export.
+### Cutting options — final list will be provided later
+Build the table and admin UI now. Seed editable placeholders based on common UAE cuts (owner will
+rename/remove): Arabic cut 8 pieces, Arabic cut 4 pieces, Half lengthwise, Fridge cut (medium pieces),
+Whole (Ghouzi), Saloona (small pieces), Biryani (large pieces), Hadrami joints, Mufattah.
+Fields: name_en/ar, description, optional photo and optional video link, extra price (default 0),
+applies-to categories, toggle, sort order.
 
-## 8. Design and quality bar
+### "Order includes" extras
+Checkboxes per order line: **Head — الرأس · Intestines — المصران · Tripe — الكرش** (admin-editable list,
+each with default ticked/unticked, optional price, toggle).
 
-- Follow `.claude/skills/nashamah-brand/SKILL.md` exactly (colors, fonts, no gradients/shadows,
-  gold hairlines, RTL). Mobile-first; looks like a premium local brand, not a template.
-- Accessibility WCAG 2.2 AA; Lighthouse ≥ 90 on performance, accessibility, best practices, SEO.
-- SEO: localized metadata, `hreflang`, sitemap, Open Graph images, product structured data.
-- PWA manifest + icons (from the icon-only mark) so it can be "installed" before the native app.
-- Analytics: Vercel Analytics + privacy-friendly events (view breed, add to cart, checkout, purchase).
+### Packaging (price per animal)
+| Option | Price |
+|---|---|
+| Slaughterhouse bag — كيس المسلخ | Free |
+| Carton box — كرتون | AED 10 |
+| Foam box with ice — صندوق فلين مع ثلج | AED 25 |
 
-## 9. Repository, CI and the Software Factory
+Admin can edit names, descriptions, photos, prices and toggle each one.
 
-- Create/maintain `AGENTS.md` with: fresh-checkout setup, `pnpm dev --port <port>`, and validation
-  commands (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm e2e`).
-- GitHub Actions `ci.yml` on every PR: install, lint, typecheck, unit tests, build, Playwright e2e
-  (EN + AR), `drizzle-kit check`. Add **CodeQL**, **Dependabot** (npm + actions, weekly),
-  **dependency-review**, Lighthouse CI on the preview URL, and a `SECURITY.md`.
-- Assume branch protection on `main`: PR required, CI green required, no force push.
-- Install the **Software Factory v2** by following
-  https://github.com/zazencodes/zazencodes-season-3/blob/main/src/software-factory-claude-code-v2/INSTALL.md
-  — fill `factory/checks.sh` with the same commands as CI, tailor the reviewer agents
-  (security: auth/OTP/payments/webhooks/PII; ui: the nashamah-brand skill + RTL; ux: the order stepper,
-  guest checkout, Arabic copy), add `.claude/skills/nashamah-brand` to the reviewers' reading list, and
-  make the approver ESCALATE anything touching auth, payments, invoices/VAT, migrations or env vars.
-- After Phase 0–1 below, create one GitHub issue per remaining phase item (labelled `factory` only
-  when I confirm), small enough for one PR each.
+### Delivery — placeholder
+Prices and slots are not decided. Build the data model and admin screens (zones per emirate with fee,
+time slots with capacity and cut-off, blackout dates, pickup-from-shop toggle) but seed them as
+**"To be confirmed"**: fee 0 with a visible "Delivery fee will be confirmed" note in checkout, and a
+single generic slot. All seven emirates in the address dropdown.
 
-## 10. Delivery plan
+### Price rules
+All totals are computed on the server from the database. Order lines store a **snapshot** of names,
+age/weight, and prices so later edits never change past orders. UAE **VAT 5%** configurable in settings
+(prices entered VAT-inclusive or exclusive — setting).
 
-- **Phase 0** — repo scaffold, tooling, CI, AGENTS.md, brand tokens, fonts, layout shell (header,
-  footer, language switch, RTL), `.env.example`, Neon + Drizzle schema + seed, Vercel deploy.
-- **Phase 1** — public catalogue (categories, breeds, sizes, availability) EN/AR.
-- **Phase 2** — admin panel: auth for staff, catalogue CRUD, toggles, image upload.
-- **Phase 3** — order builder (cutting, extras, packaging), cart.
-- **Phase 4** — customer auth (phone OTP), guest checkout, addresses, delivery slots/zones.
-- **Phase 5** — payments + webhook, orders, VAT, PDF invoice, email/SMS notifications.
-- **Phase 6** — order tracking, admin order management, refunds, coupons, reports.
-- **Phase 7** — SEO, PWA, analytics, performance and security hardening, launch checklist.
-- **Phase 8 (later)** — Expo mobile app reusing the API and translations; push notifications.
+## 3. Customer flow
 
-Work rules: small commits with clear messages, never commit secrets, write tests with each feature,
-keep everything bilingual from day one, and stop to ask me when a decision is a business decision
-(prices, policies, legal text, gateway choice). At the end of each phase, list what I must test and
-what you need from me.
+1. **Home**: hero with logo, category tiles with illustrations (Cattle/Camels "Coming soon"), active
+   seasonal banner (Eid Al-Adha / Qurban with its illustration), breeds, how-it-works
+   (Choose → Cut → Pack → Deliver), trust strip (halal, licensed slaughterhouse, weight guarantee,
+   vet-checked), FAQ, WhatsApp button. Language auto-detected, one-tap switch — **no blocking pop-up**.
+2. Category → breed cards (photo, "from" price or "Price on request", availability label).
+3. **Breed page / order builder** (stepper with a sticky summary):
+   age/weight option (radio rows: *age · weight · price*) → cutting (cards with photo) → extras
+   (head / intestines / tripe) → packaging (bag free / carton 10 / foam+ice 25) → quantity →
+   special instructions (+ "on behalf of" name for Qurban) → Add to cart.
+4. Cart → **Log in with mobile number (OTP)** or **Continue as guest** (name + mobile verified by OTP,
+   optional email + "Email me the invoice" checkbox).
+5. **Delivery address** (required before payment): emirate, area, street/building/villa, landmark,
+   map pin (optional, Google Maps later), date/slot (placeholder), saved addresses for members.
+6. Review & pay (VAT shown, accept terms) → payment (mock locally).
+7. Confirmation page, invoice download, email (Mailpit locally), order tracking:
+   Received → Confirmed → Slaughtering → Cutting & packing → Out for delivery → Delivered
+   (or Cancelled / Refunded). Guests track with order number + mobile.
 
-## Open inputs from the owner (ask if still missing)
+## 4. Payments and invoices
 
-- [[Competitor website URL to analyse]]
-- [[Final list of breeds, sizes, weights, prices]]  ·  [[Cutting options and prices]]
-- [[Packaging prices]]  ·  [[Delivery fees per emirate, time slots, cut-off times]]
-- [[Company legal name, trade licence, TRN, address, phone, WhatsApp, email domain]]
-- [[Payment gateway choice and merchant account]]  ·  [[Domain name]]
+- Order created as `pending_payment` before payment; marked paid **only** by the verified webhook
+  (signature, idempotent) — the mock provider uses the exact same code path.
+- On payment, generate a bilingual **Tax Invoice PDF** following the brand kit invoice page (green top
+  bar, "INVOICE | فاتورة", gold hairlines, logo): company details and TRN from settings (placeholders now),
+  sequential invoice number, customer, address, lines (category, breed, age, weight, cutting, extras,
+  packaging, qty, price), subtotal, delivery, discount, VAT 5%, total AED. Store via the storage
+  interface; downloadable from confirmation page and account.
+- Email the invoice to members with an email, or to guests who ticked the box.
+
+## 5. Login and security
+
+- Customers: **mobile number + one-time code** (E.164, default +971). Mitigations (implement now, with
+  local equivalents): bot check before sending a code; rate limits per number and per IP; country
+  allow-list (UAE + GCC); 6-digit code, 5-minute expiry, max 5 attempts then lockout; optional verified
+  email as backup/recovery; re-verify for changing phone number; secure httpOnly cookies, session
+  rotation, "log out of all devices".
+- Admin/staff: **email + password + authenticator app (TOTP)** — never SMS-only. Roles: owner, manager,
+  order staff, content editor. Audit log for every catalogue, price, toggle and order change.
+- OWASP Top 10: CSRF, strict CSP and security headers, Zod validation, parameterised queries, private
+  invoice files behind auth/signed links, minimal PII, privacy policy (UAE PDPL), cookie notice.
+
+## 6. Admin panel (`/admin`, EN/AR, mobile-friendly)
+
+Dashboard (today's orders, revenue, status counts) · Categories (illustrations, coming-soon status) ·
+Seasonal collections · Breeds (photo upload, toggle) · Age/weight options per breed (inline table:
+age, weight, price, toggle, add row, reorder) · Cutting, extras, packaging (toggle, price) · Orders
+(filter, status change with customer notification, print invoice & packing slip, notes, refund) ·
+Customers · Delivery zones/slots (placeholder) · Coupons · Pages/FAQ content · Settings (company,
+TRN, VAT, phones, WhatsApp, payment methods) · Simple sales report + CSV export.
+
+## 7. Design and quality
+
+Follow `.claude/skills/nashamah-brand/SKILL.md` exactly. Use the transparent logo
+`docs/brand/logo-horizontal-transparent.png` (copy into `public/brand/`); build an icon-only mark and
+favicon from it; create simple brand-coloured SVG illustrations for each category and for Eid Al-Adha
+(flat, Royal Green / Gold / Ivory line style matching the logo — replaceable in admin).
+Mobile-first; WCAG 2.2 AA; Lighthouse ≥ 90; server-rendered pages with localized metadata, hreflang,
+sitemap and product structured data (competitor is JS-only — beat them on SEO); PWA manifest.
+
+## 8. Environments
+
+1. **Local (now)** — laptop only, as in section 0.
+2. **Production (later)** — Vercel + Neon + Blob + real providers on `alnashamah.ae`.
+3. **Staging/backup (later)** — Vercel Preview per pull request + Neon database branch; Neon
+   point-in-time restore for backups.
+Document in `AGENTS.md` how to switch each provider by env vars.
+
+## 9. Repository and free GitHub checks
+
+- `AGENTS.md`: setup, `pnpm dev --port <port>`, validation commands
+  (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm e2e`).
+- GitHub Actions `ci.yml` on every PR and push to `main`: install, lint, typecheck, unit tests, build,
+  Playwright e2e (EN + AR) against a Postgres service container, migration check.
+- Free security checks (repo is private, so avoid paid GitHub Advanced Security features):
+  **Dependabot** alerts + version updates (npm + actions), `actions/dependency-review-action`,
+  **gitleaks** (secret scanning), **Semgrep** OSS (static security analysis), `pnpm audit`,
+  Lighthouse CI against the locally built app, plus `SECURITY.md`. (If the repo is ever made public,
+  enable GitHub CodeQL and push protection too.)
+- Branch protection on `main`: PR required, CI must pass.
+
+## 10. Software Factory
+
+Install **Software Factory v2** by following
+https://github.com/zazencodes/zazencodes-season-3/blob/main/src/software-factory-claude-code-v2/INSTALL.md
+— `factory/checks.sh` = the same commands as CI; tailor reviewers: security (OTP, sessions, payments
+webhook, invoices, PII), UI (nashamah-brand skill, RTL, out-of-stock labels), UX (order stepper, guest
+checkout, Arabic copy). The approver must ESCALATE anything touching auth, payments, invoices/VAT,
+database migrations, env vars or CI. After Phase 1, create one small GitHub issue per remaining item
+(I add the `factory` label when ready).
+
+## 11. Phases
+
+- **Phase 0** — scaffold, Docker services, providers with local implementations, CI + security checks,
+  AGENTS.md, brand tokens/fonts, layout (header, footer, language switch, RTL), schema + seed
+  (categories, Eid seasonal, 8 breeds, 3 placeholder options each, cuts, extras, packaging).
+- **Phase 1** — public catalogue EN/AR with out-of-stock labels and coming-soon categories.
+- **Phase 2** — admin: staff login (TOTP), catalogue CRUD, photo/illustration upload, one-tap toggles,
+  audit log.
+- **Phase 3** — order builder (age/weight, cutting, extras, packaging, notes), cart.
+- **Phase 4** — customer phone-OTP login, guest checkout, addresses, delivery placeholder.
+- **Phase 5** — mock payment + webhook, orders, VAT, PDF invoice, emails.
+- **Phase 6** — order tracking, admin order management, coupons, Eid Al-Adha collection, reports.
+- **Phase 7** — SEO, PWA, accessibility/performance/security hardening, go-live checklist and
+  production provider switch-over guide.
+- **Phase 8 (later)** — Expo mobile app reusing the API, translations and brand tokens.
+
+Rules: small commits, tests with every feature, bilingual from day one, never commit secrets, ask me
+before any business decision (prices, policies, legal text, gateway). At the end of each phase list
+exactly what I should click/test on my laptop and what you need from me.
+
+## Inputs still to come from the owner
+Age/weight/price per breed · breed photos · final cutting options · delivery fees and slots ·
+company legal name, licence, TRN, address, phones, WhatsApp, email · refund/cancellation policy ·
+payment gateway (after trade licence).
 
 =====
