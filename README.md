@@ -1,15 +1,29 @@
-# Al Nashamah (النشامى) — Livestock Trading Web App · alnashamah.ae
+# Al Nashamah (النشامى) — Livestock Trading · alnashamah.ae
 
-Bilingual (English / Arabic) web app for ordering sheep and goats in the UAE (cattle and camels later,
-plus seasonal Eid Al-Adha / Qurban), to be extended into a mobile app.
+Bilingual (Arabic / English) web store for ordering sheep and goats in the UAE — cattle and camels later,
+plus seasonal Eid Al-Adha / Qurban — to be extended into a mobile app.
 
-| File | What it is |
-|---|---|
-| `docs/MASTER_PROMPT.md` | Ready-made prompt to paste into Claude Code to build the app |
-| `docs/SETUP_GUIDE.md` | What to install, which accounts you need (none paid for now), how it connects |
-| `docs/COMPETITOR_ANALYSIS.md` | Review of zabehaty.com and what we do better |
-| `.claude/skills/nashamah-brand/SKILL.md` | Brand/taste skill (colors, fonts, RTL, logo rules) used by Claude |
-| `docs/brand/` | Brand kit PDF and transparent logo |
+**Status:** Phase 0 (foundation) and Phase 1 (public catalogue) are built. See `docs/MASTER_PROMPT.md` §11.
 
-Stack: Next.js + React + TypeScript · PostgreSQL (Docker locally → Neon later) · local storage → Vercel Blob ·
-mock payments → payment gateway · console OTP → Twilio · Mailpit → Resend. Testing runs on the owner's laptop only.
+## Run it on your laptop
+
+Requires Node.js 22+, Docker Desktop. Full beginner steps (Windows): `docs/SETUP_GUIDE.md` §4.
+
+```bash
+corepack enable
+pnpm install
+cp .env.example .env.local   # Windows: copy .env.example .env.local
+pnpm db:setup                # database + starting catalogue
+pnpm dev                     # http://localhost:3000
+```
+
+## Documents
+
+| File                                     | What it is                                                     |
+| ---------------------------------------- | -------------------------------------------------------------- |
+| `docs/MASTER_PROMPT.md`                  | The full product spec Claude builds from (kept up to date)     |
+| `docs/SETUP_GUIDE.md`                    | What to install, free accounts, how everything connects        |
+| `docs/COMPETITOR_ANALYSIS.md`            | Review of zabehaty.com and what we do better                   |
+| `AGENTS.md`                              | Technical guide: commands, project map, rules                  |
+| `.claude/skills/nashamah-brand/SKILL.md` | Brand rules (colours, fonts, RTL, logo) used for every UI task |
+| `docs/brand/`                            | Brand kit PDF and original logo                                |

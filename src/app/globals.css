@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/*
+ * Al Nashamah brand tokens — see .claude/skills/nashamah-brand/SKILL.md
+ * Flat colours only: no gradients, no shadows, thin gold hairlines.
+ */
+@theme {
+  --color-green: #0f3d32;
+  --color-green-900: #0b2e26;
+  --color-green-700: #1d5446;
+  --color-gold: #c9a86b;
+  --color-gold-deep: #b5852f;
+  --color-ivory: #f5efe6;
+  --color-ivory-200: #ece3d4;
+  --color-charcoal: #1e2a24;
+  --color-muted: #5b6b63;
+  --color-line: #d9cdb6;
+  --color-danger: #a4553a;
+
+  --font-sans: var(--font-inter), var(--font-noto-sans-arabic), ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: var(--font-noto-sans-arabic), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-kufi: var(--font-noto-kufi-arabic), var(--font-noto-sans-arabic), sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+
+  --radius-brand: 4px;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-ivory);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+}
+
+html[lang="ar"] body {
+  font-family: var(--font-arabic);
+  line-height: 1.8;
+}
+
+/* Display headings: Noto Kufi Arabic in Arabic, serif display in English (brand kit p.09). */
+.font-display {
+  font-family: var(--font-serif);
+  letter-spacing: 0.01em;
+}
+html[lang="ar"] .font-display {
+  font-family: var(--font-kufi);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* Small tracked label used under section titles, e.g. "BRAND ESSENCE / POSITIONING". */
+.label-tracked {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+html[lang="ar"] .label-tracked {
+  letter-spacing: 0;
+  font-size: 0.85rem;
+}
+
+/* Subtle brand pattern (diagonal gold strokes + green dashes from the logo roof line). */
+.brand-pattern {
+  background-image: url("/illustrations/pattern.svg");
+  background-size: 180px 120px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold-deep);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

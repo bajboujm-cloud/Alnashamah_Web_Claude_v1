@@ -1,0 +1,30 @@
+# Local development services — run with `pnpm db:up` (needs Docker Desktop).
+# Nothing here is used in production.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nashamah
+      POSTGRES_PASSWORD: nashamah
+      POSTGRES_DB: nashamah
+    ports:
+      - "5433:5432" # 5433 on your laptop, so it never clashes with another Postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nashamah -d nashamah"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  mailpit:
+    # Catches every email the app sends. Inbox: http://localhost:8025
+    image: axllent/mailpit:v1.21
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # web inbox
+
+volumes:
+  pgdata:

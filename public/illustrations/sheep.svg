@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" role="img" aria-label="Sheep">
+<path d="M38 58 L176 18 L176 28 L38 68 Z" fill="#0F3D32"/><path d="M184 14 L210 27 Q214 29 214 34 L214 140 L204 140 L204 36 L184 26 Z" fill="#B5852F"/>
+<g fill="#0F3D32">
+<rect x="78" y="108" width="7" height="33" rx="3"/><rect x="94" y="110" width="7" height="31" rx="3"/>
+<rect x="132" y="110" width="7" height="31" rx="3"/><rect x="148" y="108" width="7" height="33" rx="3"/>
+<circle cx="82" cy="96" r="16"/><circle cx="98" cy="84" r="19"/><circle cx="120" cy="80" r="20"/><circle cx="141" cy="84" r="18"/>
+<circle cx="154" cy="98" r="14"/><circle cx="100" cy="104" r="15"/><circle cx="128" cy="104" r="15"/><circle cx="70" cy="90" r="7"/>
+<path d="M150 78 Q160 62 176 64 Q190 67 190 80 Q190 92 178 96 Q166 99 158 92 Z"/>
+<path d="M166 68 Q156 74 160 90 Q151 82 153 70 Z" />
+</g>
+<g fill="#F5EFE6"><circle cx="179" cy="76" r="2"/></g>
+<path d="M163 69 Q151 78 158 92" fill="none" stroke="#F5EFE6" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M24 141 Q120 133 216 141 L216 144 L24 144 Z" fill="#0F3D32"/>
+</svg>

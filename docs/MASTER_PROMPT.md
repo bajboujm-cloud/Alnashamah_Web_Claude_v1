@@ -1,7 +1,7 @@
 # Al Nashamah — Master Build Prompt
 
-> How to use: on your laptop, open this repository folder in a terminal, start `claude`, and paste
-> everything between the two `=====` lines. Claude builds Phase 0–1 and tells you what to test.
+> This is the living spec Claude Code works from — you don't need to paste it. It is kept up to date
+> with every decision. **Status: Phase 0 and Phase 1 are built** (see §11).
 > Later phases are built one GitHub issue at a time with the Software Factory (section 10).
 
 =====
@@ -12,7 +12,7 @@ It will become a mobile app later, so expose the business logic through a clean,
 (`/api/v1/...`) that a React Native (Expo) app can reuse.
 
 Read first: `AGENTS.md` (create it if missing), `.claude/skills/nashamah-brand/SKILL.md`,
-`docs/brand/brand-kit.pdf`, `docs/brand/logo-horizontal-transparent.png`, `docs/COMPETITOR_ANALYSIS.md`,
+`docs/brand/brand-kit.pdf`, `public/brand/` (web logo files), `docs/COMPETITOR_ANALYSIS.md`,
 `docs/SETUP_GUIDE.md`.
 
 ## 0. Budget rule — this phase is 100% free and runs only on my laptop
@@ -22,16 +22,16 @@ The testing environment is my laptop only. Every external service sits behind an
 free **local** implementation now and a **production** implementation that is switched on later by
 environment variables only (no code changes):
 
-| Concern | Local now (free, on laptop) | Production later |
-|---|---|---|
-| Database | PostgreSQL 16 in Docker (`docker compose up`) | Neon Postgres |
-| File storage (photos, illustrations, invoices) | `LocalDiskStorage` → `./.storage/`, served by a route | Vercel Blob |
-| Payments | `MockPaymentProvider`: a fake card page with "Pay / Fail" buttons that calls the same webhook handler | Stripe or a UAE gateway (Tap / Telr / N-Genius) + Tabby/Tamara |
-| OTP SMS | `ConsoleOtpProvider`: prints the code in the terminal and shows it on screen in dev only | Twilio Verify (SMS + WhatsApp) |
-| Email | SMTP to **Mailpit** in Docker (inbox at http://localhost:8025) | Resend |
-| Bot check | Cloudflare Turnstile **test keys** (always pass) | Turnstile real keys |
-| Rate limiting | in-memory | Upstash Redis |
-| Hosting | `pnpm dev` / `pnpm build && pnpm start` on localhost | Vercel |
+| Concern                                        | Local now (free, on laptop)                                                                           | Production later                                               |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Database                                       | PostgreSQL 16 in Docker (`docker compose up`)                                                         | Neon Postgres                                                  |
+| File storage (photos, illustrations, invoices) | `LocalDiskStorage` → `./.storage/`, served by a route                                                 | Vercel Blob                                                    |
+| Payments                                       | `MockPaymentProvider`: a fake card page with "Pay / Fail" buttons that calls the same webhook handler | Stripe or a UAE gateway (Tap / Telr / N-Genius) + Tabby/Tamara |
+| OTP SMS                                        | `ConsoleOtpProvider`: prints the code in the terminal and shows it on screen in dev only              | Twilio Verify (SMS + WhatsApp)                                 |
+| Email                                          | SMTP to **Mailpit** in Docker (inbox at http://localhost:8025)                                        | Resend                                                         |
+| Bot check                                      | Cloudflare Turnstile **test keys** (always pass)                                                      | Turnstile real keys                                            |
+| Rate limiting                                  | in-memory                                                                                             | Upstash Redis                                                  |
+| Hosting                                        | `pnpm dev` / `pnpm build && pnpm start` on localhost                                                  | Vercel                                                         |
 
 Provide `docker-compose.yml` (postgres + mailpit), `.env.example` with every variable explained,
 `pnpm setup` (install, start Docker services, migrate, seed) and `pnpm dev`. The app must run with only
@@ -48,17 +48,19 @@ Arabic / Noto Sans Arabic for invoices · React Email · Vitest · Playwright (E
 ## 2. Catalogue (everything admin-editable, bilingual EN/AR)
 
 ### Categories (each has an illustration / vector image)
-| Category | Status at launch |
-|---|---|
-| Sheep — غنم | active |
-| Goats — ماعز | active |
+
+| Category       | Status at launch                                      |
+| -------------- | ----------------------------------------------------- |
+| Sheep — غنم    | active                                                |
+| Goats — ماعز   | active                                                |
 | Cattle — أبقار | created, shown as **"Coming soon / قريباً"** (toggle) |
-| Camels — إبل | created, shown as **"Coming soon / قريباً"** (toggle) |
+| Camels — إبل   | created, shown as **"Coming soon / قريباً"** (toggle) |
 
 Fields: name_en/ar, slug, **illustration (SVG/PNG)**, short description, sort order, status
 (`active` / `coming_soon` / `hidden`). New categories can be added any time from the admin.
 
 ### Seasonal collections (each has its own illustration / vector image)
+
 - **Eid Al-Adha Sacrifice / Qurban — أضحية عيد الأضحى / قربان** (first seasonal option; more can be added,
   e.g. Aqiqah — عقيقة).
 - Fields: name_en/ar, description, illustration, on/off toggle, visible-from / visible-until dates,
@@ -67,23 +69,27 @@ Fields: name_en/ar, slug, **illustration (SVG/PNG)**, short description, sort or
   while active.
 
 ### Breeds (each has ONE photo — photos are per breed, not per age/weight)
-| Category | Breeds (EN — AR) |
-|---|---|
-| Sheep | Naeemi — نعيمي · Najdi — نجدي · Herri — حري · Somali — صومالي · Local — محلي |
-| Goats | Local — محلي · Somali — صومالي · Kashmiri — كشميري |
+
+| Category | Breeds (EN — AR)                                                             |
+| -------- | ---------------------------------------------------------------------------- |
+| Sheep    | Naeemi — نعيمي · Najdi — نجدي · Herri — حري · Somali — صومالي · Local — محلي |
+| Goats    | Local — محلي · Somali — صومالي · Kashmiri — كشميري                           |
 
 Fields: name_en/ar, description_en/ar (origin, taste, best for), **photo** (uploaded in admin; use a
 neutral branded placeholder until provided), sort order, **availability toggle**.
 
 ### Age / weight options (per breed)
+
 Each option = **Age range + Weight range + Price** — values are **placeholders for now** (show "—" /
 "Price on request" style placeholder in the admin, not fake numbers to customers).
+
 - Fields: label_en/ar (optional, e.g. "Option 1"), age (from–to, months), live weight (from–to, kg),
   price (AED, stored as integer fils), optional compare-at price, sort order, **availability toggle**.
 - Seed **3 options per breed**; the admin can add a 4th or 5th option to specific breeds (no hard limit,
   UI designed for 3–5) and delete/reorder options.
 
 ### Availability toggles — the most important admin feature
+
 - One-tap switch icon next to every **breed** and every **age/weight option** in the admin list
   (and inside the breed edit page). Instant save with optimistic UI and an undo toast; every change is
   written to an audit log (who/when).
@@ -94,6 +100,7 @@ Each option = **Age range + Weight range + Price** — values are **placeholders
 - Same toggle pattern for cutting options, extras and packaging.
 
 ### Cutting options — final list will be provided later
+
 Build the table and admin UI now. Seed editable placeholders based on common UAE cuts (owner will
 rename/remove): Arabic cut 8 pieces, Arabic cut 4 pieces, Half lengthwise, Fridge cut (medium pieces),
 Whole (Ghouzi), Saloona (small pieces), Biryani (large pieces), Hadrami joints, Mufattah.
@@ -101,25 +108,29 @@ Fields: name_en/ar, description, optional photo and optional video link, extra p
 applies-to categories, toggle, sort order.
 
 ### "Order includes" extras
+
 Checkboxes per order line: **Head — الرأس · Intestines — المصران · Tripe — الكرش** (admin-editable list,
 each with default ticked/unticked, optional price, toggle).
 
 ### Packaging (price per animal)
-| Option | Price |
-|---|---|
-| Slaughterhouse bag — كيس المسلخ | Free |
-| Carton box — كرتون | AED 10 |
+
+| Option                                | Price  |
+| ------------------------------------- | ------ |
+| Slaughterhouse bag — كيس المسلخ       | Free   |
+| Carton box — كرتون                    | AED 10 |
 | Foam box with ice — صندوق فلين مع ثلج | AED 25 |
 
 Admin can edit names, descriptions, photos, prices and toggle each one.
 
 ### Delivery — placeholder
+
 Prices and slots are not decided. Build the data model and admin screens (zones per emirate with fee,
 time slots with capacity and cut-off, blackout dates, pickup-from-shop toggle) but seed them as
 **"To be confirmed"**: fee 0 with a visible "Delivery fee will be confirmed" note in checkout, and a
 single generic slot. All seven emirates in the address dropdown.
 
 ### Price rules
+
 All totals are computed on the server from the database. Order lines store a **snapshot** of names,
 age/weight, and prices so later edits never change past orders. UAE **VAT 5%** configurable in settings
 (prices entered VAT-inclusive or exclusive — setting).
@@ -132,7 +143,7 @@ age/weight, and prices so later edits never change past orders. UAE **VAT 5%** c
    vet-checked), FAQ, WhatsApp button. Language auto-detected, one-tap switch — **no blocking pop-up**.
 2. Category → breed cards (photo, "from" price or "Price on request", availability label).
 3. **Breed page / order builder** (stepper with a sticky summary):
-   age/weight option (radio rows: *age · weight · price*) → cutting (cards with photo) → extras
+   age/weight option (radio rows: _age · weight · price_) → cutting (cards with photo) → extras
    (head / intestines / tripe) → packaging (bag free / carton 10 / foam+ice 25) → quantity →
    special instructions (+ "on behalf of" name for Qurban) → Add to cart.
 4. Cart → **Log in with mobile number (OTP)** or **Continue as guest** (name + mobile verified by OTP,
@@ -178,8 +189,8 @@ TRN, VAT, phones, WhatsApp, payment methods) · Simple sales report + CSV export
 
 ## 7. Design and quality
 
-Follow `.claude/skills/nashamah-brand/SKILL.md` exactly. Use the transparent logo
-`docs/brand/logo-horizontal-transparent.png` (copy into `public/brand/`); build an icon-only mark and
+Follow `.claude/skills/nashamah-brand/SKILL.md` exactly. Use the logo files in `public/brand/`
+(tagline **LIVESTOCK TRADING / لتجارة المواشي**; never "Cattle trading"); icon-only mark and
 favicon from it; create simple brand-coloured SVG illustrations for each category and for Eid Al-Adha
 (flat, Royal Green / Gold / Ivory line style matching the logo — replaceable in admin).
 Mobile-first; WCAG 2.2 AA; Lighthouse ≥ 90; server-rendered pages with localized metadata, hreflang,
@@ -191,7 +202,7 @@ sitemap and product structured data (competitor is JS-only — beat them on SEO)
 2. **Production (later)** — Vercel + Neon + Blob + real providers on `alnashamah.ae`.
 3. **Staging/backup (later)** — Vercel Preview per pull request + Neon database branch; Neon
    point-in-time restore for backups.
-Document in `AGENTS.md` how to switch each provider by env vars.
+   Document in `AGENTS.md` how to switch each provider by env vars.
 
 ## 9. Repository and free GitHub checks
 
@@ -218,10 +229,12 @@ database migrations, env vars or CI. After Phase 1, create one small GitHub issu
 
 ## 11. Phases
 
-- **Phase 0** — scaffold, Docker services, providers with local implementations, CI + security checks,
+- **Phase 0 ✅** — scaffold, Docker services (Postgres + Mailpit), CI + security checks,
   AGENTS.md, brand tokens/fonts, layout (header, footer, language switch, RTL), schema + seed
   (categories, Eid seasonal, 8 breeds, 3 placeholder options each, cuts, extras, packaging).
-- **Phase 1** — public catalogue EN/AR with out-of-stock labels and coming-soon categories.
+- **Phase 1 ✅** — public catalogue EN/AR with out-of-stock labels and coming-soon categories.
+  Each service adapter (storage, OTP, email, payment) is built in the phase that first needs it,
+  with its free local implementation.
 - **Phase 2** — admin: staff login (TOTP), catalogue CRUD, photo/illustration upload, one-tap toggles,
   audit log.
 - **Phase 3** — order builder (age/weight, cutting, extras, packaging, notes), cart.
@@ -237,6 +250,7 @@ before any business decision (prices, policies, legal text, gateway). At the end
 exactly what I should click/test on my laptop and what you need from me.
 
 ## Inputs still to come from the owner
+
 Age/weight/price per breed · breed photos · final cutting options · delivery fees and slots ·
 company legal name, licence, TRN, address, phones, WhatsApp, email · refund/cancellation policy ·
 payment gateway (after trade licence).

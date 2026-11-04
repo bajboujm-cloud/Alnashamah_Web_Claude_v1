@@ -10,7 +10,7 @@ A **marketplace**, not a single trader. Alongside livestock (الذبائح) it 
 different butchers, poultry, fish, vegetables & fruit, spices, organic goods, "productive families"
 products, gift wrapping, plus **donations** to UAE charities (Sharjah Charity, Dubai Charity, Emirates
 Food Bank, Beit Al Khair, Dar Al Ber, IACAD…) and an **Aqiqah & Nudhur** section.
-Operator: *Zabehaty Fresh Trading – Sole Proprietorship LLC*. iOS + Android apps.
+Operator: _Zabehaty Fresh Trading – Sole Proprietorship LLC_. iOS + Android apps.
 
 ## Livestock section
 
@@ -24,7 +24,7 @@ Operator: *Zabehaty Fresh Trading – Sole Proprietorship LLC*. iOS + Android ap
 ## Product page (order builder) — same idea as ours
 
 1. **Available weight** (الوزن المتاح): radio list, each row = weight + age + price,
-   e.g. *10–13 kg · 12–15 months · AED 735*; *9–11 kg · 3–6 months · AED 780*.
+   e.g. _10–13 kg · 12–15 months · AED 735_; _9–11 kg · 3–6 months · AED 780_.
    → Confirms your "age + weight range + price" model.
 2. **Cutting** (طريقة التقطيع), 10 options, each with a **photo and a video icon**: Arabic cut 8 pieces,
    Arabic cut 4 pieces, Arabic half lengthwise, Fridge cut (medium pieces), Whole (Ghouzi),
@@ -44,15 +44,15 @@ Operator: *Zabehaty Fresh Trading – Sole Proprietorship LLC*. iOS + Android ap
 
 ## Weaknesses we can beat
 
-| Their weakness | Al Nashamah answer |
-|---|---|
-| Cluttered marketplace (vegetables, spices, 20 butchers) — livestock is one tab among many | Focused, premium livestock brand; 3 clicks from home to cart |
-| JavaScript-only pages — search engines and slow phones see an empty page ("Zabehaty") | Server-rendered bilingual pages, good Google ranking for "خروف نعيمي دبي" etc. |
-| Language pop-up blocks every first visit | Auto-detect language, one-tap switch in header |
-| Sold-out products simply vanish; no stock status | Clear **Out of stock / نفدت الكمية** label with one-tap toggle |
-| Generic product photos; no breed explanation | Real photo + short story per breed (origin, taste, best for) |
-| Visible bugs (wallet "0 undefined"), footer email on another company's domain, © 2024 | Polished, consistent, tested in both languages |
-| No visible halal/slaughterhouse/weight guarantee | Trust strip: licensed slaughterhouse, halal, weight guarantee, vet-checked |
+| Their weakness                                                                            | Al Nashamah answer                                                             |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Cluttered marketplace (vegetables, spices, 20 butchers) — livestock is one tab among many | Focused, premium livestock brand; 3 clicks from home to cart                   |
+| JavaScript-only pages — search engines and slow phones see an empty page ("Zabehaty")     | Server-rendered bilingual pages, good Google ranking for "خروف نعيمي دبي" etc. |
+| Language pop-up blocks every first visit                                                  | Auto-detect language, one-tap switch in header                                 |
+| Sold-out products simply vanish; no stock status                                          | Clear **Out of stock / نفدت الكمية** label with one-tap toggle                 |
+| Generic product photos; no breed explanation                                              | Real photo + short story per breed (origin, taste, best for)                   |
+| Visible bugs (wallet "0 undefined"), footer email on another company's domain, © 2024     | Polished, consistent, tested in both languages                                 |
+| No visible halal/slaughterhouse/weight guarantee                                          | Trust strip: licensed slaughterhouse, halal, weight guarantee, vet-checked     |
 
 ## What we copy (good ideas) — now in the master prompt
 

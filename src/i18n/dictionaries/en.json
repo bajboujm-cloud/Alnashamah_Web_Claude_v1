@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "siteName": "Al Nashamah",
+    "tagline": "Livestock Trading",
+    "title": "Al Nashamah — Fresh Sheep & Goats Delivered in the UAE",
+    "description": "Order fresh sheep and goats online in the UAE — Naeemi, Najdi, Herri, Somali, Local and Kashmiri. Slaughtered, cut and packed your way, delivered to your door."
+  },
+  "nav": {
+    "home": "Home",
+    "categories": "Livestock",
+    "eid": "Eid Al-Adha",
+    "howItWorks": "How it works",
+    "faq": "FAQ",
+    "switchLanguage": "العربية",
+    "switchLanguageLabel": "التبديل إلى العربية",
+    "menu": "Menu",
+    "skipToContent": "Skip to content"
+  },
+  "home": {
+    "heroEyebrow": "Livestock Trading · UAE",
+    "heroTitle": "Heritage of the local market, with modern trading standards",
+    "heroText": "Choose your sheep or goat, pick the age and weight, the cutting and packaging — we handle the rest and deliver fresh to your door.",
+    "heroCta": "Browse livestock",
+    "heroSecondary": "How it works",
+    "categoriesTitle": "Our livestock",
+    "categoriesLabel": "Categories",
+    "seasonalLabel": "Seasonal",
+    "seasonalCta": "View Eid offers",
+    "breedsTitle": "Popular breeds",
+    "breedsLabel": "Breeds",
+    "howTitle": "How it works",
+    "howLabel": "Four simple steps",
+    "steps": [
+      { "title": "Choose", "text": "Pick the breed, age and weight that suit your occasion." },
+      { "title": "Cut", "text": "Select how you want it cut — whole, halves or pieces." },
+      { "title": "Pack", "text": "Slaughterhouse bag, carton box, or foam box with ice." },
+      { "title": "Deliver", "text": "Fresh to your door, on the day and time you choose." }
+    ],
+    "trustTitle": "Why Al Nashamah",
+    "trustLabel": "Our promise",
+    "trust": [
+      { "title": "Halal", "text": "Slaughtered according to Islamic rites." },
+      { "title": "Licensed slaughterhouse", "text": "Hygienic, inspected facilities." },
+      { "title": "Clear age & weight", "text": "You know exactly what you are getting." },
+      { "title": "Fresh delivery", "text": "Packed with care, delivered across the UAE." }
+    ],
+    "faqTitle": "Frequently asked questions",
+    "faqLabel": "FAQ",
+    "faq": [
+      {
+        "q": "Which areas do you deliver to?",
+        "a": "We deliver across the UAE. Delivery fees and time slots will be announced soon."
+      },
+      {
+        "q": "Can I choose how the meat is cut?",
+        "a": "Yes. After choosing the breed and size you select the cutting style and packaging."
+      },
+      {
+        "q": "Is the slaughter halal?",
+        "a": "Yes. Every animal is slaughtered according to Islamic rites in a licensed slaughterhouse."
+      },
+      {
+        "q": "Do I need an account to order?",
+        "a": "No. You can sign in with your mobile number or continue as a guest."
+      }
+    ]
+  },
+  "catalog": {
+    "breedsIn": "Breeds",
+    "from": "From",
+    "priceSoon": "Price coming soon",
+    "outOfStock": "Out of stock",
+    "comingSoon": "Coming soon",
+    "comingSoonText": "We're preparing this category. Check back soon!",
+    "viewBreed": "View options",
+    "photoSoon": "Photo coming soon",
+    "optionsTitle": "Age & weight options",
+    "optionsLabel": "Choose a size",
+    "age": "Age",
+    "weight": "Live weight",
+    "price": "Price",
+    "tbc": "To be confirmed",
+    "months": "months",
+    "kg": "kg",
+    "orderingSoon": "Online ordering opens soon",
+    "orderingSoonText": "Cutting, packaging and checkout are coming in the next update.",
+    "packagingTitle": "Packaging options",
+    "free": "Free",
+    "noBreeds": "No breeds available yet.",
+    "back": "Back",
+    "eligibleBreeds": "Eligible breeds"
+  },
+  "footer": {
+    "about": "A trusted, modern identity for livestock trading in the UAE.",
+    "rights": "All rights reserved.",
+    "contact": "Contact us on WhatsApp"
+  },
+  "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundText": "The page you are looking for doesn't exist or has moved.",
+    "goHome": "Back to home",
+    "errorTitle": "Something went wrong",
+    "errorText": "Please try again in a moment.",
+    "retry": "Try again"
+  }
+}

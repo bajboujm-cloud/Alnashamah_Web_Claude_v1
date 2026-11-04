@@ -1,7 +1,27 @@
-node_modules/
-.next/
+# dependencies
+/node_modules
+# next.js / build
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+# testing
+/coverage
+/test-results/
+/playwright-report/
+# env files (never commit secrets) — .env.example is the template
 .env*
 !.env.example
-.vercel/
+# local file storage (uploads, invoices)
+/.storage/
+# vercel
+.vercel
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+.pnpm-debug.log*
+# software factory runtime state
 /factory/jobs/
 /.worktrees/

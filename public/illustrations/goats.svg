@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" role="img" aria-label="Goat">
+<path d="M38 58 L176 18 L176 28 L38 68 Z" fill="#0F3D32"/><path d="M184 14 L210 27 Q214 29 214 34 L214 140 L204 140 L204 36 L184 26 Z" fill="#B5852F"/>
+<g fill="#0F3D32">
+<rect x="80" y="104" width="6" height="37" rx="3"/><rect x="94" y="106" width="6" height="35" rx="3"/>
+<rect x="136" y="106" width="6" height="35" rx="3"/><rect x="150" y="104" width="6" height="37" rx="3"/>
+<path d="M74 92 Q76 74 100 72 L146 72 Q160 72 164 66 L170 56 L182 60 L178 74 Q172 92 160 100 Q150 110 120 110 L96 110 Q76 108 74 92 Z"/>
+<path d="M74 86 Q66 76 70 66 Q74 76 80 80 Z"/>
+<path d="M168 58 Q174 44 192 46 Q200 48 200 58 Q200 66 192 70 L182 74 Q172 72 168 58 Z"/>
+<path d="M190 68 L194 84 L186 72 Z"/>
+<path d="M174 50 Q170 34 182 26" fill="none" stroke="#0F3D32" stroke-width="5" stroke-linecap="round"/>
+<path d="M180 52 Q182 38 196 34" fill="none" stroke="#0F3D32" stroke-width="4" stroke-linecap="round"/>
+<path d="M172 56 Q162 58 160 68 Q168 66 174 62 Z"/>
+</g>
+<circle cx="188" cy="55" r="2" fill="#F5EFE6"/>
+<path d="M24 141 Q120 133 216 141 L216 144 L24 144 Z" fill="#0F3D32"/>
+</svg>

@@ -1,0 +1,9 @@
+pnpm-lock.yaml
+drizzle/
+.next/
+node_modules/
+public/
+docs/brand/
+docs/competitor/
+playwright-report/
+test-results/

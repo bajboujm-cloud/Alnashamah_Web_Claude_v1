@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" role="img" aria-label="Cattle">
+<path d="M38 58 L176 18 L176 28 L38 68 Z" fill="#0F3D32"/><path d="M184 14 L210 27 Q214 29 214 34 L214 140 L204 140 L204 36 L184 26 Z" fill="#B5852F"/>
+<g fill="#0F3D32" transform="translate(-16 0)">
+<rect x="68" y="104" width="10" height="37" rx="4"/><rect x="86" y="106" width="10" height="35" rx="4"/>
+<rect x="140" y="106" width="10" height="35" rx="4"/><rect x="158" y="104" width="10" height="37" rx="4"/>
+<path d="M60 90 Q60 70 84 68 L156 66 Q172 66 178 74 L182 82 Q182 104 166 110 L80 112 Q60 110 60 90 Z"/>
+<path d="M62 78 Q50 86 52 112 L56 112 Q56 92 64 86 Z"/>
+<circle cx="53" cy="114" r="4"/>
+<path d="M172 68 Q178 58 192 58 Q204 60 206 72 L206 88 Q204 98 194 98 Q184 98 180 90 Z"/>
+<path d="M176 64 Q166 52 170 44 Q176 54 184 58 Z"/>
+<path d="M200 62 Q214 56 214 46 Q206 54 196 58 Z"/>
+<path d="M150 108 Q152 118 146 120 L138 110 Z"/>
+</g>
+<circle cx="178" cy="72" r="2" fill="#F5EFE6"/>
+<path d="M24 141 Q120 133 216 141 L216 144 L24 144 Z" fill="#0F3D32"/>
+</svg>

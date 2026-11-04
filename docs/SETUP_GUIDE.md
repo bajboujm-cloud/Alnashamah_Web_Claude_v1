@@ -23,11 +23,11 @@ which (free) accounts you need now, and what gets added later when you go live.
 adding keys: Vercel (hosting on alnashamah.ae), Neon (online database), Vercel Blob (photos/invoices),
 payment gateway, Twilio (SMS codes), Resend (email). Nothing has to be rewritten.
 
-| Environment | When | Where |
-|---|---|---|
-| Local / testing | **now** | your laptop only |
-| Production | later | Vercel + Neon on alnashamah.ae |
-| Staging / backup | later | Vercel preview per change + Neon database copy & backups |
+| Environment      | When    | Where                                                    |
+| ---------------- | ------- | -------------------------------------------------------- |
+| Local / testing  | **now** | your laptop only                                         |
+| Production       | later   | Vercel + Neon on alnashamah.ae                           |
+| Staging / backup | later   | Vercel preview per change + Neon database copy & backups |
 
 ## 2. Install on your laptop (all free)
 
@@ -44,39 +44,55 @@ payment gateway, Twilio (SMS codes), Resend (email). Nothing has to be rewritten
 
 ## 3. Accounts
 
-| Now | Cost |
-|---|---|
-| **Claude** (Pro works; Max gives more build time) | your existing plan |
-| **GitHub** — the repo `bajboujm-cloud/Alnashamah_Web_Claude_v1` | free |
+| Now                                                             | Cost               |
+| --------------------------------------------------------------- | ------------------ |
+| **Claude** (Pro works; Max gives more build time)               | your existing plan |
+| **GitHub** — the repo `bajboujm-cloud/Alnashamah_Web_Claude_v1` | free               |
 
 Nothing else is needed now. The app uses free local stand-ins: the OTP code is printed on screen,
 emails land in the local Mailpit inbox, and payments go through a fake "Pay / Fail" page.
 
-| Later, at go-live (not now) | Notes |
-|---|---|
-| Vercel Pro | required for a commercial site (~USD 20/month) |
-| Neon | free tier may be enough at first; paid plan for backups |
-| Payment gateway (Stripe UAE, Tap, Telr, N-Genius) + Tabby/Tamara | needs trade licence, Emirates ID, IBAN, TRN |
-| Twilio Verify | pay per SMS code; UAE sender ID registration |
-| Resend | free up to 3,000 emails/month |
-| Cloudflare Turnstile, Upstash, Sentry | free tiers |
-| alnashamah.ae DNS | you own it already — point it to Vercel at go-live |
+| Later, at go-live (not now)                                      | Notes                                                   |
+| ---------------------------------------------------------------- | ------------------------------------------------------- |
+| Vercel Pro                                                       | required for a commercial site (~USD 20/month)          |
+| Neon                                                             | free tier may be enough at first; paid plan for backups |
+| Payment gateway (Stripe UAE, Tap, Telr, N-Genius) + Tabby/Tamara | needs trade licence, Emirates ID, IBAN, TRN             |
+| Twilio Verify                                                    | pay per SMS code; UAE sender ID registration            |
+| Resend                                                           | free up to 3,000 emails/month                           |
+| Cloudflare Turnstile, Upstash, Sentry                            | free tiers                                              |
+| alnashamah.ae DNS                                                | you own it already — point it to Vercel at go-live      |
 
-## 4. First run on your laptop
+## 4. First run on your laptop (Windows)
 
-1. Get the code: `git clone https://github.com/bajboujm-cloud/Alnashamah_Web_Claude_v1.git`
-   then `cd Alnashamah_Web_Claude_v1` (or `git pull` if you already have it).
-2. Open Docker Desktop (it must be running).
-3. Start Claude Code in that folder: `claude`
-4. Paste the prompt from `docs/MASTER_PROMPT.md`. Claude builds Phase 0–1, commits and pushes.
-5. Run it: `pnpm setup` (first time only) then `pnpm dev`, and open:
-   - http://localhost:3000/en and http://localhost:3000/ar — the store
-   - http://localhost:3000/admin — admin panel (login details printed by the seed step)
-   - http://localhost:8025 — test inbox where invoice emails arrive
+Phases 0–1 are already built and on GitHub; you don't need to paste any prompt.
+
+1. Install Git, Node.js 22 LTS and Docker Desktop (section 2), then open **Docker Desktop** and wait until it says _running_.
+2. Open **PowerShell** and run, one line at a time:
+   ```powershell
+   corepack enable
+   git clone https://github.com/bajboujm-cloud/Alnashamah_Web_Claude_v1.git
+   cd Alnashamah_Web_Claude_v1
+   git checkout ccr-74fd4369-jq71o5      # until this work is merged into main
+   pnpm install
+   copy .env.example .env.local
+   pnpm db:setup                          # database in Docker + starting catalogue
+   pnpm dev
+   ```
+3. Open in your browser:
+   - http://localhost:3000/ar — the store in Arabic
+   - http://localhost:3000/en — the store in English
+   - http://localhost:8025 — test email inbox (used from Phase 5)
+4. To stop: press `Ctrl + C` in PowerShell. Next time only `pnpm dev` is needed (with Docker Desktop open).
+5. To get new updates later: `git pull`, then `pnpm install` and `pnpm db:migrate`.
+
+Optional: `pnpm db:studio` opens a simple database browser where you can already switch a breed or
+age/weight option off (`is_available` = false) to see the "Out of stock / نفدت الكمية" label — the proper
+one-tap admin switches come in Phase 2.
 
 ## 5. GitHub settings (free, one time)
 
 On github.com → your repo → **Settings**:
+
 - **Branches → Add rule for `main`**: require a pull request, require status checks to pass,
   block force pushes.
 - **Code security**: turn on **Dependabot alerts** and **Dependabot security updates** (free).
@@ -97,12 +113,12 @@ On github.com → your repo → **Settings**:
 
 Yes, it's the normal choice in the UAE, with these protections built in:
 
-| Risk | Protection |
-|---|---|
-| Bots triggering thousands of paid SMS ("SMS pumping") | bot check, rate limits, UAE/GCC-only numbers, Twilio fraud guard |
-| Guessing the code | 6 digits, 5-minute expiry, 5 tries, then temporary lock |
-| SIM swap / old numbers given to someone else | optional verified email as backup; re-check before changing phone |
-| SMS not arriving | WhatsApp or email code fallback |
+| Risk                                                  | Protection                                                        |
+| ----------------------------------------------------- | ----------------------------------------------------------------- |
+| Bots triggering thousands of paid SMS ("SMS pumping") | bot check, rate limits, UAE/GCC-only numbers, Twilio fraud guard  |
+| Guessing the code                                     | 6 digits, 5-minute expiry, 5 tries, then temporary lock           |
+| SIM swap / old numbers given to someone else          | optional verified email as backup; re-check before changing phone |
+| SMS not arriving                                      | WhatsApp or email code fallback                                   |
 
 Admin/staff use **email + password + authenticator app** instead, because they control prices and orders.
 

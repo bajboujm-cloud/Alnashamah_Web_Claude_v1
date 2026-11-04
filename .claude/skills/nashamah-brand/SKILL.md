@@ -5,20 +5,24 @@ description: Al Nashamah (النشامى) brand and UI taste guide. Load before 
 
 # Al Nashamah — brand & taste skill
 
-Source of truth: `docs/brand/brand-kit.pdf` (21 pages) and `docs/brand/logo-horizontal-transparent.png` (transparent PNG, current approved web logo).
-Brand promise: **"أصالة السوق المحلي، بمعايير تجارة عصرية"** — *A trusted, modern identity for livestock trading in the UAE.*
+Source of truth: `docs/brand/brand-kit.pdf` (21 pages). Web logo files are in `public/brand/` (made from
+`docs/brand/logo-horizontal-transparent.png`): `logo-horizontal.png` (colour), `logo-horizontal-reverse.png`
+(on green), `mark.png` / `mark-reverse.png` (sheep icon only), `icon-*.png` (app icons).
+The public name is **Al Nashamah Livestock Trading — النشامى لتجارة المواشي**. The logo tagline reads
+**LIVESTOCK TRADING** (never "Cattle trading", which appears only on the trade licence).
+Brand promise: **"أصالة السوق المحلي، بمعايير تجارة عصرية"** — _A trusted, modern identity for livestock trading in the UAE._
 Values: Trust (الثقة) · Heritage (الأصالة) · Quality (الجودة) · Accessibility (القرب).
 The identity draws on sheep/halal trading, **not** generic farm imagery. No cartoon farm clip-art.
 
 ## Colors (official, flat — no gradients)
 
-| Token | Name | Hex | Use |
-|---|---|---|---|
-| `--brand-green` | Royal Green / الأخضر الملكي | `#0F3D32` | primary surfaces, headers, primary buttons, headings |
-| `--brand-gold` | Aged Gold / الذهبي المعتّق | `#C9A86B` | thin rules, accents, highlights, active states, prices |
-| `--brand-ivory` | Warm Ivory / العاجي الدافئ | `#F5EFE6` | page background, cards on green |
-| `--brand-charcoal` | Charcoal / الفحمي | `#1E2A24` | body text, footer, monochrome |
-| `--brand-gold-deep` | (logo roof accent) | `#B5852F` | logo only / small icon accents |
+| Token               | Name                        | Hex       | Use                                                    |
+| ------------------- | --------------------------- | --------- | ------------------------------------------------------ |
+| `--brand-green`     | Royal Green / الأخضر الملكي | `#0F3D32` | primary surfaces, headers, primary buttons, headings   |
+| `--brand-gold`      | Aged Gold / الذهبي المعتّق  | `#C9A86B` | thin rules, accents, highlights, active states, prices |
+| `--brand-ivory`     | Warm Ivory / العاجي الدافئ  | `#F5EFE6` | page background, cards on green                        |
+| `--brand-charcoal`  | Charcoal / الفحمي           | `#1E2A24` | body text, footer, monochrome                          |
+| `--brand-gold-deep` | (logo roof accent)          | `#B5852F` | logo only / small icon accents                         |
 
 Ratio: **70% green + ivory · 20% charcoal · 10% gold** (gold for details only).
 Contrast: gold on ivory fails WCAG for body text — use gold only for large text, rules and decoration; body text is charcoal or green.
@@ -28,8 +32,8 @@ Errors may use a muted terracotta (`#A4553A`, as on the "don't" crosses in the k
 
 - Arabic display / headings: **Noto Kufi Arabic** Bold.
 - Arabic body: **Noto Sans Arabic** Regular.
-- English display (wordmark-style, "AL NASHAMAH"): serif display — **Georgia** or a close web serif (e.g. *Libre Caslon* / *Noto Serif*), letter-spaced, uppercase.
-- English UI/body: clean sans (e.g. **Inter** / *Noto Sans*), small caps labels with wide tracking (e.g. `BRAND ESSENCE / POSITIONING`).
+- English display (wordmark-style, "AL NASHAMAH"): serif display — **Georgia** or a close web serif (e.g. _Libre Caslon_ / _Noto Serif_), letter-spaced, uppercase.
+- English UI/body: clean sans (e.g. **Inter** / _Noto Sans_), small caps labels with wide tracking (e.g. `BRAND ESSENCE / POSITIONING`).
 - Section label pattern from the kit: Arabic title bold green, under it a tiny tracked uppercase English label in grey-green, then a thin gold hairline rule.
 
 ## Layout & graphic language
