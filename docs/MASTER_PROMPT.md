@@ -243,6 +243,8 @@ database migrations, env vars or CI. After Phase 1, create one small GitHub issu
   with its free local implementation.
 - **Phase 2 ✅** — admin: staff login (TOTP), catalogue CRUD, photo/illustration upload, one-tap toggles,
   audit log, business settings, staff accounts with roles (owner, manager, order staff, content editor).
+  Since then: per-breed Shown/Hidden, category & seasonal show/hide, Website text editor, Branding
+  (logo + welcome picture uploads), Promotions slider above the welcome section, WhatsApp number from settings.
 - **Phase 3** — order builder (age/weight, cutting, extras, packaging, notes), cart.
 - **Phase 4** — customer phone-OTP login, guest checkout, addresses, delivery placeholder.
 - **Phase 5** — mock payment + webhook, orders, VAT, PDF invoice, emails.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, type ReactNode } from "react";
+import { startTransition, useActionState, useEffect, useRef, type ReactNode } from "react";
 import type { FormState } from "./form-state";
 
 type Props = {
@@ -22,7 +22,18 @@ export function ActionForm({ action, messages, children, className = "", resetOn
   }, [state, resetOnSuccess]);
 
   return (
-    <form ref={ref} action={formAction} className={className} data-pending={pending || undefined}>
+    <form
+      ref={ref}
+      // Submitting ourselves (instead of action={…}) stops React from emptying the form after every
+      // submit, so typed values and chosen files survive an error message.
+      onSubmit={(e) => {
+        e.preventDefault();
+        const data = new FormData(e.currentTarget);
+        startTransition(() => formAction(data));
+      }}
+      className={className}
+      data-pending={pending || undefined}
+    >
       <fieldset disabled={pending} className="contents">
         {children}
       </fieldset>

@@ -1,22 +1,27 @@
-import Image from "next/image";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { Container } from "./Container";
+import { Logo } from "./Logo";
 
-export function Footer({ locale, t, whatsapp }: { locale: Locale; t: Dictionary; whatsapp: string | null }) {
+export function Footer({
+  locale,
+  t,
+  whatsapp,
+  logo,
+}: {
+  locale: Locale;
+  t: Dictionary;
+  whatsapp: string | null;
+  /** Logo for dark backgrounds. */
+  logo: string;
+}) {
   const year = new Date().getFullYear();
   return (
     <footer className="mt-20 bg-green text-ivory">
       <div className="h-1 bg-gold" aria-hidden />
       <Container className="grid gap-8 py-12 sm:grid-cols-2">
         <div>
-          <Image
-            src="/brand/logo-horizontal-reverse.png"
-            alt={`${t.meta.siteName} — ${t.meta.tagline}`}
-            width={1294}
-            height={459}
-            className="h-16 w-auto"
-          />
+          <Logo src={logo} alt={`${t.meta.siteName} — ${t.meta.tagline}`} className="h-16" />
           <p className="mt-4 max-w-sm text-sm text-ivory/80">{t.footer.about}</p>
         </div>
         <div className="flex flex-col gap-3 sm:items-end">

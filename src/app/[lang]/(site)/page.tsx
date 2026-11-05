@@ -8,16 +8,25 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { hasLocale, pick } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { isSeasonVisible } from "@/lib/availability";
-import { getFeaturedBreeds, getSeasonalCollections, getVisibleCategories } from "@/server/catalog";
+import { PromoSlider } from "@/components/PromoSlider";
+import { getBranding } from "@/server/branding";
+import {
+  getActivePromotions,
+  getFeaturedBreeds,
+  getSeasonalCollections,
+  getVisibleCategories,
+} from "@/server/catalog";
 
 export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const [t, categories, breeds, seasons] = await Promise.all([
+  const [t, categories, breeds, seasons, brand, promos] = await Promise.all([
     getDictionary(lang),
     getVisibleCategories(),
     getFeaturedBreeds(8),
     getSeasonalCollections(),
+    getBranding(),
+    getActivePromotions(),
   ]);
   const activeSeasons = seasons.filter((s) => isSeasonVisible(s));
   const nameOf = (id: string) => {
@@ -27,6 +36,25 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
 
   return (
     <>
+      <PromoSlider
+        rtl={lang === "ar"}
+        labels={{
+          region: t.home.promoLabel,
+          prev: t.home.promoPrev,
+          next: t.home.promoNext,
+          goTo: t.home.promoGoTo,
+        }}
+        slides={promos.map((p) => ({
+          id: p.id,
+          title: pick(lang, p.titleEn, p.titleAr),
+          text: pick(lang, p.textEn, p.textAr),
+          image: p.imageUrl,
+          imageMobile: p.imageMobileUrl,
+          button: pick(lang, p.buttonEn, p.buttonAr),
+          link: p.linkUrl,
+        }))}
+      />
+
       {/* Hero */}
       <section className="brand-pattern relative overflow-hidden bg-green text-ivory">
         <div className="absolute inset-y-0 start-0 w-1.5 bg-gold" aria-hidden />
@@ -52,12 +80,13 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
             </div>
           </div>
           <Image
-            src="/brand/mark-reverse.png"
+            src={brand.heroImage}
             alt=""
             width={442}
             height={229}
             priority
-            className="mx-auto h-auto w-full max-w-sm"
+            unoptimized={brand.heroImage.endsWith(".svg")}
+            className="mx-auto h-auto max-h-72 w-full max-w-sm object-contain"
           />
         </Container>
       </section>

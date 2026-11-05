@@ -61,6 +61,8 @@ pnpm e2e                  # browser tests (tests/e2e), desktop + phone, needs th
 - `src/server/storage/` — uploads (real file type checked from the bytes, 5 MB max), saved under `STORAGE_DIR`
   and served by `src/app/files/[...key]/route.ts`. Vercel Blob replaces this at go-live.
 - `src/app/[lang]/(site)/` — the public shop pages (header/footer layout).
+  Logos, the welcome picture and the WhatsApp number come from `getBranding()` (`src/server/branding.ts`),
+  never hard-coded paths; home promotions from `getActivePromotions()`.
 - `public/brand/` — logo files (do not redraw or recolour; see the brand skill). `public/illustrations/` — category art.
 
 ## Rules

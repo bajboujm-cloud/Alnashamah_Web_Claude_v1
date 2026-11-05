@@ -199,6 +199,28 @@ export const seasonalCollectionBreeds = pgTable(
   (t) => [primaryKey({ columns: [t.collectionId, t.breedId] })],
 );
 
+/** Home-page promotion slides (Admin → Promotions). Shown only while active and inside the dates. */
+export const promotions = pgTable("promotions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  titleEn: text("title_en").notNull().default(""),
+  titleAr: text("title_ar").notNull().default(""),
+  textEn: text("text_en").notNull().default(""),
+  textAr: text("text_ar").notNull().default(""),
+  /** Wide banner (3:1). */
+  imageUrl: text("image_url").notNull(),
+  /** Optional phone version (4:3); the wide one is used when empty. */
+  imageMobileUrl: text("image_mobile_url"),
+  buttonEn: text("button_en").notNull().default(""),
+  buttonAr: text("button_ar").notNull().default(""),
+  /** A page on this site ("/ar/sheep") or a full https:// address. */
+  linkUrl: text("link_url"),
+  isActive: boolean("is_active").notNull().default(true),
+  startsAt: timestamp("starts_at", { withTimezone: true }),
+  endsAt: timestamp("ends_at", { withTimezone: true }),
+  sortOrder: integer("sort_order").notNull().default(0),
+  ...timestamps,
+});
+
 /** Delivery zones per emirate. Fee null = "to be confirmed" (placeholder until decided). */
 export const deliveryZones = pgTable("delivery_zones", {
   id: uuid("id").primaryKey().defaultRandom(),

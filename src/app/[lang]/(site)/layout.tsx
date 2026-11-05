@@ -5,7 +5,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { hasLocale, pick } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { isSeasonVisible } from "@/lib/availability";
-import { whatsappNumber } from "@/lib/site";
+import { getBranding } from "@/server/branding";
 import { getSeasonalCollections } from "@/server/catalog";
 
 /** Menu label: the part before " / " (e.g. "Eid Al-Adha Sacrifice / Qurban" → "Eid Al-Adha Sacrifice"). */
@@ -15,18 +15,22 @@ const shortName = (name: string) => name.split(" / ")[0];
 export default async function SiteLayout({ children, params }: LayoutProps<"/[lang]">) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const [t, seasons] = await Promise.all([getDictionary(lang), getSeasonalCollections()]);
+  const [t, seasons, brand] = await Promise.all([
+    getDictionary(lang),
+    getSeasonalCollections(),
+    getBranding(),
+  ]);
   const seasonal = seasons
     .filter((s) => isSeasonVisible(s))
     .map((s) => ({ slug: s.slug, label: shortName(pick(lang, s.nameEn, s.nameAr)) }));
   return (
     <>
-      <Header locale={lang} t={t} seasonal={seasonal} />
+      <Header locale={lang} t={t} seasonal={seasonal} logo={brand.logo} />
       <main id="main" className="flex-1">
         {children}
       </main>
-      <Footer locale={lang} t={t} whatsapp={whatsappNumber} />
-      {whatsappNumber ? <WhatsAppButton number={whatsappNumber} label={t.footer.contact} /> : null}
+      <Footer locale={lang} t={t} whatsapp={brand.whatsapp} logo={brand.logoReverse} />
+      {brand.whatsapp ? <WhatsAppButton number={brand.whatsapp} label={t.footer.contact} /> : null}
     </>
   );
 }

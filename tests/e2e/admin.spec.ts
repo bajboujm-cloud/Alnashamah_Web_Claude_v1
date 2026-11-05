@@ -34,6 +34,8 @@ test.afterAll(async () => {
   await sql`update seasonal_collections set is_active = true where slug = 'eid-al-adha'`;
   await sql`delete from site_texts`;
   await sql`update breeds set is_visible = true`;
+  await sql`delete from promotions`;
+  await sql`delete from settings where key like 'brand.%'`;
   await cleanupStaff();
 });
 
@@ -255,4 +257,62 @@ test("a breed can be hidden from the website and shown again", async () => {
   await expect(sw).not.toHaveAttribute("data-pending");
   await page.goto("/en/goats");
   await expect(page.getByTestId("breed-card")).toHaveCount(3);
+});
+
+test("the logo can be replaced and restored from Branding", async () => {
+  await page.goto("/en/admin/branding");
+  await page.setInputFiles("input[name=logo_url]", {
+    name: "logo.png",
+    mimeType: "image/png",
+    buffer: PNG_1PX,
+  });
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByTestId("form-message")).toHaveText("Saved ✓");
+  await page.goto("/en");
+  await expect(page.locator("header img").first()).toHaveAttribute("src", /files(%2F|\/)branding/);
+
+  await page.goto("/en/admin/branding");
+  await page.getByTestId("brand-logo_url").getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByTestId("form-message")).toHaveText("Saved ✓");
+  await page.goto("/en");
+  await expect(page.locator("header img").first()).toHaveAttribute("src", /logo-horizontal\.png/);
+});
+
+test("promotions slide on the home page and can be switched off", async () => {
+  await page.goto("/en");
+  await expect(page.getByTestId("promo-slider")).toHaveCount(0);
+
+  await page.goto("/en/admin/promotions");
+  const form = page.locator("section").filter({ hasText: "New promotion" });
+  // A promotion needs a picture.
+  await form.getByRole("button", { name: "Add" }).click();
+  await expect(form.getByTestId("form-message")).toContainText("upload the banner picture");
+  await form
+    .locator("input[name=image]")
+    .setInputFiles({ name: "eid.png", mimeType: "image/png", buffer: PNG_1PX });
+  await form.locator("input[name=titleEn]").fill("Eid offer");
+  await form.locator("input[name=titleAr]").fill("عرض العيد");
+  await form.locator("input[name=buttonEn]").fill("Order now");
+  await form.locator("input[name=linkUrl]").fill("javascript:alert(1)");
+  await form.getByRole("button", { name: "Add" }).click();
+  await expect(form.getByTestId("form-message")).toContainText("check the highlighted");
+  await form.locator("input[name=linkUrl]").fill("/en/sheep");
+  await form.getByRole("button", { name: "Add" }).click();
+  await expect(form.getByTestId("form-message")).toHaveText("Saved ✓");
+
+  await page.goto("/ar");
+  await expect(page.getByTestId("promo-slider")).toContainText("عرض العيد");
+  await page.goto("/en");
+  await expect(page.getByTestId("promo-slider")).toContainText("Eid offer");
+  await page.getByTestId("promo-slider").getByRole("link", { name: "Order now" }).click();
+  await expect(page).toHaveURL(/\/en\/sheep$/);
+
+  await page.goto("/en/admin/promotions");
+  const sw = page.getByTestId("admin-promotion").first().getByTestId("promotion-switch");
+  await sw.click();
+  await expect(sw).toHaveAttribute("aria-checked", "false");
+  await expect(sw).not.toHaveAttribute("data-pending");
+  await page.goto("/en");
+  await expect(page.getByTestId("promo-slider")).toHaveCount(0);
 });

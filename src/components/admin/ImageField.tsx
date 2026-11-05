@@ -33,7 +33,7 @@ export function ImageField({
           </div>
         ) : null}
         <input type="file" name={name} accept={accept} className={`${inputClass} max-w-xs`} />
-        {current ? (
+        {current && removeLabel ? (
           <Checkbox name={`remove${name[0].toUpperCase()}${name.slice(1)}`} label={removeLabel} />
         ) : null}
       </div>

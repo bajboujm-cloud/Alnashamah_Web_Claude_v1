@@ -1,19 +1,21 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { Container } from "./Container";
 import { LanguageSwitch } from "./LanguageSwitch";
+import { Logo } from "./Logo";
 
 export function Header({
   locale,
   t,
   seasonal,
+  logo,
 }: {
   locale: Locale;
   t: Dictionary;
   /** Seasonal offers currently shown on the website (e.g. Eid Al-Adha); hidden ones get no menu link. */
   seasonal: { slug: string; label: string }[];
+  logo: string;
 }) {
   const links = [
     { href: `/${locale}#categories`, label: t.nav.categories },
@@ -25,14 +27,7 @@ export function Header({
     <header className="border-b border-gold/50 bg-ivory">
       <Container className="flex items-center justify-between gap-4 py-3">
         <Link href={`/${locale}`} aria-label={`${t.meta.siteName} — ${t.nav.home}`} className="shrink-0">
-          <Image
-            src="/brand/logo-horizontal.png"
-            alt={`${t.meta.siteName} — ${t.meta.tagline}`}
-            width={1294}
-            height={459}
-            priority
-            className="h-11 w-auto sm:h-14"
-          />
+          <Logo src={logo} alt={`${t.meta.siteName} — ${t.meta.tagline}`} priority className="h-11 sm:h-14" />
         </Link>
         <nav aria-label={t.nav.menu} className="hidden items-center gap-6 text-sm text-charcoal md:flex">
           {links.map((l) => (

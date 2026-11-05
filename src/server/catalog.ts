@@ -1,6 +1,7 @@
 import "server-only";
 import { and, asc, eq, inArray, ne } from "drizzle-orm";
 import { connection } from "next/server";
+import { isSeasonVisible } from "@/lib/availability";
 import { db, schema as s } from "@/server/db";
 
 /**
@@ -93,6 +94,13 @@ export async function getSeasonalCollection(slug: string) {
       .filter((b) => b.category.status === "active")
       .sort((a, b) => a.category.sortOrder - b.category.sortOrder || a.sortOrder - b.sortOrder),
   };
+}
+
+/** Promotions to show on the home page now (switched on and inside their optional dates). */
+export async function getActivePromotions() {
+  await connection();
+  const rows = await db.query.promotions.findMany({ orderBy: [asc(s.promotions.sortOrder)] });
+  return rows.filter((p) => isSeasonVisible(p));
 }
 
 export type CategoryWithBreeds = NonNullable<Awaited<ReturnType<typeof getCategoryWithBreeds>>>;

@@ -43,6 +43,13 @@
       "when": 1793878936431,
       "tag": "0005_breed_visibility",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793909550275,
+      "tag": "0006_promotions",
+      "breakpoints": true
     }
   ]
 }

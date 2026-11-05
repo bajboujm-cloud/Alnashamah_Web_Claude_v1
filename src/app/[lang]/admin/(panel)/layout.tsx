@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminNav, type NavItem } from "@/components/admin/AdminNav";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
+import { Logo } from "@/components/Logo";
+import { getBranding } from "@/server/branding";
 import { hasLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { can, type Permission } from "@/server/auth/permissions";
@@ -16,7 +17,7 @@ export default async function PanelLayout({ children, params }: LayoutProps<"/[l
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   const user = await requireStaff(lang);
-  const dict = await getDictionary(lang);
+  const [dict, brand] = await Promise.all([getDictionary(lang), getBranding()]);
   const t = dict.admin;
   const base = `/${lang}/admin`;
 
@@ -29,6 +30,8 @@ export default async function PanelLayout({ children, params }: LayoutProps<"/[l
     { href: `${base}/extras`, label: t.nav.extras, perm: "catalog.content" },
     { href: `${base}/packaging`, label: t.nav.packaging, perm: "catalog.content" },
     { href: `${base}/texts`, label: t.nav.texts, perm: "catalog.content" },
+    { href: `${base}/branding`, label: t.nav.branding, perm: "settings.edit" },
+    { href: `${base}/promotions`, label: t.nav.promotions, perm: "catalog.content" },
     { href: `${base}/settings`, label: t.nav.settings, perm: "settings.edit" },
     { href: `${base}/staff`, label: t.nav.staff, perm: "staff.manage" },
     { href: `${base}/audit`, label: t.nav.audit, perm: "audit.view" },
@@ -41,13 +44,7 @@ export default async function PanelLayout({ children, params }: LayoutProps<"/[l
       <aside className="bg-green text-ivory md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0">
         <div className="flex items-center justify-between gap-2 border-b border-ivory/15 px-4 py-3">
           <Link href={base} aria-label={t.title}>
-            <Image
-              src="/brand/logo-horizontal-reverse.png"
-              alt={t.title}
-              width={1294}
-              height={459}
-              className="h-10 w-auto"
-            />
+            <Logo src={brand.logoReverse} alt={t.title} className="h-10" />
           </Link>
           <div className="md:hidden">
             <LanguageSwitch

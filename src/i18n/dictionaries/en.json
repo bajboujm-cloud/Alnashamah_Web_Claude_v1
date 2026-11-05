@@ -86,7 +86,11 @@
         "q": "Do I need an account to order?",
         "a": "No. You can sign in with your mobile number or continue as a guest."
       }
-    ]
+    ],
+    "promoLabel": "Promotions",
+    "promoPrev": "Previous promotion",
+    "promoNext": "Next promotion",
+    "promoGoTo": "Show promotion"
   },
   "catalog": {
     "breedsIn": "Breeds",
@@ -143,7 +147,9 @@
       "staff": "Staff",
       "audit": "Activity log",
       "account": "My account",
-      "texts": "Website text"
+      "texts": "Website text",
+      "branding": "Branding",
+      "promotions": "Promotions"
     },
     "login": {
       "title": "Staff sign in",
@@ -219,7 +225,8 @@
       "passwordWeak": "Use letters and numbers.",
       "passwordChanged": "Password changed. Other devices were signed out.",
       "emailTaken": "A staff member with this email already exists.",
-      "lastOwner": "There must always be at least one active owner."
+      "lastOwner": "There must always be at least one active owner.",
+      "imageRequired": "Please upload the banner picture."
     },
     "dashboard": {
       "welcome": "Welcome",
@@ -356,6 +363,39 @@
       "english": "English",
       "arabic": "Arabic",
       "edited": "edited"
+    },
+    "branding": {
+      "title": "Branding",
+      "help": "Replace the logo and the picture in the green welcome section. Remove an upload to go back to the original.",
+      "logo": "Logo (light backgrounds — top of every page)",
+      "logoHelp": "Transparent PNG or SVG, wide, about 1300 × 460 px.",
+      "logoReverse": "Logo for dark backgrounds (footer, admin)",
+      "logoReverseHelp": "Light-coloured version, transparent PNG or SVG, about 1300 × 460 px.",
+      "hero": "Picture in the green welcome section",
+      "heroHelp": "Transparent PNG or SVG works best on green, about 900 × 470 px.",
+      "default": "Using the original",
+      "whatsappNote": "The WhatsApp number is set in Business settings."
+    },
+    "promotions": {
+      "title": "Promotions",
+      "help": "Promotions slide at the top of the home page, above the green welcome section. Only promotions that are switched on (and within their dates) are shown; with none, the slider disappears.",
+      "add": "Add promotion",
+      "newTitle": "New promotion",
+      "titleEn": "Title (English, optional)",
+      "titleAr": "Title (Arabic, optional)",
+      "textEn": "Text (English, optional)",
+      "textAr": "Text (Arabic, optional)",
+      "image": "Banner picture (wide)",
+      "imageHelp": "Best: 1920 × 640 px (3:1). On phones the middle part is shown, so keep important text in the centre.",
+      "imageMobile": "Phone picture (optional)",
+      "imageMobileHelp": "Best: 1080 × 810 px (4:3). If empty, the wide picture is used.",
+      "buttonEn": "Button text (English, optional)",
+      "buttonAr": "Button text (Arabic, optional)",
+      "link": "Button / picture link (optional)",
+      "linkHelp": "A page on this site such as /ar/sheep/naeemi, or a full https:// address.",
+      "startsAt": "Show from (optional)",
+      "endsAt": "Show until (optional)",
+      "imageRequired": "Please upload the banner picture."
     }
   }
 }
