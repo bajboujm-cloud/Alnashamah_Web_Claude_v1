@@ -97,9 +97,19 @@ Phases 0–1 are already built and on GitHub; you don't need to paste any prompt
 5. To stop: press `Ctrl + C` in PowerShell. Next time only `pnpm dev` is needed (with Docker Desktop open).
 6. To get new updates later (Docker Desktop open): `git pull`, then `pnpm install`, `pnpm db:migrate` and `pnpm db:seed`.
 
-Optional: `pnpm db:studio` opens a simple database browser where you can already switch a breed or
-age/weight option off (`is_available` = false) to see the "Out of stock / نفدت الكمية" label — the proper
-one-tap admin switches come in Phase 2.
+### Editing prices and sizes before the admin panel exists (temporary)
+
+1. With Docker Desktop open, run `pnpm db:studio` and open https://local.drizzle.studio
+2. Click the table **breed_options**, then **Sort → breed_name** so each breed's sizes are grouped.
+   Use **Filters → breed_name contains "Naeemi"** to see one breed only.
+3. Edit the cells: `label_en` / `label_ar` (size name), `age_min_months` / `age_max_months`,
+   `weight_min_kg` / `weight_max_kg`, **`price_aed`** (price in dirhams), `is_available` (false = Out of stock).
+   Click **Save** at the bottom, then refresh the website.
+4. `breed_name` is filled automatically — you can't change it here. Leave `price_fils`, `id` and `breed_id` alone.
+5. Breed descriptions and the whole-breed on/off switch are in the table **breeds**
+   (`description_en`, `description_ar`, `is_available`).
+
+The proper admin screens (with photo upload) come in Phase 2.
 
 ## 5. GitHub settings (free, one time)
 

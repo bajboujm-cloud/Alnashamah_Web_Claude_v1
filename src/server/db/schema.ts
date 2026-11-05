@@ -53,6 +53,8 @@ export const breeds = pgTable(
     categoryId: uuid("category_id")
       .notNull()
       .references(() => categories.id, { onDelete: "restrict" }),
+    /** Read-only helper for the database editor: filled automatically by a trigger (e.g. "Sheep — غنم"). */
+    categoryName: text("category_name"),
     slug: text("slug").notNull(),
     nameEn: text("name_en").notNull(),
     nameAr: text("name_ar").notNull(),
@@ -76,12 +78,19 @@ export const breedOptions = pgTable(
     breedId: uuid("breed_id")
       .notNull()
       .references(() => breeds.id, { onDelete: "cascade" }),
+    /** Read-only helper for the database editor: filled automatically (e.g. "Sheep / Naeemi — نعيمي"). */
+    breedName: text("breed_name"),
     labelEn: text("label_en"),
     labelAr: text("label_ar"),
     ageMinMonths: integer("age_min_months"),
     ageMaxMonths: integer("age_max_months"),
     weightMinKg: kg("weight_min_kg"),
     weightMaxKg: kg("weight_max_kg"),
+    /**
+     * Price in AED for easy editing in the database editor. A trigger keeps it in sync with `price_fils`
+     * (edit either one). The app always reads `price_fils`.
+     */
+    priceAed: numeric("price_aed", { precision: 10, scale: 2, mode: "number" }),
     priceFils: integer("price_fils"),
     compareAtPriceFils: integer("compare_at_price_fils"),
     /** One-tap toggle. Off = this row shown as "Out of stock", never hidden. */

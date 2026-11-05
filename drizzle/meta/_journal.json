@@ -8,6 +8,20 @@
       "when": 1793825758759,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793862668490,
+      "tag": "0001_editor_helper_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793862669728,
+      "tag": "0002_editor_helper_triggers",
+      "breakpoints": true
     }
   ]
 }
