@@ -33,6 +33,7 @@ test.afterAll(async () => {
   await sql`update categories set status = 'coming_soon' where slug in ('cattle', 'camels')`;
   await sql`update seasonal_collections set is_active = true where slug = 'eid-al-adha'`;
   await sql`delete from site_texts`;
+  await sql`update breeds set is_visible = true`;
   await cleanupStaff();
 });
 
@@ -230,4 +231,28 @@ test("website wording can be edited and reset", async () => {
   await expect(home.getByTestId("form-message")).toHaveText("Saved ✓");
   await page.goto("/ar");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("أصالة السوق المحلي، بمعايير تجارة عصرية");
+});
+
+test("a breed can be hidden from the website and shown again", async () => {
+  await page.goto("/en/admin/breeds");
+  const kashmiri = page.locator('[data-testid=admin-breed][data-slug="goats/kashmiri"]');
+  const sw = kashmiri.getByTestId("breed-visibility-switch");
+  await sw.click();
+  await expect(sw).toHaveAttribute("aria-checked", "false");
+  await expect(sw).not.toHaveAttribute("data-pending");
+  await expect(kashmiri.getByTestId("hidden-note")).toBeVisible();
+
+  await page.goto("/en/goats");
+  await expect(page.getByTestId("breed-card")).toHaveCount(2);
+  await expect(page.getByTestId("breed-card").filter({ hasText: "Kashmiri" })).toHaveCount(0);
+  expect((await page.goto("/en/goats/kashmiri"))?.status()).toBe(404);
+  await page.goto("/en/seasonal/eid-al-adha");
+  await expect(page.getByTestId("breed-card")).toHaveCount(7);
+
+  await page.goto("/en/admin/breeds");
+  await sw.click();
+  await expect(sw).toHaveAttribute("aria-checked", "true");
+  await expect(sw).not.toHaveAttribute("data-pending");
+  await page.goto("/en/goats");
+  await expect(page.getByTestId("breed-card")).toHaveCount(3);
 });

@@ -64,6 +64,8 @@ export const breeds = pgTable(
     photoUrl: text("photo_url"),
     /** One-tap toggle. Off = whole breed shown as "Out of stock", never hidden. */
     isAvailable: boolean("is_available").notNull().default(true),
+    /** One-tap toggle. Off = breed removed from the website entirely (kept in the admin). */
+    isVisible: boolean("is_visible").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
     ...timestamps,
   },

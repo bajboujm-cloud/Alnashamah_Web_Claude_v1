@@ -98,6 +98,8 @@ Each option = **Age range + Weight range + Price** — values are **placeholders
   greyed, with the same label. **Never hide** out-of-stock items. Ordering an unavailable item is
   blocked on the server too (and re-checked at checkout and at payment).
 - Same toggle pattern for cutting options, extras and packaging.
+- Separately, every breed has a **Shown / Hidden** switch that removes it from the website entirely
+  (category pages, home, seasonal offers and its own page) while keeping it in the admin.
 
 ### Cutting options — final list will be provided later
 

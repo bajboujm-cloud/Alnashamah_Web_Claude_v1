@@ -232,7 +232,7 @@
     },
     "breeds": {
       "title": "Breeds & stock",
-      "help": "Tap a switch to put a breed or a size in or out of stock. The website updates immediately — out-of-stock items stay visible with an “Out of stock” label.",
+      "help": "Two switches per breed: “In stock / Out of stock” keeps the breed on the website with an “Out of stock” label; “Shown / Hidden” removes it from the website completely. Sizes have their own stock switch. Changes appear immediately.",
       "add": "Add breed",
       "editTitle": "Edit breed",
       "newTitle": "New breed",
@@ -251,7 +251,8 @@
       "deleteSize": "Delete size",
       "details": "Breed details",
       "deleteBreed": "Delete breed",
-      "noSizes": "No sizes yet."
+      "noSizes": "No sizes yet.",
+      "hiddenNote": "Hidden from website"
     },
     "categories": {
       "title": "Categories",

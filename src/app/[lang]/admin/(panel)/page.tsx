@@ -16,7 +16,10 @@ export default async function Dashboard({ params, searchParams }: PageProps<"/[l
   const t = (await getDictionary(lang)).admin;
   const [cats, seasons] = await Promise.all([adminBreedsByCategory(), getSeasonalCollections()]);
 
-  const breeds = cats.filter((c) => c.status !== "hidden").flatMap((c) => c.breeds);
+  const breeds = cats
+    .filter((c) => c.status !== "hidden")
+    .flatMap((c) => c.breeds)
+    .filter((b) => b.isVisible);
   const inStock = breeds.filter(isBreedInStock).length;
   const noPrice = breeds.flatMap((b) => b.options).filter((o) => o.priceFils == null).length;
   const cards = [

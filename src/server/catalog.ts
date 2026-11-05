@@ -4,7 +4,7 @@ import { connection } from "next/server";
 import { db, schema as s } from "@/server/db";
 
 /**
- * Read-only catalogue queries for the public site. Stock and prices must always be fresh,
+ * Read-only catalogue queries for the public site. Hidden breeds (is_visible = false) never appear. Stock and prices must always be fresh,
  * so every query waits for a real request (`connection()`) instead of being baked in at build time.
  */
 
@@ -24,6 +24,7 @@ export async function getCategoryWithBreeds(slug: string) {
     where: and(eq(s.categories.slug, slug), ne(s.categories.status, "hidden")),
     with: {
       breeds: {
+        where: eq(s.breeds.isVisible, true),
         orderBy: [asc(s.breeds.sortOrder)],
         with: { options: { orderBy: optionOrder } },
       },
@@ -42,6 +43,7 @@ export async function getBreed(categorySlug: string, breedSlug: string) {
 export async function getFeaturedBreeds(limit = 8) {
   await connection();
   const rows = await db.query.breeds.findMany({
+    where: eq(s.breeds.isVisible, true),
     with: { category: true, options: { orderBy: optionOrder } },
     orderBy: [asc(s.breeds.sortOrder)],
   });
@@ -75,9 +77,12 @@ export async function getSeasonalCollection(slug: string) {
     .where(eq(s.seasonalCollectionBreeds.collectionId, collection.id));
   const breeds = links.length
     ? await db.query.breeds.findMany({
-        where: inArray(
-          s.breeds.id,
-          links.map((l) => l.breedId),
+        where: and(
+          inArray(
+            s.breeds.id,
+            links.map((l) => l.breedId),
+          ),
+          eq(s.breeds.isVisible, true),
         ),
         with: { category: true, options: { orderBy: optionOrder } },
       })

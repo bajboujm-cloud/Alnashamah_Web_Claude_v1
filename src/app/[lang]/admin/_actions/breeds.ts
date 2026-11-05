@@ -53,6 +53,15 @@ export async function setBreedAvailable(id: string, available: boolean) {
   refresh();
 }
 
+/** Shows or hides a breed on the website (separate from in / out of stock). */
+export async function setBreedVisible(id: string, visible: boolean) {
+  const user = await authorize("catalog.prices");
+  if (!isUuid(id)) return;
+  await db.update(s.breeds).set({ isVisible: visible }).where(eq(s.breeds.id, id));
+  await audit(user, visible ? "show" : "hide", "breed", id);
+  refresh();
+}
+
 export async function setOptionAvailable(id: string, available: boolean) {
   const user = await authorize("stock.toggle");
   if (!isUuid(id)) return;

@@ -9,7 +9,7 @@ import { formatAed, formatAge, formatWeight } from "@/lib/format";
 import { can } from "@/server/auth/permissions";
 import { requireStaff } from "@/server/auth/staff";
 import { adminBreedsByCategory } from "@/server/admin-data";
-import { setBreedAvailable, setOptionAvailable } from "../../_actions/breeds";
+import { setBreedAvailable, setBreedVisible, setOptionAvailable } from "../../_actions/breeds";
 
 export default async function BreedsPage({ params }: PageProps<"/[lang]/admin/breeds">) {
   const { lang } = await params;
@@ -49,7 +49,7 @@ export default async function BreedsPage({ params }: PageProps<"/[lang]/admin/br
                 {cat.breeds.map((b) => (
                   <article
                     key={b.id}
-                    className={`border bg-white ${b.isAvailable ? "border-line" : "border-danger/40"}`}
+                    className={`border bg-white ${!b.isVisible ? "border-dashed border-muted bg-ivory/60" : b.isAvailable ? "border-line" : "border-danger/40"}`}
                     data-testid="admin-breed"
                     data-slug={`${cat.slug}/${b.slug}`}
                   >
@@ -65,6 +65,11 @@ export default async function BreedsPage({ params }: PageProps<"/[lang]/admin/br
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-semibold text-green">{pick(lang, b.nameEn, b.nameAr)}</p>
+                        {!b.isVisible ? (
+                          <p className="text-xs font-semibold text-muted" data-testid="hidden-note">
+                            {t.breeds.hiddenNote}
+                          </p>
+                        ) : null}
                         {canEdit ? (
                           <Link
                             href={`/${lang}/admin/breeds/${b.id}`}
@@ -74,16 +79,28 @@ export default async function BreedsPage({ params }: PageProps<"/[lang]/admin/br
                           </Link>
                         ) : null}
                       </div>
-                      {canToggle ? (
-                        <Switch
-                          checked={b.isAvailable}
-                          label={`${pick(lang, b.nameEn, b.nameAr)} — ${t.common.toggleHint}`}
-                          onLabel={t.common.available}
-                          offLabel={t.common.outOfStock}
-                          action={setBreedAvailable.bind(null, b.id)}
-                          testId="breed-switch"
-                        />
-                      ) : null}
+                      <div className="flex shrink-0 flex-col items-start">
+                        {canToggle ? (
+                          <Switch
+                            checked={b.isAvailable}
+                            label={`${pick(lang, b.nameEn, b.nameAr)} — ${t.common.toggleHint}`}
+                            onLabel={t.common.available}
+                            offLabel={t.common.outOfStock}
+                            action={setBreedAvailable.bind(null, b.id)}
+                            testId="breed-switch"
+                          />
+                        ) : null}
+                        {canAdd ? (
+                          <Switch
+                            checked={b.isVisible}
+                            label={`${pick(lang, b.nameEn, b.nameAr)} — ${t.common.visibilityHint}`}
+                            onLabel={t.common.shown}
+                            offLabel={t.common.hiddenLabel}
+                            action={setBreedVisible.bind(null, b.id)}
+                            testId="breed-visibility-switch"
+                          />
+                        ) : null}
+                      </div>
                     </header>
                     <ul className="divide-y divide-line">
                       {b.options.map((o) => (
