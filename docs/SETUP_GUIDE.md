@@ -95,7 +95,7 @@ Phases 0–1 are already built and on GitHub; you don't need to paste any prompt
    - http://localhost:3000/en — the store in English
    - http://localhost:8025 — test email inbox (used from Phase 5)
 5. To stop: press `Ctrl + C` in PowerShell. Next time only `pnpm dev` is needed (with Docker Desktop open).
-6. To get new updates later: `git pull`, then `pnpm install` and `pnpm db:migrate`.
+6. To get new updates later (Docker Desktop open): `git pull`, then `pnpm install`, `pnpm db:migrate` and `pnpm db:seed`.
 
 Optional: `pnpm db:studio` opens a simple database browser where you can already switch a breed or
 age/weight option off (`is_available` = false) to see the "Out of stock / نفدت الكمية" label — the proper

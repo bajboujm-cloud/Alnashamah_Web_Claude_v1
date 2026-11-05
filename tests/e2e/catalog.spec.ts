@@ -97,3 +97,24 @@ test("unknown pages return 404", async ({ page }) => {
   expect(res?.status()).toBe(404);
   await expect(page.getByText("Page not found")).toBeVisible();
 });
+
+test("sample prices show on cards and the breed page", async ({ page }) => {
+  await page.goto("/en/sheep");
+  await expect(page.getByTestId("breed-card").filter({ hasText: "Naeemi" })).toContainText("AED 1,143");
+  await expect(page.getByTestId("breed-card").filter({ hasText: "Herri" })).toContainText(
+    "Price coming soon",
+  );
+  await page.goto("/en/sheep/naeemi");
+  const rows = page.getByTestId("option-row");
+  await expect(rows.nth(0)).toContainText("2–4 months");
+  await expect(rows.nth(0)).toContainText("8–10 kg");
+  await expect(rows.nth(2)).toContainText("AED 1,240");
+});
+
+test("cards sit two per row on phones", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "phone", "phone layout only");
+  await page.goto("/ar/sheep");
+  const [a, b] = [page.getByTestId("breed-card").nth(0), page.getByTestId("breed-card").nth(1)];
+  const [boxA, boxB] = [await a.boundingBox(), await b.boundingBox()];
+  expect(boxA && boxB && Math.abs(boxA.y - boxB.y) < 2).toBeTruthy();
+});

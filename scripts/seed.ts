@@ -9,12 +9,20 @@ import {
   cuttingSeed,
   deliveryZoneSeed,
   extrasSeed,
+  optionLabels,
   packagingSeed,
+  samplePricing,
   seasonalSeed,
   settingsSeed,
 } from "./seed-data";
 
 const { db, sql } = createDb(DATABASE_URL, { max: 1 });
+
+/** Labels the seed itself gives to empty rows — rows still carrying them (and nothing else) are untouched. */
+const PLACEHOLDER_LABELS = new Set([
+  ...optionLabels.map(([en]) => en),
+  ...Array.from({ length: 10 }, (_, i) => `Option ${i + 1}`),
+]);
 
 async function main() {
   await db.insert(s.categories).values(categorySeed).onConflictDoNothing();
@@ -33,23 +41,39 @@ async function main() {
       .onConflictDoNothing();
   }
 
-  // Give every breed that has no options yet 3 empty placeholder options.
-  const allBreeds = await db.select().from(s.breeds);
+  // Options: a breed gets the starting rows when it has none, or when it still has only the untouched
+  // empty placeholders from an earlier seed. Rows edited in the admin are never replaced.
+  const allBreeds = await db.query.breeds.findMany({ with: { category: true, options: true } });
   for (const breed of allBreeds) {
-    const existing = await db
-      .select({ id: s.breedOptions.id })
-      .from(s.breedOptions)
-      .where(eq(s.breedOptions.breedId, breed.id))
-      .limit(1);
-    if (existing.length) continue;
-    await db.insert(s.breedOptions).values(
-      Array.from({ length: OPTIONS_PER_BREED }, (_, i) => ({
-        breedId: breed.id,
-        labelEn: `Option ${i + 1}`,
-        labelAr: `الخيار ${i + 1}`,
-        sortOrder: i + 1,
-      })),
+    const untouched = breed.options.every(
+      (o) =>
+        o.priceFils == null &&
+        o.ageMinMonths == null &&
+        o.ageMaxMonths == null &&
+        o.weightMinKg == null &&
+        o.weightMaxKg == null &&
+        o.isAvailable &&
+        PLACEHOLDER_LABELS.has(o.labelEn ?? ""),
     );
+    if (!untouched) continue;
+
+    const sample = samplePricing[`${breed.category.slug}/${breed.slug}`] ?? [];
+    // Already seeded and nothing new to apply: keep the rows (and their ids) as they are.
+    const hasOldLabels = breed.options.some((o) => o.labelEn?.startsWith("Option "));
+    if (breed.options.length && !sample.length && !hasOldLabels) continue;
+    const count = Math.max(OPTIONS_PER_BREED, sample.length);
+    const rows = Array.from({ length: count }, (_, i) => ({
+      breedId: breed.id,
+      labelEn: optionLabels[i]?.[0] ?? `Option ${i + 1}`,
+      labelAr: optionLabels[i]?.[1] ?? `الخيار ${i + 1}`,
+      sortOrder: i + 1,
+      ...sample[i],
+    }));
+
+    await db.transaction(async (tx) => {
+      if (breed.options.length) await tx.delete(s.breedOptions).where(eq(s.breedOptions.breedId, breed.id));
+      await tx.insert(s.breedOptions).values(rows);
+    });
   }
 
   await db.insert(s.cuttingOptions).values(cuttingSeed).onConflictDoNothing();

@@ -42,22 +42,25 @@ export function BreedCard({ locale, t, href, breed, categoryName }: Props) {
           className={inStock ? "" : "opacity-60 grayscale"}
         />
         {!inStock && (
-          <div className="absolute start-3 top-3">
+          <div className="absolute start-2 top-2 sm:start-3 sm:top-3">
             <OutOfStockBadge label={t.outOfStock} />
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-2 border-t-2 border-gold/60 p-4">
+      <div className="flex flex-1 flex-col gap-1 border-t-2 border-gold/60 p-3 sm:gap-2 sm:p-4">
         {categoryName ? <p className="label-tracked">{categoryName}</p> : null}
-        <h3 className="font-display text-xl text-green">{name}</h3>
-        <p className="line-clamp-2 text-sm text-muted">
+        <h3 className="font-display text-lg text-green sm:text-xl">{name}</h3>
+        <p className="hidden text-sm text-muted sm:line-clamp-2">
           {pick(locale, breed.descriptionEn, breed.descriptionAr)}
         </p>
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 pt-2 text-sm">
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 pt-1 text-xs sm:pt-2 sm:text-sm">
           <span className="whitespace-nowrap font-semibold text-green">
             {price != null ? `${t.from} ${formatAed(price, locale)}` : t.priceSoon}
           </span>
-          <span className="whitespace-nowrap text-gold-deep group-hover:underline" aria-hidden>
+          <span
+            className="hidden whitespace-nowrap text-gold-deep group-hover:underline sm:inline"
+            aria-hidden
+          >
             {t.viewBreed} {locale === "ar" ? "←" : "→"}
           </span>
         </div>

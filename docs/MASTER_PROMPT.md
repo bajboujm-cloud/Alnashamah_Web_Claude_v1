@@ -233,6 +233,10 @@ database migrations, env vars or CI. After Phase 1, create one small GitHub issu
   AGENTS.md, brand tokens/fonts, layout (header, footer, language switch, RTL), schema + seed
   (categories, Eid seasonal, 8 breeds, 3 placeholder options each, cuts, extras, packaging).
 - **Phase 1 ✅** — public catalogue EN/AR with out-of-stock labels and coming-soon categories.
+  Phones show categories and breeds two per row. Sizes are named Small / Medium / Large (صغير / وسط / كبير);
+  sample ages, weights and prices were copied from zabehaty.com (5 Nov 2026) for Naeemi, Najdi, Somali sheep
+  and Local, Somali, Kashmiri goats as **temporary placeholders** until the owner's own list; Herri and Local
+  sheep stay "Price coming soon".
   Each service adapter (storage, OTP, email, payment) is built in the phase that first needs it,
   with its free local implementation.
 - **Phase 2** — admin: staff login (TOTP), catalogue CRUD, photo/illustration upload, one-tap toggles,

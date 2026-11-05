@@ -87,7 +87,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
       <Container className="mt-16 space-y-20">
         <section aria-labelledby="categories">
           <SectionHeading id="categories" title={t.home.categoriesTitle} label={t.home.categoriesLabel} />
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
             {categories.map((c) => (
               <CategoryCard key={c.id} locale={lang} category={c} comingSoonLabel={t.catalog.comingSoon} />
             ))}
@@ -97,7 +97,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         {breeds.length > 0 && (
           <section aria-labelledby="breeds">
             <SectionHeading id="breeds" title={t.home.breedsTitle} label={t.home.breedsLabel} />
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
               {breeds.map((b) => (
                 <BreedCard
                   key={b.id}
@@ -114,11 +114,11 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
 
         <section aria-labelledby="how">
           <SectionHeading id="how" title={t.home.howTitle} label={t.home.howLabel} />
-          <ol className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <ol className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
             {t.home.steps.map((step, i) => (
               <li
                 key={step.title}
-                className={`p-6 ${i % 2 ? "bg-green text-ivory" : "border border-line bg-white"}`}
+                className={`p-4 sm:p-6 ${i % 2 ? "bg-green text-ivory" : "border border-line bg-white"}`}
               >
                 <div className="h-0.5 w-12 bg-gold" aria-hidden />
                 <p className={`mt-4 font-serif text-3xl ${i % 2 ? "text-gold" : "text-gold-deep"}`}>
@@ -133,9 +133,9 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
 
         <section aria-labelledby="trust">
           <SectionHeading id="trust" title={t.home.trustTitle} label={t.home.trustLabel} />
-          <ul className="grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid grid-cols-2 gap-px border border-line bg-line lg:grid-cols-4">
             {t.home.trust.map((item) => (
-              <li key={item.title} className="bg-ivory p-6">
+              <li key={item.title} className="bg-ivory p-4 sm:p-6">
                 <h3 className="font-display text-lg text-green">{item.title}</h3>
                 <p className="mt-1 text-sm text-muted">{item.text}</p>
               </li>

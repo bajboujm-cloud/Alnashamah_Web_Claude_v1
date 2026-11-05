@@ -23,10 +23,10 @@ export function CategoryCard({ locale, category, comingSoonLabel }: Props) {
   return (
     <Link
       href={`/${locale}/${category.slug}`}
-      className={`group relative flex flex-col border border-line bg-white p-5 transition-colors hover:border-gold ${soon ? "opacity-80" : ""}`}
+      className={`group relative flex flex-col border border-line bg-white p-3 transition-colors sm:p-5 hover:border-gold ${soon ? "opacity-80" : ""}`}
       data-testid="category-card"
     >
-      <div className="mb-4 h-0.5 w-16 bg-gold" aria-hidden />
+      <div className="mb-2 h-0.5 w-10 bg-gold sm:mb-4 sm:w-16" aria-hidden />
       {category.illustrationUrl ? (
         <Image
           src={category.illustrationUrl}
@@ -36,11 +36,11 @@ export function CategoryCard({ locale, category, comingSoonLabel }: Props) {
           className={`mx-auto h-auto w-full max-w-[220px] ${soon ? "opacity-50" : ""}`}
         />
       ) : null}
-      <div className="mt-4 flex items-center justify-between gap-2">
-        <h3 className="font-display text-xl text-green">{name}</h3>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-1 sm:mt-4 sm:gap-2">
+        <h3 className="font-display text-lg text-green sm:text-xl">{name}</h3>
         {soon ? <ComingSoonBadge label={comingSoonLabel} /> : null}
       </div>
-      <p className="mt-1 text-sm text-muted">
+      <p className="mt-1 hidden text-sm text-muted sm:block">
         {pick(locale, category.descriptionEn, category.descriptionAr)}
       </p>
     </Link>

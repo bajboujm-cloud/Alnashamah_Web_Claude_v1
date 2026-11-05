@@ -109,13 +109,15 @@ export default async function BreedPage({ params }: PageProps<"/[lang]/[category
           {packaging.length > 0 && (
             <div className="mt-8">
               <h2 className="font-display text-lg text-green">{t.catalog.packagingTitle}</h2>
-              <ul className="mt-3 grid gap-3 sm:grid-cols-3">
+              <ul className="mt-3 grid grid-cols-3 gap-2 sm:gap-3">
                 {packaging.map((p) => (
                   <li
                     key={p.id}
-                    className={`border border-line bg-white p-4 ${p.isAvailable ? "" : "text-muted"}`}
+                    className={`border border-line bg-white p-2.5 sm:p-4 ${p.isAvailable ? "" : "text-muted"}`}
                   >
-                    <p className="font-semibold text-green">{pick(lang, p.nameEn, p.nameAr)}</p>
+                    <p className="text-sm font-semibold leading-snug text-green sm:text-base">
+                      {pick(lang, p.nameEn, p.nameAr)}
+                    </p>
                     <p className="mt-1 text-sm">
                       {p.priceFils === 0 ? t.catalog.free : formatAed(p.priceFils, lang)}
                     </p>

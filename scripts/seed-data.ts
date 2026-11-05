@@ -120,8 +120,48 @@ export const breedSeed: Record<string, BreedSeed[]> = {
   ],
 };
 
-/** Every breed starts with 3 empty options (age, weight, price to be filled in the admin). */
+/** Every breed starts with at least 3 options (age, weight, price — edited later in the admin). */
 export const OPTIONS_PER_BREED = 3;
+
+/** Row names by position: 1 = Small … 5 = Extra large+. */
+export const optionLabels = [
+  ["Small", "صغير"],
+  ["Medium", "وسط"],
+  ["Large", "كبير"],
+  ["Extra large", "كبير جداً"],
+  ["Jumbo", "جامبو"],
+] as const;
+
+export type SampleOption = {
+  ageMinMonths: number;
+  ageMaxMonths: number;
+  weightMinKg: number;
+  weightMaxKg: number;
+  priceFils: number;
+};
+
+const row = (ages: [number, number], kg: [number, number], aed: number): SampleOption => ({
+  ageMinMonths: ages[0],
+  ageMaxMonths: ages[1],
+  weightMinKg: kg[0],
+  weightMaxKg: kg[1],
+  priceFils: aed * 100,
+});
+
+/**
+ * TEMPORARY sample sizes and prices, copied from zabehaty.com on 2026-11-05 so the catalogue looks real
+ * while the owner prepares Al Nashamah's own list. Replace them in the admin (Phase 2).
+ * Herri and Local sheep are not sold there, so they keep empty rows ("Price coming soon").
+ * Weights are as listed by the competitor (kg).
+ */
+export const samplePricing: Record<string, SampleOption[]> = {
+  "sheep/naeemi": [row([2, 4], [8, 10], 1143), row([4, 6], [11, 13], 1191), row([6, 8], [14, 16], 1240)],
+  "sheep/najdi": [row([2, 4], [8, 10], 1143), row([4, 6], [11, 13], 1191), row([6, 8], [14, 16], 1240)],
+  "sheep/somali": [row([12, 15], [10, 13], 735)],
+  "goats/local": [row([2, 4], [5, 7], 780), row([4, 6], [8, 10], 820), row([6, 8], [10, 12], 774)],
+  "goats/somali": [row([12, 15], [10, 13], 735)],
+  "goats/kashmiri": [row([3, 6], [9, 11], 770)],
+};
 
 /** Placeholder names based on common UAE cuts — the owner will provide the final list. */
 export const cuttingSeed = [
