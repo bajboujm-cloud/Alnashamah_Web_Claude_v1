@@ -66,10 +66,21 @@ emails land in the local Mailpit inbox, and payments go through a fake "Pay / Fa
 
 Phases 0–1 are already built and on GitHub; you don't need to paste any prompt.
 
-1. Install Git, Node.js 22 LTS and Docker Desktop (section 2), then open **Docker Desktop** and wait until it says _running_.
-2. Open **PowerShell** and run, one line at a time:
+1. Install the three programs (once):
+   - **Node.js 22 LTS** — https://nodejs.org → "Windows Installer (.msi)" → Next, Next, Finish.
+   - **Git** — https://git-scm.com/download/win (if not installed already).
+   - **Docker Desktop** — https://www.docker.com/products/docker-desktop → install, restart the laptop
+     if asked, then open Docker Desktop and wait until it says _Engine running_.
+2. **Close PowerShell and open a new one** (normal, not "as Administrator") so it sees Node.js. Check:
    ```powershell
-   corepack enable
+   node -v          # should print v22.x
+   ```
+3. Run, one line at a time:
+   ```powershell
+   Set-ExecutionPolicy -Scope CurrentUser RemoteSigned   # answer Y — lets pnpm run in PowerShell
+   npm install -g pnpm@10
+   cd $HOME
+   mkdir Projects; cd Projects
    git clone https://github.com/bajboujm-cloud/Alnashamah_Web_Claude_v1.git
    cd Alnashamah_Web_Claude_v1
    git checkout ccr-74fd4369-jq71o5      # until this work is merged into main
@@ -78,12 +89,13 @@ Phases 0–1 are already built and on GitHub; you don't need to paste any prompt
    pnpm db:setup                          # database in Docker + starting catalogue
    pnpm dev
    ```
-3. Open in your browser:
+   Keep the project in your user folder (e.g. `C:\Users\<you>\Projects`), never in `C:\Windows\System32`.
+4. Open in your browser:
    - http://localhost:3000/ar — the store in Arabic
    - http://localhost:3000/en — the store in English
    - http://localhost:8025 — test email inbox (used from Phase 5)
-4. To stop: press `Ctrl + C` in PowerShell. Next time only `pnpm dev` is needed (with Docker Desktop open).
-5. To get new updates later: `git pull`, then `pnpm install` and `pnpm db:migrate`.
+5. To stop: press `Ctrl + C` in PowerShell. Next time only `pnpm dev` is needed (with Docker Desktop open).
+6. To get new updates later: `git pull`, then `pnpm install` and `pnpm db:migrate`.
 
 Optional: `pnpm db:studio` opens a simple database browser where you can already switch a breed or
 age/weight option off (`is_available` = false) to see the "Out of stock / نفدت الكمية" label — the proper
