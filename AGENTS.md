@@ -25,6 +25,7 @@ pnpm admin:create --email you@example.com --name "Your Name"   # first owner acc
 Admin panel: `/ar/admin` or `/en/admin` — email + password + authenticator-app code (TOTP).
 
 Only one `next dev` can run per folder. The e2e tests reuse a dev server already running on port 3000.
+If a page keeps reloading in development, stop `pnpm dev`, delete the `.next` folder and start it again.
 
 ## Validation commands (same as CI)
 

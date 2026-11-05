@@ -21,7 +21,7 @@ export function ImageField({
     <Field label={label} hint={hint}>
       <div className="flex flex-wrap items-center gap-3">
         {current ? (
-          <div className="relative h-20 w-28 overflow-hidden border border-line bg-ivory-200">
+          <div className="relative aspect-[4/3] w-32 overflow-hidden border border-line bg-ivory-200">
             <Image
               src={current}
               alt=""

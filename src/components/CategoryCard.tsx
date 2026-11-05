@@ -28,13 +28,16 @@ export function CategoryCard({ locale, category, comingSoonLabel }: Props) {
     >
       <div className="mb-2 h-0.5 w-10 bg-gold sm:mb-4 sm:w-16" aria-hidden />
       {category.illustrationUrl ? (
-        <Image
-          src={category.illustrationUrl}
-          alt=""
-          width={240}
-          height={160}
-          className={`mx-auto h-auto w-full max-w-[220px] ${soon ? "opacity-50" : ""}`}
-        />
+        // 3:2 box. Illustrations (SVG) are shown whole; photos fill the box edge to edge.
+        <div className="relative aspect-[3/2] w-full overflow-hidden">
+          <Image
+            src={category.illustrationUrl}
+            alt=""
+            fill
+            sizes="(max-width: 1024px) 50vw, 25vw"
+            className={`${category.illustrationUrl.endsWith(".svg") ? "object-contain" : "object-cover"} ${soon ? "opacity-50" : ""}`}
+          />
+        </div>
       ) : null}
       <div className="mt-2 flex flex-wrap items-center justify-between gap-1 sm:mt-4 sm:gap-2">
         <h3 className="font-display text-lg text-green sm:text-xl">{name}</h3>

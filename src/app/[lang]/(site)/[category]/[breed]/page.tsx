@@ -85,7 +85,13 @@ export default async function BreedPage({ params }: PageProps<"/[lang]/[category
 
       <div className="grid gap-10 md:grid-cols-[1fr_1.2fr]">
         <div className="border-s-4 border-gold">
-          <BreedPhoto src={breed.photoUrl} alt={name} placeholderLabel={t.catalog.photoSoon} priority />
+          <BreedPhoto
+            src={breed.photoUrl}
+            alt={name}
+            placeholderLabel={t.catalog.photoSoon}
+            sizes="(max-width: 768px) 100vw, 45vw"
+            priority
+          />
         </div>
         <div>
           <p className="label-tracked">{categoryName}</p>

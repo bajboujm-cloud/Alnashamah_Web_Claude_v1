@@ -1,18 +1,24 @@
 import Image from "next/image";
 
-/** One photo per breed; until it is uploaded a branded placeholder is shown. */
+/**
+ * One photo per breed, always shown as a 4:3 landscape box that the photo fills edge to edge
+ * (cropped, never stretched). Best upload: 1600 × 1200 px. Until a photo is uploaded a branded
+ * placeholder is shown. `sizes` tells the browser how wide the box is so phones download a small copy.
+ */
 export function BreedPhoto({
   src,
   alt,
   placeholderLabel,
   priority = false,
   className = "",
+  sizes = "(max-width: 1024px) 50vw, 25vw",
 }: {
   src: string | null;
   alt: string;
   placeholderLabel: string;
   priority?: boolean;
   className?: string;
+  sizes?: string;
 }) {
   return (
     <div className={`relative aspect-[4/3] overflow-hidden bg-ivory-200 ${className}`}>
@@ -21,7 +27,7 @@ export function BreedPhoto({
           src={src}
           alt={alt}
           fill
-          sizes="(max-width: 640px) 100vw, 33vw"
+          sizes={sizes}
           className="object-cover"
           unoptimized={src.endsWith(".svg")}
           priority={priority}
