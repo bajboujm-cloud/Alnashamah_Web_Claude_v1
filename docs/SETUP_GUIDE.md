@@ -97,19 +97,34 @@ Phases 0–1 are already built and on GitHub; you don't need to paste any prompt
 5. To stop: press `Ctrl + C` in PowerShell. Next time only `pnpm dev` is needed (with Docker Desktop open).
 6. To get new updates later (Docker Desktop open): `git pull`, then `pnpm install`, `pnpm db:migrate` and `pnpm db:seed`.
 
-### Editing prices and sizes before the admin panel exists (temporary)
+### The admin panel (edit prices, photos, descriptions, stock)
 
-1. With Docker Desktop open, run `pnpm db:studio` and open https://local.drizzle.studio
-2. Click the table **breed_options**, then **Sort → breed_name** so each breed's sizes are grouped.
-   Use **Filters → breed_name contains "Naeemi"** to see one breed only.
-3. Edit the cells: `label_en` / `label_ar` (size name), `age_min_months` / `age_max_months`,
-   `weight_min_kg` / `weight_max_kg`, **`price_aed`** (price in dirhams), `is_available` (false = Out of stock).
-   Click **Save** at the bottom, then refresh the website.
-4. `breed_name` is filled automatically — you can't change it here. Leave `price_fils`, `id` and `breed_id` alone.
-5. Breed descriptions and the whole-breed on/off switch are in the table **breeds**
-   (`description_en`, `description_ar`, `is_available`).
+1. **Create your owner account once** (Docker Desktop open, in the project folder):
+   ```powershell
+   pnpm admin:create --email you@alnashamah.ae --name "Mohammad"
+   ```
+   It prints a **temporary password** — copy it.
+2. Install **Google Authenticator** or **Microsoft Authenticator** on your phone (free).
+3. Run `pnpm dev` and open **http://localhost:3000/ar/admin** (or `/en/admin`).
+4. Sign in with your email and the temporary password. The first time, a **QR code** appears: in the
+   authenticator app tap **+ → Scan QR code**, then type the 6-digit code it shows.
+   Every later sign-in asks for the current 6-digit code from the app.
+5. Go to **My account** and change the temporary password.
 
-The proper admin screens (with photo upload) come in Phase 2.
+What you can do there:
+
+| Screen                                       | What for                                                                                                                                                                                                               |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Breeds & stock                               | One-tap switches to put a breed or a size in / out of stock; **Edit** a breed for its photo, names, descriptions and its sizes (age, weight after slaughter, price in AED), add a 4th / 5th size, add or delete breeds |
+| Categories                                   | Names, illustration, status (Active / Coming soon / Hidden), add new categories                                                                                                                                        |
+| Seasonal                                     | Eid Al-Adha / Qurban: show on website on/off, dates, illustration, which breeds are included                                                                                                                           |
+| Cutting options · Order includes · Packaging | Names, prices, photos, on/off                                                                                                                                                                                          |
+| Business settings                            | Company name, TRN, licence, address, phones, WhatsApp, VAT                                                                                                                                                             |
+| Staff                                        | Add staff with a role (Owner, Manager, Order staff, Content editor); reset a password; disable                                                                                                                         |
+| Activity log                                 | Who changed what and when                                                                                                                                                                                              |
+
+Forgot your password or lost your phone? Run
+`pnpm admin:create --email you@alnashamah.ae --reset` — it prints a new temporary password and you scan a new QR code.
 
 ## 5. GitHub settings (free, one time)
 

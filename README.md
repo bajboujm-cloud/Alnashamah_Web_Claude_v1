@@ -3,7 +3,7 @@
 Bilingual (Arabic / English) web store for ordering sheep and goats in the UAE — cattle and camels later,
 plus seasonal Eid Al-Adha / Qurban — to be extended into a mobile app.
 
-**Status:** Phase 0 (foundation) and Phase 1 (public catalogue) are built. See `docs/MASTER_PROMPT.md` §11.
+**Status:** Phase 0 (foundation), Phase 1 (public catalogue) and Phase 2 (admin panel) are built. See `docs/MASTER_PROMPT.md` §11.
 
 ## Run it on your laptop
 
@@ -14,7 +14,8 @@ corepack enable
 pnpm install
 cp .env.example .env.local   # Windows: copy .env.example .env.local
 pnpm db:setup                # database + starting catalogue
-pnpm dev                     # http://localhost:3000
+pnpm admin:create --email you@example.com --name "Your Name"   # first admin account
+pnpm dev                     # shop: http://localhost:3000 · admin: http://localhost:3000/ar/admin
 ```
 
 ## Documents

@@ -83,7 +83,7 @@ neutral branded placeholder until provided), sort order, **availability toggle**
 Each option = **Age range + Weight range + Price** — values are **placeholders for now** (show "—" /
 "Price on request" style placeholder in the admin, not fake numbers to customers).
 
-- Fields: label_en/ar (optional, e.g. "Option 1"), age (from–to, months), live weight (from–to, kg),
+- Fields: label_en/ar (optional, e.g. "Option 1"), age (from–to, months), weight after slaughter — الوزن بعد الذبح (from–to, kg),
   price (AED, stored as integer fils), optional compare-at price, sort order, **availability toggle**.
 - Seed **3 options per breed**; the admin can add a 4th or 5th option to specific breeds (no hard limit,
   UI designed for 3–5) and delete/reorder options.
@@ -236,11 +236,11 @@ database migrations, env vars or CI. After Phase 1, create one small GitHub issu
   Phones show categories and breeds two per row. Sizes are named Small / Medium / Large (صغير / وسط / كبير);
   sample ages, weights and prices were copied from zabehaty.com (5 Nov 2026) for Naeemi, Najdi, Somali sheep
   and Local, Somali, Kashmiri goats as **temporary placeholders** until the owner's own list; Herri and Local
-  sheep stay "Price coming soon".
+  sheep stay "Price coming soon". Weights are **after slaughter (الوزن بعد الذبح)**.
   Each service adapter (storage, OTP, email, payment) is built in the phase that first needs it,
   with its free local implementation.
-- **Phase 2** — admin: staff login (TOTP), catalogue CRUD, photo/illustration upload, one-tap toggles,
-  audit log.
+- **Phase 2 ✅** — admin: staff login (TOTP), catalogue CRUD, photo/illustration upload, one-tap toggles,
+  audit log, business settings, staff accounts with roles (owner, manager, order staff, content editor).
 - **Phase 3** — order builder (age/weight, cutting, extras, packaging, notes), cart.
 - **Phase 4** — customer phone-OTP login, guest checkout, addresses, delivery placeholder.
 - **Phase 5** — mock payment + webhook, orders, VAT, PDF invoice, emails.

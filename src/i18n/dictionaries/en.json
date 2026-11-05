@@ -31,18 +31,42 @@
     "howTitle": "How it works",
     "howLabel": "Four simple steps",
     "steps": [
-      { "title": "Choose", "text": "Pick the breed, age and weight that suit your occasion." },
-      { "title": "Cut", "text": "Select how you want it cut — whole, halves or pieces." },
-      { "title": "Pack", "text": "Slaughterhouse bag, carton box, or foam box with ice." },
-      { "title": "Deliver", "text": "Fresh to your door, on the day and time you choose." }
+      {
+        "title": "Choose",
+        "text": "Pick the breed, age and weight that suit your occasion."
+      },
+      {
+        "title": "Cut",
+        "text": "Select how you want it cut — whole, halves or pieces."
+      },
+      {
+        "title": "Pack",
+        "text": "Slaughterhouse bag, carton box, or foam box with ice."
+      },
+      {
+        "title": "Deliver",
+        "text": "Fresh to your door, on the day and time you choose."
+      }
     ],
     "trustTitle": "Why Al Nashamah",
     "trustLabel": "Our promise",
     "trust": [
-      { "title": "Halal", "text": "Slaughtered according to Islamic rites." },
-      { "title": "Licensed slaughterhouse", "text": "Hygienic, inspected facilities." },
-      { "title": "Clear age & weight", "text": "You know exactly what you are getting." },
-      { "title": "Fresh delivery", "text": "Packed with care, delivered across the UAE." }
+      {
+        "title": "Halal",
+        "text": "Slaughtered according to Islamic rites."
+      },
+      {
+        "title": "Licensed slaughterhouse",
+        "text": "Hygienic, inspected facilities."
+      },
+      {
+        "title": "Clear age & weight",
+        "text": "You know exactly what you are getting."
+      },
+      {
+        "title": "Fresh delivery",
+        "text": "Packed with care, delivered across the UAE."
+      }
     ],
     "faqTitle": "Frequently asked questions",
     "faqLabel": "FAQ",
@@ -77,7 +101,7 @@
     "optionsTitle": "Age & weight options",
     "optionsLabel": "Choose a size",
     "age": "Age",
-    "weight": "Live weight",
+    "weight": "Weight after slaughter",
     "price": "Price",
     "tbc": "To be confirmed",
     "months": "months",
@@ -102,5 +126,216 @@
     "errorTitle": "Something went wrong",
     "errorText": "Please try again in a moment.",
     "retry": "Try again"
+  },
+  "admin": {
+    "title": "Admin panel",
+    "viewSite": "View website",
+    "signOut": "Sign out",
+    "menu": "Menu",
+    "nav": {
+      "dashboard": "Dashboard",
+      "breeds": "Breeds & stock",
+      "categories": "Categories",
+      "seasonal": "Seasonal",
+      "cutting": "Cutting options",
+      "extras": "Order includes",
+      "packaging": "Packaging",
+      "settings": "Business settings",
+      "staff": "Staff",
+      "audit": "Activity log",
+      "account": "My account"
+    },
+    "login": {
+      "title": "Staff sign in",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "invalid": "Wrong email or password.",
+      "locked": "Too many attempts. Please try again in 15 minutes.",
+      "codeTitle": "Enter your authenticator code",
+      "codeHelp": "Open your authenticator app and type the 6-digit code shown for Al Nashamah.",
+      "code": "6-digit code",
+      "verify": "Verify",
+      "invalidCode": "That code is not correct or has expired. Try the new code.",
+      "setupTitle": "Set up your authenticator app",
+      "setup1": "Install Google Authenticator or Microsoft Authenticator on your phone.",
+      "setup2": "In the app, tap + and scan this QR code.",
+      "setup3": "Type the 6-digit code the app shows, then press Verify.",
+      "manualKey": "Can't scan? Enter this key in the app:",
+      "startOver": "Back to sign in",
+      "expired": "Your sign-in step expired. Please sign in again."
+    },
+    "common": {
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "confirmDelete": "Delete this permanently?",
+      "add": "Add",
+      "edit": "Edit",
+      "back": "Back",
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "descriptionEn": "Description (English)",
+      "descriptionAr": "Description (Arabic)",
+      "photo": "Photo",
+      "illustration": "Illustration",
+      "uploadHelp": "JPG, PNG or WebP, up to 5 MB.",
+      "uploadSvgHelp": "SVG, JPG, PNG or WebP, up to 5 MB.",
+      "removeImage": "Remove image",
+      "priceAed": "Price (AED)",
+      "priceEmpty": "Empty = “Price coming soon”",
+      "free": "Free",
+      "available": "In stock",
+      "outOfStock": "Out of stock",
+      "toggleHint": "Tap to switch in / out of stock",
+      "order": "Order",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "slug": "Web address",
+      "slugHelp": "Lowercase English letters, numbers and dashes, e.g. naeemi",
+      "none": "None yet.",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "msg": {
+      "saved": "Saved ✓",
+      "deleted": "Deleted",
+      "error": "Something went wrong. Please try again.",
+      "notAllowed": "Your role can't make this change.",
+      "invalid": "Please check the highlighted fields.",
+      "tooBig": "The image is larger than 5 MB.",
+      "badType": "Please upload a JPG, PNG or WebP image.",
+      "slugTaken": "This web address is already used.",
+      "slugReserved": "This web address is reserved. Choose another.",
+      "inUse": "Can't delete: it still has breeds. Move or delete them first.",
+      "denied": "You don't have access to that page.",
+      "wrongPassword": "Current password is not correct.",
+      "passwordTooShort": "Use at least 10 characters.",
+      "passwordWeak": "Use letters and numbers.",
+      "passwordChanged": "Password changed. Other devices were signed out.",
+      "emailTaken": "A staff member with this email already exists.",
+      "lastOwner": "There must always be at least one active owner."
+    },
+    "dashboard": {
+      "welcome": "Welcome",
+      "inStock": "Breeds in stock",
+      "outOfStock": "Breeds out of stock",
+      "noPrice": "Sizes without a price",
+      "seasonOn": "Active seasonal offers",
+      "ordersSoon": "Orders will appear here once online ordering is switched on (Phase 5).",
+      "quick": "Quick links"
+    },
+    "breeds": {
+      "title": "Breeds & stock",
+      "help": "Tap a switch to put a breed or a size in or out of stock. The website updates immediately — out-of-stock items stay visible with an “Out of stock” label.",
+      "add": "Add breed",
+      "editTitle": "Edit breed",
+      "newTitle": "New breed",
+      "category": "Category",
+      "sizes": "Sizes (age, weight, price)",
+      "sizesHelp": "Usually 3 sizes; add a 4th or 5th when needed. Weight is after slaughter.",
+      "size": "Size",
+      "labelEn": "Size name (English)",
+      "labelAr": "Size name (Arabic)",
+      "ageFrom": "Age from (months)",
+      "ageTo": "Age to (months)",
+      "weightFrom": "Weight from (kg)",
+      "weightTo": "Weight to (kg)",
+      "oldPrice": "Old price (optional, shown crossed out)",
+      "addSize": "Add size",
+      "deleteSize": "Delete size",
+      "details": "Breed details",
+      "deleteBreed": "Delete breed",
+      "noSizes": "No sizes yet."
+    },
+    "categories": {
+      "title": "Categories",
+      "add": "Add category",
+      "newTitle": "New category",
+      "status": "Status",
+      "active": "Active",
+      "comingSoon": "Coming soon",
+      "hidden": "Hidden",
+      "breedCount": "breeds"
+    },
+    "seasonal": {
+      "title": "Seasonal offers",
+      "add": "Add seasonal offer",
+      "newTitle": "New seasonal offer",
+      "active": "Show on website",
+      "startsAt": "Show from (optional)",
+      "endsAt": "Show until (optional)",
+      "eligible": "Breeds included"
+    },
+    "simple": {
+      "cuttingTitle": "Cutting options",
+      "cuttingHelp": "The final list will be confirmed by the owner. These are shown when ordering (Phase 3).",
+      "extrasTitle": "Order includes",
+      "extrasHelp": "Checkboxes on each order, e.g. head, intestines, tripe.",
+      "packagingTitle": "Packaging",
+      "packagingHelp": "Price per animal.",
+      "defaultSelected": "Ticked by default",
+      "videoUrl": "Video link (optional)",
+      "addItem": "Add option"
+    },
+    "settings": {
+      "title": "Business settings",
+      "help": "Used on invoices and contact buttons. Leave empty until you have the details.",
+      "fields": {
+        "company.legal_name_en": "Company name (English)",
+        "company.legal_name_ar": "Company name (Arabic)",
+        "company.trn": "TRN (VAT registration number)",
+        "company.trade_license_no": "Trade licence number",
+        "company.address_en": "Address (English)",
+        "company.address_ar": "Address (Arabic)",
+        "company.phone": "Phone",
+        "company.whatsapp": "WhatsApp number (e.g. 9715XXXXXXXX)",
+        "company.email": "Email",
+        "tax.vat_rate_percent": "VAT rate (%)",
+        "tax.prices_include_vat": "Prices include VAT"
+      }
+    },
+    "staff": {
+      "title": "Staff",
+      "add": "Add staff member",
+      "name": "Name",
+      "role": "Role",
+      "roles": {
+        "owner": "Owner",
+        "manager": "Manager",
+        "order_staff": "Order staff",
+        "content_editor": "Content editor"
+      },
+      "roleHelp": "Owner: everything. Manager: everything except staff. Order staff: stock switches. Content editor: names, descriptions and photos.",
+      "created": "Account created. Give this temporary password to the person — it is shown only once:",
+      "resetDone": "New temporary password (shown only once):",
+      "resetPassword": "Reset password & authenticator",
+      "disable": "Disable",
+      "enable": "Enable",
+      "disabled": "Disabled",
+      "you": "you",
+      "twoFactorOn": "Authenticator linked",
+      "twoFactorOff": "Authenticator not set up yet",
+      "lastLogin": "Last sign-in",
+      "never": "Never"
+    },
+    "audit": {
+      "title": "Activity log",
+      "help": "The latest 200 changes made in the admin panel.",
+      "when": "When",
+      "who": "Who",
+      "what": "What",
+      "item": "Item"
+    },
+    "account": {
+      "title": "My account",
+      "changePassword": "Change password",
+      "current": "Current password",
+      "new": "New password",
+      "rules": "At least 10 characters, with letters and numbers.",
+      "signOutAll": "Sign out on all devices"
+    }
   }
 }

@@ -70,7 +70,7 @@ export const breeds = pgTable(
   (t) => [uniqueIndex("breeds_category_slug_idx").on(t.categoryId, t.slug)],
 );
 
-/** Age + live-weight range + price. Usually 3 per breed, some breeds 4–5. */
+/** Age + weight range (after slaughter, kg) + price. Usually 3 per breed, some breeds 4–5. */
 export const breedOptions = pgTable(
   "breed_options",
   {
@@ -225,6 +225,45 @@ export const auditLog = pgTable("audit_log", {
   entityId: text("entity_id"),
   before: jsonb("before"),
   after: jsonb("after"),
+  createdAt: timestamps.createdAt,
+});
+
+/* ----------------------------------------------------------------------------------------------
+ * Staff (admin panel) accounts. Customers get their own phone-number login in Phase 4.
+ * Staff always sign in with email + password + authenticator-app code (TOTP).
+ * -------------------------------------------------------------------------------------------- */
+
+export const staffRole = pgEnum("staff_role", ["owner", "manager", "order_staff", "content_editor"]);
+
+export const staffUsers = pgTable("staff_users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  role: staffRole("role").notNull(),
+  /** scrypt hash — the password itself is never stored. */
+  passwordHash: text("password_hash").notNull(),
+  /** Authenticator secret, encrypted with AUTH_SECRET. Null until the user sets up their app. */
+  totpSecretEnc: text("totp_secret_enc"),
+  totpEnabled: boolean("totp_enabled").notNull().default(false),
+  /** Last accepted TOTP time-step, so a code can't be used twice. */
+  totpLastStep: integer("totp_last_step"),
+  isActive: boolean("is_active").notNull().default(true),
+  failedLogins: integer("failed_logins").notNull().default(0),
+  lockedUntil: timestamp("locked_until", { withTimezone: true }),
+  lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+  ...timestamps,
+});
+
+export const staffSessions = pgTable("staff_sessions", {
+  /** SHA-256 of the random token kept in the browser cookie. */
+  id: text("id").primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => staffUsers.id, { onDelete: "cascade" }),
+  /** "pending" = password OK, waiting for the authenticator code; "active" = fully signed in. */
+  stage: text("stage", { enum: ["pending", "active"] }).notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  userAgent: text("user_agent"),
   createdAt: timestamps.createdAt,
 });
 

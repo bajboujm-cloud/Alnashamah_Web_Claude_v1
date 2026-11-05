@@ -9,10 +9,13 @@ export function LanguageSwitch({
   locale,
   label,
   ariaLabel,
+  onDark = false,
 }: {
   locale: Locale;
   label: string;
   ariaLabel: string;
+  /** Light text for use on the green admin bar. */
+  onDark?: boolean;
 }) {
   const pathname = usePathname() ?? `/${locale}`;
   const target: Locale = locale === "ar" ? "en" : "ar";
@@ -27,7 +30,7 @@ export function LanguageSwitch({
       onClick={() => {
         document.cookie = `${LOCALE_COOKIE}=${target}; path=/; max-age=31536000; samesite=lax`;
       }}
-      className="rounded-brand border border-gold/70 px-3 py-1.5 text-sm text-green hover:bg-gold/15"
+      className={`rounded-brand border border-gold/70 px-3 py-1.5 text-sm hover:bg-gold/15 ${onDark ? "text-ivory" : "text-green"}`}
       data-testid="language-switch"
     >
       {label}

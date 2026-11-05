@@ -19,7 +19,10 @@ pnpm install
 cp .env.example .env.local    # defaults work as-is
 pnpm db:setup                 # starts Postgres + Mailpit in Docker, applies migrations, seeds the catalogue
 pnpm dev                      # http://localhost:3000  (use --port <n> for another port)
+pnpm admin:create --email you@example.com --name "Your Name"   # first owner account (prints a password)
 ```
+
+Admin panel: `/ar/admin` or `/en/admin` — email + password + authenticator-app code (TOTP).
 
 Only one `next dev` can run per folder. The e2e tests reuse a dev server already running on port 3000.
 
@@ -46,6 +49,15 @@ pnpm e2e                  # browser tests (tests/e2e), desktop + phone, needs th
   with a label, never hidden). Reuse these everywhere (pages, admin, checkout, API).
 - `scripts/seed.ts` + `scripts/seed-data.ts` — starting catalogue. The seed only adds missing rows and never
   overwrites admin edits.
+- `src/app/[lang]/admin/` — admin panel. `(auth)` = sign-in pages, `(panel)` = signed-in screens,
+  `_actions/` = Server Actions. **Every page calls `requireStaff(lang, permission)` and every action calls
+  `authorize(permission)`** (`src/server/auth/staff.ts`); roles → permissions in `src/server/auth/permissions.ts`.
+  Every change is written with `audit()`.
+- `src/server/auth/` — staff passwords (scrypt), authenticator codes (TOTP, secret encrypted with `AUTH_SECRET`),
+  database-backed sessions (only a SHA-256 of the cookie token is stored), lockout after 5 failures.
+- `src/server/storage/` — uploads (real file type checked from the bytes, 5 MB max), saved under `STORAGE_DIR`
+  and served by `src/app/files/[...key]/route.ts`. Vercel Blob replaces this at go-live.
+- `src/app/[lang]/(site)/` — the public shop pages (header/footer layout).
 - `public/brand/` — logo files (do not redraw or recolour; see the brand skill). `public/illustrations/` — category art.
 
 ## Rules

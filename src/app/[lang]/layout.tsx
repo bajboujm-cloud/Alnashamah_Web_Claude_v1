@@ -1,12 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Kufi_Arabic, Noto_Sans_Arabic } from "next/font/google";
 import { notFound } from "next/navigation";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { dirOf, hasLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
-import { alternates, siteUrl, whatsappNumber } from "@/lib/site";
+import { alternates, siteUrl } from "@/lib/site";
 import "../globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -66,12 +63,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         >
           {t.nav.skipToContent}
         </a>
-        <Header locale={lang} t={t} />
-        <main id="main" className="flex-1">
-          {children}
-        </main>
-        <Footer locale={lang} t={t} whatsapp={whatsappNumber} />
-        {whatsappNumber ? <WhatsAppButton number={whatsappNumber} label={t.footer.contact} /> : null}
+        {children}
       </body>
     </html>
   );

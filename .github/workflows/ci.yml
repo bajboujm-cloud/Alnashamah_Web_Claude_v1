@@ -30,6 +30,8 @@ jobs:
     env:
       DATABASE_URL: postgres://nashamah:nashamah@localhost:5433/nashamah
       NEXT_TELEMETRY_DISABLED: "1"
+      # Test-only value for the production build in CI; the real one lives in Vercel at go-live.
+      AUTH_SECRET: ci-test-secret-not-used-anywhere-else-00000000
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
