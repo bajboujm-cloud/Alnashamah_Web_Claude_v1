@@ -83,13 +83,14 @@ export default async function BreedPage({ params }: PageProps<"/[lang]/[category
         </span>
       </nav>
 
-      <div className="grid gap-10 md:grid-cols-[1fr_1.2fr]">
-        <div className="border-s-4 border-gold">
+      {/* Photo kept the same size as a breed card on the category page (about 22rem wide). */}
+      <div className="grid items-start gap-10 md:grid-cols-[22rem_1fr]">
+        <div className="w-full max-w-60 border-s-4 border-gold md:max-w-none">
           <BreedPhoto
             src={breed.photoUrl}
             alt={name}
             placeholderLabel={t.catalog.photoSoon}
-            sizes="(max-width: 768px) 100vw, 45vw"
+            sizes="(max-width: 768px) 240px, 352px"
             priority
           />
         </div>
