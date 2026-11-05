@@ -4,7 +4,8 @@ name: Security
 on:
   pull_request:
   push:
-    branches: [main]
+    # Our working branch (the repository default) and main, once it exists.
+    branches: [main, ccr-74fd4369-jq71o5]
   schedule:
     - cron: "17 3 * * 1" # every Monday
 

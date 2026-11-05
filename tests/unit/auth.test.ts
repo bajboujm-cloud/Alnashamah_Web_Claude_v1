@@ -42,6 +42,10 @@ describe("encryption", () => {
     expect(sealed).not.toContain("JBSWY3DPEHPK3PXP");
     expect(decrypt(sealed, "a".repeat(40))).toBe("JBSWY3DPEHPK3PXP");
     expect(() => decrypt(sealed, "b".repeat(40))).toThrow();
+    // A shortened tag is refused.
+    const [iv, tag, data] = sealed.split(".");
+    const short = Buffer.from(tag, "base64url").subarray(0, 4).toString("base64url");
+    expect(() => decrypt([iv, short, data].join("."), "a".repeat(40))).toThrow();
   });
   it("hashes session tokens", () => {
     expect(sha256("abc")).toHaveLength(64);
