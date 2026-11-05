@@ -56,23 +56,26 @@ export default async function CategoryPage({ params }: PageProps<"/[lang]/[categ
 
   return (
     <Container className="py-12">
-      <div className="flex items-center gap-6">
+      {/* Category image beside the name; the description sits under the name, never over the image. */}
+      <div className="mb-8 flex items-start gap-6">
         {category.illustrationUrl ? (
-          <Image
-            src={category.illustrationUrl}
-            alt=""
-            width={240}
-            height={160}
-            className="hidden h-auto w-36 sm:block"
-          />
+          <div className="relative hidden aspect-[3/2] w-36 shrink-0 overflow-hidden sm:block">
+            <Image
+              src={category.illustrationUrl}
+              alt=""
+              fill
+              sizes="144px"
+              className={category.illustrationUrl.endsWith(".svg") ? "object-contain" : "object-cover"}
+            />
+          </div>
         ) : null}
-        <div className="flex-1">
-          <SectionHeading as="h1" title={name} label={t.catalog.breedsIn} />
+        <div className="min-w-0 flex-1">
+          <SectionHeading as="h1" title={name} />
+          <p className="-mt-4 max-w-2xl text-muted">
+            {pick(lang, category.descriptionEn, category.descriptionAr)}
+          </p>
         </div>
       </div>
-      <p className="-mt-4 mb-8 max-w-2xl text-muted">
-        {pick(lang, category.descriptionEn, category.descriptionAr)}
-      </p>
       {category.breeds.length ? (
         <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
           {category.breeds.map((b) => (
