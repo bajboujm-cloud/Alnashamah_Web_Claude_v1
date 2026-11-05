@@ -1,0 +1,26 @@
+name: "✨ Change or new feature / تعديل أو ميزة جديدة"
+description: Ask for a change to the design, wording or a new feature. اطلب تعديلاً في التصميم أو النصوص أو ميزة جديدة.
+title: "Feature: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What do you want? / ماذا تريد؟
+      description: Describe the change as you would to a person. اشرح التعديل كما تشرحه لشخص.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why? Who is it for? / لماذا؟ ولمن؟
+      placeholder: e.g. customers on phones scroll too much
+  - type: textarea
+    id: example
+    attributes:
+      label: Example, link or picture (optional) / مثال أو رابط أو صورة (اختياري)
+  - type: dropdown
+    id: priority
+    attributes:
+      label: How urgent? / مدى الأهمية
+      options: ["Soon / قريباً", "Normal / عادي", "Later / لاحقاً"]

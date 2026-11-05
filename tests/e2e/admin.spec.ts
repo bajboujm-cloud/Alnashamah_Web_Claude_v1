@@ -30,6 +30,9 @@ test.afterAll(async () => {
       where b.slug = 'local' and c.slug = 'sheep')`;
   await sql`update breeds set photo_url = null where slug = 'local'
     and category_id = (select id from categories where slug = 'sheep')`;
+  await sql`update categories set status = 'coming_soon' where slug in ('cattle', 'camels')`;
+  await sql`update seasonal_collections set is_active = true where slug = 'eid-al-adha'`;
+  await sql`delete from site_texts`;
   await cleanupStaff();
 });
 
@@ -173,4 +176,58 @@ test("every change is in the activity log", async () => {
   await page.goto("/en/admin/audit");
   await expect(page.getByText("breed · out-of-stock").first()).toBeVisible();
   await expect(page.getByText("size · update").first()).toBeVisible();
+});
+
+test("one-tap hide for a category and for the Eid offer", async () => {
+  await page.goto("/en/admin/categories");
+  const camels = page.locator('[data-testid=admin-category][data-slug="camels"]');
+  await camels.getByTestId("visibility-switch").click();
+  await expect(camels.getByTestId("visibility-switch")).toHaveAttribute("aria-checked", "false");
+  await expect(camels.getByTestId("visibility-switch")).not.toHaveAttribute("data-pending");
+
+  await page.goto("/en/admin/seasonal");
+  const eid = page.getByTestId("admin-seasonal").first();
+  await eid.getByTestId("visibility-switch").click();
+  await expect(eid.getByTestId("visibility-switch")).toHaveAttribute("aria-checked", "false");
+  await expect(eid.getByTestId("visibility-switch")).not.toHaveAttribute("data-pending");
+
+  await page.goto("/en");
+  await expect(page.getByTestId("category-card")).toHaveCount(3);
+  await expect(page.getByText("Eid Al-Adha Sacrifice / Qurban")).toHaveCount(0);
+  await expect(page.locator('header a[href="/en/seasonal/eid-al-adha"]')).toHaveCount(0);
+  expect((await page.goto("/en/seasonal/eid-al-adha"))?.status()).toBe(404);
+  expect((await page.goto("/en/camels"))?.status()).toBe(404);
+
+  // Switch both back on.
+  await page.goto("/en/admin/categories");
+  await camels.getByTestId("visibility-switch").click();
+  await expect(camels.getByTestId("visibility-switch")).toHaveAttribute("aria-checked", "true");
+  await expect(camels.getByTestId("visibility-switch")).not.toHaveAttribute("data-pending");
+  await page.goto("/en/admin/seasonal");
+  await eid.getByTestId("visibility-switch").click();
+  await expect(eid.getByTestId("visibility-switch")).toHaveAttribute("aria-checked", "true");
+  await expect(eid.getByTestId("visibility-switch")).not.toHaveAttribute("data-pending");
+  await page.goto("/en");
+  await expect(page.getByTestId("category-card")).toHaveCount(4);
+  await expect(page.locator('header a[href="/en/seasonal/eid-al-adha"]').first()).toBeAttached();
+});
+
+test("website wording can be edited and reset", async () => {
+  await page.goto("/en/admin/texts");
+  const home = page.getByTestId("texts-home");
+  await home.locator("summary").click();
+  await home.locator('textarea[name="ar:home.heroTitle"]').fill("أفضل الذبائح في الإمارات");
+  await home.getByRole("button", { name: "Save" }).click();
+  await expect(home.getByTestId("form-message")).toHaveText("Saved ✓");
+  await page.goto("/ar");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("أفضل الذبائح في الإمارات");
+
+  // Emptying the box brings back the original wording.
+  await page.goto("/en/admin/texts");
+  await home.locator("summary").click();
+  await home.locator('textarea[name="ar:home.heroTitle"]').fill("");
+  await home.getByRole("button", { name: "Save" }).click();
+  await expect(home.getByTestId("form-message")).toHaveText("Saved ✓");
+  await page.goto("/ar");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("أصالة السوق المحلي، بمعايير تجارة عصرية");
 });

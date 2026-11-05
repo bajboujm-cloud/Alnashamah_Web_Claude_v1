@@ -216,6 +216,21 @@ export const settings = pgTable("settings", {
   updatedAt: timestamps.updatedAt,
 });
 
+/**
+ * Website wording edited in the admin panel ("Website text"). Each row replaces one built-in text from
+ * src/i18n/dictionaries/{en,ar}.json, e.g. key "home.heroTitle", locale "ar".
+ */
+export const siteTexts = pgTable(
+  "site_texts",
+  {
+    key: text("key").notNull(),
+    locale: text("locale", { enum: ["en", "ar"] }).notNull(),
+    value: text("value").notNull(),
+    updatedAt: timestamps.updatedAt,
+  },
+  (t) => [primaryKey({ columns: [t.key, t.locale] })],
+);
+
 /** Every admin change (prices, toggles, content) is recorded here. */
 export const auditLog = pgTable("audit_log", {
   id: uuid("id").primaryKey().defaultRandom(),

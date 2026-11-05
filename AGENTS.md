@@ -42,6 +42,8 @@ pnpm e2e                  # browser tests (tests/e2e), desktop + phone, needs th
 
 - `src/app/[lang]/…` — pages; every page is under `/ar` or `/en`. `src/proxy.ts` redirects bare URLs.
 - `src/i18n/` — locales and dictionaries (`ar.json` and `en.json` must have identical keys — a unit test enforces it).
+  Owners can override any public text in the admin ("Website text" → `site_texts` table); `getDictionary()`
+  applies those edits on top of the JSON files, so always read texts through it.
 - `src/server/db/schema.ts` — database schema. After changing it run `pnpm db:generate --name <change>` and commit
   the new file in `drizzle/`. Never edit an applied migration.
 - `src/server/catalog.ts` — read-only queries for the public site.

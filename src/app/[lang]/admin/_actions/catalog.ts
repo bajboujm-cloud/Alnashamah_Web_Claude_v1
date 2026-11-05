@@ -94,6 +94,20 @@ export async function saveCategory(_prev: FormState, data: FormData): Promise<Fo
   });
 }
 
+/** One-tap show / hide. Showing again makes it Active if it has breeds, otherwise "Coming soon". */
+export async function setCategoryVisible(id: string, visible: boolean) {
+  const user = await authorize("catalog.prices");
+  if (!isUuid(id)) return;
+  let status: "active" | "coming_soon" | "hidden" = "hidden";
+  if (visible) {
+    const [{ n }] = await db.select({ n: count() }).from(s.breeds).where(eq(s.breeds.categoryId, id));
+    status = n > 0 ? "active" : "coming_soon";
+  }
+  await db.update(s.categories).set({ status }).where(eq(s.categories.id, id));
+  await audit(user, visible ? "show" : "hide", "category", id, null, { status });
+  refresh();
+}
+
 export async function deleteCategory(_prev: FormState, data: FormData): Promise<FormState> {
   return guarded(async () => {
     const user = await authorize("catalog.prices");
@@ -191,6 +205,14 @@ export async function saveSeasonal(_prev: FormState, data: FormData): Promise<Fo
     refresh();
     return ok();
   });
+}
+
+export async function setSeasonalVisible(id: string, visible: boolean) {
+  const user = await authorize("catalog.prices");
+  if (!isUuid(id)) return;
+  await db.update(s.seasonalCollections).set({ isActive: visible }).where(eq(s.seasonalCollections.id, id));
+  await audit(user, visible ? "show" : "hide", "seasonal", id);
+  refresh();
 }
 
 export async function deleteSeasonal(_prev: FormState, data: FormData): Promise<FormState> {

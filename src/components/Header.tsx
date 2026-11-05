@@ -5,10 +5,19 @@ import type { Dictionary } from "@/i18n/dictionaries";
 import { Container } from "./Container";
 import { LanguageSwitch } from "./LanguageSwitch";
 
-export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
+export function Header({
+  locale,
+  t,
+  seasonal,
+}: {
+  locale: Locale;
+  t: Dictionary;
+  /** Seasonal offers currently shown on the website (e.g. Eid Al-Adha); hidden ones get no menu link. */
+  seasonal: { slug: string; label: string }[];
+}) {
   const links = [
     { href: `/${locale}#categories`, label: t.nav.categories },
-    { href: `/${locale}/seasonal/eid-al-adha`, label: t.nav.eid },
+    ...seasonal.map((s) => ({ href: `/${locale}/seasonal/${s.slug}`, label: s.label })),
     { href: `/${locale}#how`, label: t.nav.howItWorks },
     { href: `/${locale}#faq`, label: t.nav.faq },
   ];

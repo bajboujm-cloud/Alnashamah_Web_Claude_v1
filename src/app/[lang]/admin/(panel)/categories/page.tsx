@@ -10,7 +10,8 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { can } from "@/server/auth/permissions";
 import { requireStaff } from "@/server/auth/staff";
 import { adminCategories } from "@/server/admin-data";
-import { deleteCategory, saveCategory } from "../../_actions/catalog";
+import { Switch } from "@/components/admin/Switch";
+import { deleteCategory, saveCategory, setCategoryVisible } from "../../_actions/catalog";
 
 type Cat = Awaited<ReturnType<typeof adminCategories>>[number];
 
@@ -82,32 +83,51 @@ export default async function CategoriesPage({ params }: PageProps<"/[lang]/admi
       <PageTitle title={t.categories.title} />
       <div className="space-y-4">
         {cats.map((c) => (
-          <details key={c.id} className="border border-line bg-white" data-testid="admin-category">
-            <summary className="flex cursor-pointer items-center justify-between gap-3 p-4">
-              <span className="font-semibold text-green">{pick(lang, c.nameEn, c.nameAr)}</span>
-              <span className="text-xs text-muted">
-                {c.status === "active"
-                  ? t.categories.active
-                  : c.status === "coming_soon"
-                    ? t.categories.comingSoon
-                    : t.categories.hidden}{" "}
-                · {c.breeds.length} {t.categories.breedCount}
-              </span>
-            </summary>
-            <div className="border-t border-line p-4">
-              <CategoryForm t={t} c={c} full={full} />
-              {full ? (
-                <ActionForm
-                  action={deleteCategory}
-                  messages={t.msg}
-                  className="mt-4 border-t border-line pt-4"
-                >
-                  <input type="hidden" name="id" value={c.id} />
-                  <ConfirmButton question={t.common.confirmDelete}>{t.common.delete}</ConfirmButton>
-                </ActionForm>
-              ) : null}
-            </div>
-          </details>
+          <div
+            key={c.id}
+            className={`flex items-start gap-3 border bg-white p-1 ${c.status === "hidden" ? "border-danger/40" : "border-line"}`}
+            data-testid="admin-category"
+            data-slug={c.slug}
+          >
+            <details className="min-w-0 flex-1">
+              <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-3 p-3">
+                <span className="font-semibold text-green">{pick(lang, c.nameEn, c.nameAr)}</span>
+                <span className="text-xs text-muted">
+                  {c.status === "active"
+                    ? t.categories.active
+                    : c.status === "coming_soon"
+                      ? t.categories.comingSoon
+                      : t.categories.hidden}{" "}
+                  · {c.breeds.length} {t.categories.breedCount}
+                </span>
+              </summary>
+              <div className="border-t border-line p-4">
+                <CategoryForm t={t} c={c} full={full} />
+                {full ? (
+                  <ActionForm
+                    action={deleteCategory}
+                    messages={t.msg}
+                    className="mt-4 border-t border-line pt-4"
+                  >
+                    <input type="hidden" name="id" value={c.id} />
+                    <ConfirmButton question={t.common.confirmDelete}>{t.common.delete}</ConfirmButton>
+                  </ActionForm>
+                ) : null}
+              </div>
+            </details>
+            {full ? (
+              <div className="shrink-0 p-2">
+                <Switch
+                  checked={c.status !== "hidden"}
+                  label={`${pick(lang, c.nameEn, c.nameAr)} — ${t.common.visibilityHint}`}
+                  onLabel={t.common.shown}
+                  offLabel={t.common.hiddenLabel}
+                  action={setCategoryVisible.bind(null, c.id)}
+                  testId="visibility-switch"
+                />
+              </div>
+            ) : null}
+          </div>
         ))}
       </div>
       {full ? (

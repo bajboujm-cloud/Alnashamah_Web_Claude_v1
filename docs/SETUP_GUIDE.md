@@ -116,8 +116,9 @@ What you can do there:
 | Screen                                       | What for                                                                                                                                                                                                               |
 | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Breeds & stock                               | One-tap switches to put a breed or a size in / out of stock; **Edit** a breed for its photo, names, descriptions and its sizes (age, weight after slaughter, price in AED), add a 4th / 5th size, add or delete breeds |
-| Categories                                   | Names, illustration, status (Active / Coming soon / Hidden), add new categories                                                                                                                                        |
-| Seasonal                                     | Eid Al-Adha / Qurban: show on website on/off, dates, illustration, which breeds are included                                                                                                                           |
+| Categories                                   | **Show / hide switch** (e.g. hide Cattle and Camels), names, illustration, status, add new categories                                                                                                                  |
+| Seasonal                                     | Eid Al-Adha / Qurban: **show / hide switch** (also removes it from the top menu and home page), dates, illustration, breeds included                                                                                   |
+| Website text                                 | Edit any wording on the website (home page, menu, labels, footer) in Arabic and English; empty a box to restore the original                                                                                           |
 | Cutting options · Order includes · Packaging | Names, prices, photos, on/off                                                                                                                                                                                          |
 | Business settings                            | Company name, TRN, licence, address, phones, WhatsApp, VAT                                                                                                                                                             |
 | Staff                                        | Add staff with a role (Owner, Manager, Order staff, Content editor); reset a password; disable                                                                                                                         |
@@ -137,14 +138,27 @@ On github.com → your repo → **Settings**:
   gitleaks for leaked passwords/keys and Semgrep for security bugs — run by GitHub Actions.)
 - **Actions → General**: allow GitHub Actions (private repos get 2,000 free minutes/month).
 
-## 6. Daily workflow
+## 6. Daily workflow — separate chats for features and problems
 
-1. `git pull`, open Docker Desktop, `claude` in the project folder.
-2. Ask for a change, or let the Software Factory do it: create a GitHub issue describing the feature,
-   add the label `factory`, then in Claude Code run `/factory run`. It writes a spec, builds, runs the
-   checks, gets code/security/UI/UX reviews, and merges small safe changes. Anything risky (login,
-   payments, invoices, database changes) comes back to you labelled `factory:needs-human`.
-3. Test on http://localhost:3000. Happy → merge the pull request on GitHub.
+Each Claude Code chat ("session") has its own memory and its own branch, so you can keep work apart:
+
+| Chat                                         | Use it for                                               |
+| -------------------------------------------- | -------------------------------------------------------- |
+| **Main build chat** (this one)               | The planned phases: ordering, login, payment, invoices … |
+| **One new chat per problem or small change** | A bug you found, a wording or design tweak               |
+
+How to do it (works from your phone):
+
+1. On github.com → the repository → **Issues → New issue**, choose **🐞 Problem** or **✨ Change or new feature**,
+   fill in the form (Arabic or English, screenshots welcome) and submit. It gets a number, e.g. **#12**.
+2. Open **claude.ai/code → New session**, pick the repository and write: `Please fix issue #12`.
+   That chat reads the issue, makes the change on its own branch, runs the checks and opens a **pull request**.
+3. Check it (on your laptop: `git fetch` then `git checkout <that branch>` and `pnpm dev`, or just read the summary)
+   and press **Merge** on GitHub. Then `git pull` on `main`.
+
+Tips: one issue per chat; keep the main build chat for phases. Everything is merged into the **main** branch,
+so every new chat starts from the latest version. Later, the Software Factory can pick up issues labelled
+`factory` automatically.
 
 ## 7. Mobile-number login — is it safe?
 

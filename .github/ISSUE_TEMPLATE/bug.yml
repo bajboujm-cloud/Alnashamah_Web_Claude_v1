@@ -1,0 +1,38 @@
+name: "🐞 Problem / مشكلة"
+description: Something on the website or admin panel is not working. شيء لا يعمل في الموقع أو لوحة الإدارة.
+title: "Bug: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened? / ماذا حدث؟
+      description: Describe the problem. صف المشكلة.
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Page address / رابط الصفحة
+      placeholder: http://localhost:3000/ar/sheep/naeemi
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to see it / خطوات إظهار المشكلة
+      placeholder: |
+        1. Open …
+        2. Tap …
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should happen instead? / ما المتوقع؟
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device / الجهاز
+      options: ["Phone / جوال", "Laptop / لابتوب", "Both / كلاهما"]
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot or error text / صورة الشاشة أو نص الخطأ
+      description: Paste or drag a screenshot here. الصق صورة أو اسحبها هنا.

@@ -28,6 +28,7 @@ export default async function PanelLayout({ children, params }: LayoutProps<"/[l
     { href: `${base}/cutting`, label: t.nav.cutting, perm: "catalog.content" },
     { href: `${base}/extras`, label: t.nav.extras, perm: "catalog.content" },
     { href: `${base}/packaging`, label: t.nav.packaging, perm: "catalog.content" },
+    { href: `${base}/texts`, label: t.nav.texts, perm: "catalog.content" },
     { href: `${base}/settings`, label: t.nav.settings, perm: "settings.edit" },
     { href: `${base}/staff`, label: t.nav.staff, perm: "staff.manage" },
     { href: `${base}/audit`, label: t.nav.audit, perm: "audit.view" },

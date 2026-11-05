@@ -11,7 +11,8 @@ import { can } from "@/server/auth/permissions";
 import { requireStaff } from "@/server/auth/staff";
 import { adminBreedsByCategory } from "@/server/admin-data";
 import { db } from "@/server/db";
-import { deleteSeasonal, saveSeasonal } from "../../_actions/catalog";
+import { Switch } from "@/components/admin/Switch";
+import { deleteSeasonal, saveSeasonal, setSeasonalVisible } from "../../_actions/catalog";
 
 const day = (d: Date | null) => (d ? new Date(d.getTime() + 4 * 3_600_000).toISOString().slice(0, 10) : ""); // UAE date
 
@@ -140,27 +141,42 @@ export default async function SeasonalAdminPage({ params }: PageProps<"/[lang]/a
       <PageTitle title={t.seasonal.title} />
       <div className="space-y-4">
         {seasons.map((c) => (
-          <details key={c.id} className="border border-line bg-white" open={seasons.length === 1}>
-            <summary className="flex cursor-pointer items-center justify-between gap-3 p-4">
-              <span className="font-semibold text-green">{pick(lang, c.nameEn, c.nameAr)}</span>
-              <span className={`text-xs ${c.isActive ? "text-green" : "text-muted"}`}>
-                {c.isActive ? t.common.yes : t.common.no} · {t.seasonal.active}
-              </span>
-            </summary>
-            <div className="border-t border-line p-4">
-              <SeasonForm lang={lang} t={t} c={c} cats={cats} full={full} />
-              {full ? (
-                <ActionForm
-                  action={deleteSeasonal}
-                  messages={t.msg}
-                  className="mt-4 border-t border-line pt-4"
-                >
-                  <input type="hidden" name="id" value={c.id} />
-                  <ConfirmButton question={t.common.confirmDelete}>{t.common.delete}</ConfirmButton>
-                </ActionForm>
-              ) : null}
-            </div>
-          </details>
+          <div
+            key={c.id}
+            className={`flex items-start gap-3 border bg-white p-1 ${c.isActive ? "border-line" : "border-danger/40"}`}
+            data-testid="admin-seasonal"
+          >
+            <details className="min-w-0 flex-1">
+              <summary className="cursor-pointer p-3 font-semibold text-green">
+                {pick(lang, c.nameEn, c.nameAr)}
+              </summary>
+              <div className="border-t border-line p-4">
+                <SeasonForm lang={lang} t={t} c={c} cats={cats} full={full} />
+                {full ? (
+                  <ActionForm
+                    action={deleteSeasonal}
+                    messages={t.msg}
+                    className="mt-4 border-t border-line pt-4"
+                  >
+                    <input type="hidden" name="id" value={c.id} />
+                    <ConfirmButton question={t.common.confirmDelete}>{t.common.delete}</ConfirmButton>
+                  </ActionForm>
+                ) : null}
+              </div>
+            </details>
+            {full ? (
+              <div className="shrink-0 p-2">
+                <Switch
+                  checked={c.isActive}
+                  label={`${pick(lang, c.nameEn, c.nameAr)} — ${t.common.visibilityHint}`}
+                  onLabel={t.common.shown}
+                  offLabel={t.common.hiddenLabel}
+                  action={setSeasonalVisible.bind(null, c.id)}
+                  testId="visibility-switch"
+                />
+              </div>
+            ) : null}
+          </div>
         ))}
       </div>
       {full ? (

@@ -8,7 +8,6 @@
   "nav": {
     "home": "Home",
     "categories": "Livestock",
-    "eid": "Eid Al-Adha",
     "howItWorks": "How it works",
     "faq": "FAQ",
     "switchLanguage": "العربية",
@@ -143,7 +142,8 @@
       "settings": "Business settings",
       "staff": "Staff",
       "audit": "Activity log",
-      "account": "My account"
+      "account": "My account",
+      "texts": "Website text"
     },
     "login": {
       "title": "Staff sign in",
@@ -197,7 +197,10 @@
       "slugHelp": "Lowercase English letters, numbers and dashes, e.g. naeemi",
       "none": "None yet.",
       "yes": "Yes",
-      "no": "No"
+      "no": "No",
+      "shown": "Shown on website",
+      "hiddenLabel": "Hidden",
+      "visibilityHint": "Tap to show or hide on the website"
     },
     "msg": {
       "saved": "Saved ✓",
@@ -336,6 +339,22 @@
       "new": "New password",
       "rules": "At least 10 characters, with letters and numbers.",
       "signOutAll": "Sign out on all devices"
+    },
+    "texts": {
+      "title": "Website text",
+      "help": "Change any wording on the website, in English and Arabic. Each box starts with the current text — edit it and press Save. To go back to the original wording, empty the box and save.",
+      "original": "Original",
+      "sections": {
+        "meta": "Page title & Google description",
+        "nav": "Top menu",
+        "home": "Home page",
+        "catalog": "Breed & price labels",
+        "footer": "Bottom of page",
+        "errors": "Error pages"
+      },
+      "english": "English",
+      "arabic": "Arabic",
+      "edited": "edited"
     }
   }
 }
