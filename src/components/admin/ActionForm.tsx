@@ -31,36 +31,37 @@ export function ActionForm({ action, messages, children, className = "", resetOn
         const data = new FormData(e.currentTarget);
         startTransition(() => formAction(data));
       }}
-      className={className}
       data-pending={pending || undefined}
     >
-      <fieldset disabled={pending} className="contents">
+      {/* The layout classes (space-y-…, gap-…) go on the fieldset so they reach the fields inside it;
+          with display: contents they did not, and the submit button touched the last input. */}
+      <fieldset disabled={pending} className={`min-w-0 ${className}`}>
         {children}
+        {state.status !== "idle" && state.msg ? (
+          <div
+            role={state.status === "error" ? "alert" : "status"}
+            className={`mt-3 rounded-brand border px-3 py-2 text-sm ${
+              state.status === "error" ? "border-danger/40 text-danger" : "border-green/30 text-green"
+            }`}
+            data-testid="form-message"
+          >
+            {messages[state.msg] ?? state.msg}
+            {state.extra ? (
+              <code
+                className="mt-1 block select-all font-mono text-base font-semibold"
+                data-testid="form-extra"
+              >
+                {state.extra}
+              </code>
+            ) : null}
+          </div>
+        ) : null}
+        {state.fields?.length ? (
+          <style>
+            {state.fields.map((f) => `[name="${CSS.escape(f)}"]`).join(",") + "{border-color:#A4553A}"}
+          </style>
+        ) : null}
       </fieldset>
-      {state.status !== "idle" && state.msg ? (
-        <div
-          role={state.status === "error" ? "alert" : "status"}
-          className={`mt-3 rounded-brand border px-3 py-2 text-sm ${
-            state.status === "error" ? "border-danger/40 text-danger" : "border-green/30 text-green"
-          }`}
-          data-testid="form-message"
-        >
-          {messages[state.msg] ?? state.msg}
-          {state.extra ? (
-            <code
-              className="mt-1 block select-all font-mono text-base font-semibold"
-              data-testid="form-extra"
-            >
-              {state.extra}
-            </code>
-          ) : null}
-        </div>
-      ) : null}
-      {state.fields?.length ? (
-        <style>
-          {state.fields.map((f) => `[name="${CSS.escape(f)}"]`).join(",") + "{border-color:#A4553A}"}
-        </style>
-      ) : null}
     </form>
   );
 }
