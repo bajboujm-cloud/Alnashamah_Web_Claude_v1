@@ -16,7 +16,7 @@ describe("passwords", () => {
     expect(passwordProblem("short1")).toBe("tooShort");
     expect(passwordProblem("onlyletterslong")).toBe("weak");
     expect(passwordProblem("Nashamah2026")).toBeNull();
-    expect(passwordProblem(generatePassword())).toBeNull();
+    for (let i = 0; i < 200; i++) expect(passwordProblem(generatePassword())).toBeNull();
   });
 });
 

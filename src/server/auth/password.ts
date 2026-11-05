@@ -44,11 +44,12 @@ export function passwordProblem(password: string): "tooShort" | "weak" | null {
   return null;
 }
 
-/** Readable random password for new staff accounts (shown once). */
-export function generatePassword() {
+/** Readable random password for new staff accounts (shown once). Always has letters and digits. */
+export function generatePassword(): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
-  const bytes = randomBytes(14);
-  let out = "";
-  for (const b of bytes) out += alphabet[b % alphabet.length];
-  return `${out.slice(0, 7)}-${out.slice(7)}`;
+  for (;;) {
+    let out = "";
+    for (const b of randomBytes(14)) out += alphabet[b % alphabet.length];
+    if (/\d/.test(out) && /[A-Za-z]/.test(out)) return `${out.slice(0, 7)}-${out.slice(7)}`;
+  }
 }
