@@ -48,6 +48,9 @@ pnpm e2e                  # browser tests (tests/e2e), desktop + phone, needs th
 - `src/server/db/schema.ts` — database schema. After changing it run `pnpm db:generate --name <change>` and commit
   the new file in `drizzle/`. Never edit an applied migration.
 - `src/server/catalog.ts` — read-only queries for the public site.
+- `src/lib/pricing.ts` — pure price maths (unit/line totals, VAT) shared by the order builder and the server.
+- `src/server/cart.ts` + `src/app/actions/cart.ts` — cart in the database, id in an httpOnly cookie; `resolveLine()`
+  re-checks every choice against the live catalogue. Never store or trust prices from the browser.
 - `src/lib/availability.ts` — stock rules (breed off ⇒ all its options out of stock; out-of-stock items are shown
   with a label, never hidden). Reuse these everywhere (pages, admin, checkout, API).
 - `scripts/seed.ts` + `scripts/seed-data.ts` — starting catalogue. The seed only adds missing rows and never

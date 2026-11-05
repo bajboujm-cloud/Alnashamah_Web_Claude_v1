@@ -6,6 +6,7 @@ import { hasLocale, pick } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { isSeasonVisible } from "@/lib/availability";
 import { getBranding } from "@/server/branding";
+import { getCartCount } from "@/server/cart";
 import { getSeasonalCollections } from "@/server/catalog";
 
 /** Menu label: the part before " / " (e.g. "Eid Al-Adha Sacrifice / Qurban" → "Eid Al-Adha Sacrifice"). */
@@ -15,17 +16,18 @@ const shortName = (name: string) => name.split(" / ")[0];
 export default async function SiteLayout({ children, params }: LayoutProps<"/[lang]">) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
-  const [t, seasons, brand] = await Promise.all([
+  const [t, seasons, brand, cartCount] = await Promise.all([
     getDictionary(lang),
     getSeasonalCollections(),
     getBranding(),
+    getCartCount(),
   ]);
   const seasonal = seasons
     .filter((s) => isSeasonVisible(s))
     .map((s) => ({ slug: s.slug, label: shortName(pick(lang, s.nameEn, s.nameAr)) }));
   return (
     <>
-      <Header locale={lang} t={t} seasonal={seasonal} logo={brand.logo} />
+      <Header locale={lang} t={t} seasonal={seasonal} logo={brand.logo} cartCount={cartCount} />
       <main id="main" className="flex-1">
         {children}
       </main>

@@ -13,7 +13,8 @@
     "switchLanguage": "العربية",
     "switchLanguageLabel": "التبديل إلى العربية",
     "menu": "Menu",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "cart": "Cart"
   },
   "home": {
     "heroEyebrow": "Livestock Trading · UAE",
@@ -358,7 +359,9 @@
         "home": "Home page",
         "catalog": "Breed & price labels",
         "footer": "Bottom of page",
-        "errors": "Error pages"
+        "errors": "Error pages",
+        "order": "Ordering (breed page)",
+        "cart": "Cart"
       },
       "english": "English",
       "arabic": "Arabic",
@@ -397,5 +400,73 @@
       "endsAt": "Show until (optional)",
       "imageRequired": "Please upload the banner picture."
     }
+  },
+  "order": {
+    "title": "Build your order",
+    "stepSize": "Choose the size",
+    "stepCutting": "How should we cut it?",
+    "stepExtras": "Order includes",
+    "stepPackaging": "Packaging",
+    "stepDetails": "Quantity & notes",
+    "quantity": "Quantity",
+    "occasion": "Occasion",
+    "occasions": {
+      "none": "No special occasion",
+      "udhiyah": "Udhiyah (Eid Al-Adha sacrifice)",
+      "aqiqah": "Aqiqah",
+      "sadaqah": "Sadaqah (charity)",
+      "other": "Other"
+    },
+    "onBehalfOf": "On behalf of (name, optional)",
+    "notes": "Special instructions (optional)",
+    "notesPlaceholder": "e.g. please remove the fat",
+    "total": "Total",
+    "perAnimal": "per animal",
+    "add": "Add to cart",
+    "adding": "Adding…",
+    "added": "Added to your cart ✓",
+    "viewCart": "View cart",
+    "chooseSize": "Choose a size first.",
+    "outOfStockNote": "This breed is out of stock right now. Please check again soon.",
+    "problems": {
+      "unavailable": "Sorry, this size is no longer available.",
+      "noPrice": "This size has no price yet.",
+      "chooseCutting": "Please choose how to cut it.",
+      "choosePackaging": "Please choose the packaging.",
+      "choiceUnavailable": "One of your choices is no longer available. Please choose again.",
+      "tooMany": "Your cart is full (20 items).",
+      "invalid": "Something went wrong. Please try again."
+    }
+  },
+  "cart": {
+    "title": "Your cart",
+    "label": "Cart",
+    "empty": "Your cart is empty.",
+    "emptyCta": "Browse livestock",
+    "continueShopping": "Continue shopping",
+    "size": "Size",
+    "cutting": "Cutting",
+    "includes": "Includes",
+    "packaging": "Packaging",
+    "occasion": "Occasion",
+    "onBehalfOf": "On behalf of",
+    "notes": "Notes",
+    "quantity": "Quantity",
+    "decrease": "Decrease quantity",
+    "increase": "Increase quantity",
+    "remove": "Remove",
+    "each": "each",
+    "summary": "Order summary",
+    "subtotal": "Subtotal (before VAT)",
+    "vat": "VAT",
+    "vatIncluded": "Prices include VAT",
+    "total": "Total",
+    "delivery": "Delivery",
+    "deliveryTbc": "Confirmed at checkout",
+    "checkout": "Continue to checkout",
+    "checkoutSoon": "Checkout — sign-in or guest, delivery address and payment — opens in the next update.",
+    "unavailableLine": "No longer available — please remove it.",
+    "fixLines": "Remove the items marked above to continue.",
+    "none": "—"
   }
 }

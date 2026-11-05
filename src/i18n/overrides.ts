@@ -1,5 +1,14 @@
 /** Sections of the website wording that can be edited in the admin panel (not the admin's own texts). */
-export const EDITABLE_SECTIONS = ["meta", "nav", "home", "catalog", "footer", "errors"] as const;
+export const EDITABLE_SECTIONS = [
+  "meta",
+  "nav",
+  "home",
+  "catalog",
+  "order",
+  "cart",
+  "footer",
+  "errors",
+] as const;
 export type EditableSection = (typeof EDITABLE_SECTIONS)[number];
 
 /** { home: { steps: [{ title: "Choose" }] } } → { "home.steps.0.title": "Choose" } */

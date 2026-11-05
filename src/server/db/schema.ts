@@ -306,6 +306,39 @@ export const staffSessions = pgTable("staff_sessions", {
   createdAt: timestamps.createdAt,
 });
 
+/* ----------------------------------------------------------------------------------------------
+ * Shopping cart. One cart per browser (random id in an httpOnly cookie); later linked to the customer.
+ * Lines store only choices — prices are always recalculated from the live catalogue.
+ * -------------------------------------------------------------------------------------------- */
+
+export const occasions = ["none", "udhiyah", "aqiqah", "sadaqah", "other"] as const;
+
+export const carts = pgTable("carts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ...timestamps,
+});
+
+export const cartItems = pgTable("cart_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  cartId: uuid("cart_id")
+    .notNull()
+    .references(() => carts.id, { onDelete: "cascade" }),
+  breedOptionId: uuid("breed_option_id")
+    .notNull()
+    .references(() => breedOptions.id, { onDelete: "cascade" }),
+  cuttingOptionId: uuid("cutting_option_id").references(() => cuttingOptions.id, { onDelete: "set null" }),
+  packagingOptionId: uuid("packaging_option_id").references(() => packagingOptions.id, {
+    onDelete: "set null",
+  }),
+  /** Ids of the ticked "order includes" extras. */
+  extraIds: jsonb("extra_ids").$type<string[]>().notNull().default([]),
+  quantity: integer("quantity").notNull().default(1),
+  occasion: text("occasion", { enum: occasions }).notNull().default("none"),
+  onBehalfOf: text("on_behalf_of").notNull().default(""),
+  notes: text("notes").notNull().default(""),
+  ...timestamps,
+});
+
 export const categoriesRelations = relations(categories, ({ many }) => ({
   breeds: many(breeds),
 }));

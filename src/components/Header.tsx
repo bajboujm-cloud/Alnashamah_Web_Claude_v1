@@ -10,12 +10,15 @@ export function Header({
   t,
   seasonal,
   logo,
+  cartCount,
 }: {
   locale: Locale;
   t: Dictionary;
   /** Seasonal offers currently shown on the website (e.g. Eid Al-Adha); hidden ones get no menu link. */
   seasonal: { slug: string; label: string }[];
   logo: string;
+  /** Number of animals in the cart. */
+  cartCount: number;
 }) {
   const links = [
     { href: `/${locale}#categories`, label: t.nav.categories },
@@ -41,6 +44,38 @@ export function Header({
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <Link
+            href={`/${locale}/cart`}
+            aria-label={`${t.nav.cart}${cartCount ? ` (${cartCount})` : ""}`}
+            className="relative flex h-11 w-11 items-center justify-center rounded-brand border border-line text-green hover:border-gold"
+            data-testid="header-cart"
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              aria-hidden
+            >
+              <path
+                d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle cx="10" cy="20" r="1.4" />
+              <circle cx="17" cy="20" r="1.4" />
+            </svg>
+            {cartCount ? (
+              <span
+                className="absolute -end-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1 text-xs font-bold text-green-900"
+                data-testid="cart-count"
+              >
+                {cartCount}
+              </span>
+            ) : null}
+          </Link>
           <LanguageSwitch
             locale={locale}
             label={t.nav.switchLanguage}

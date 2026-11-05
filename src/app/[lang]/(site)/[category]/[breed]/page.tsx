@@ -3,15 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BreedPhoto } from "@/components/BreedPhoto";
 import { Container } from "@/components/Container";
-import { OptionsList } from "@/components/OptionsList";
-import { SectionHeading } from "@/components/SectionHeading";
+import { OrderBuilder } from "@/components/OrderBuilder";
 import { OutOfStockBadge } from "@/components/StockBadge";
 import { hasLocale, pick } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { isBreedInStock, isOptionAvailable } from "@/lib/availability";
-import { formatAed } from "@/lib/format";
+import { formatAge, formatWeight } from "@/lib/format";
 import { alternates, siteUrl } from "@/lib/site";
-import { getBreed, getPackagingOptions } from "@/server/catalog";
+import { getOrderChoices } from "@/server/cart";
+import { getBreed } from "@/server/catalog";
 
 export async function generateMetadata({
   params,
@@ -28,15 +28,13 @@ export async function generateMetadata({
   };
 }
 
-export default async function BreedPage({ params }: PageProps<"/[lang]/[category]/[breed]">) {
+export default async function BreedPage({ params, searchParams }: PageProps<"/[lang]/[category]/[breed]">) {
   const { lang, category: categorySlug, breed: breedSlug } = await params;
   if (!hasLocale(lang)) notFound();
-  const [t, found, packaging] = await Promise.all([
-    getDictionary(lang),
-    getBreed(categorySlug, breedSlug),
-    getPackagingOptions(),
-  ]);
+  const [t, found] = await Promise.all([getDictionary(lang), getBreed(categorySlug, breedSlug)]);
   if (!found) notFound();
+  const choices = await getOrderChoices(found.category.id);
+  const { occasion } = await searchParams;
   const { breed, category } = found;
   const name = pick(lang, breed.nameEn, breed.nameAr);
   const categoryName = pick(lang, category.nameEn, category.nameAr);
@@ -104,40 +102,43 @@ export default async function BreedPage({ params }: PageProps<"/[lang]/[category
           <p className="mt-4 text-muted">{pick(lang, breed.descriptionEn, breed.descriptionAr)}</p>
 
           <div className="mt-8">
-            <SectionHeading title={t.catalog.optionsTitle} label={t.catalog.optionsLabel} />
-            <OptionsList locale={lang} t={t.catalog} breed={breed} />
+            <OrderBuilder
+              lang={lang}
+              t={{ order: t.order, catalog: t.catalog }}
+              inStock={inStock}
+              defaultOccasion={occasion === "udhiyah" ? "udhiyah" : "none"}
+              sizes={breed.options.map((o) => ({
+                id: o.id,
+                label: pick(lang, o.labelEn, o.labelAr) ?? "",
+                age: formatAge(o.ageMinMonths, o.ageMaxMonths, lang) ?? t.catalog.tbc,
+                weight: formatWeight(o.weightMinKg, o.weightMaxKg, lang) ?? t.catalog.tbc,
+                priceFils: o.priceFils,
+                compareAtFils: o.compareAtPriceFils,
+                available: isOptionAvailable(breed, o),
+              }))}
+              cutting={choices.cutting.map((c) => ({
+                id: c.id,
+                name: pick(lang, c.nameEn, c.nameAr),
+                photoUrl: c.photoUrl,
+                priceFils: c.priceFils,
+                available: c.isAvailable,
+              }))}
+              extras={choices.extras.map((e) => ({
+                id: e.id,
+                name: pick(lang, e.nameEn, e.nameAr),
+                priceFils: e.priceFils,
+                available: e.isAvailable,
+                selectedByDefault: e.selectedByDefault,
+              }))}
+              packaging={choices.packaging.map((p) => ({
+                id: p.id,
+                name: pick(lang, p.nameEn, p.nameAr),
+                photoUrl: p.photoUrl,
+                priceFils: p.priceFils,
+                available: p.isAvailable,
+              }))}
+            />
           </div>
-
-          <div className="mt-8 border border-gold/60 bg-white p-5">
-            <p className="font-semibold text-green">{t.catalog.orderingSoon}</p>
-            <p className="mt-1 text-sm text-muted">{t.catalog.orderingSoonText}</p>
-          </div>
-
-          {packaging.length > 0 && (
-            <div className="mt-8">
-              <h2 className="font-display text-lg text-green">{t.catalog.packagingTitle}</h2>
-              <ul className="mt-3 grid grid-cols-3 gap-2 sm:gap-3">
-                {packaging.map((p) => (
-                  <li
-                    key={p.id}
-                    className={`border border-line bg-white p-2.5 sm:p-4 ${p.isAvailable ? "" : "text-muted"}`}
-                  >
-                    <p className="text-sm font-semibold leading-snug text-green sm:text-base">
-                      {pick(lang, p.nameEn, p.nameAr)}
-                    </p>
-                    <p className="mt-1 text-sm">
-                      {p.priceFils === 0 ? t.catalog.free : formatAed(p.priceFils, lang)}
-                    </p>
-                    {!p.isAvailable && (
-                      <div className="mt-2">
-                        <OutOfStockBadge label={t.catalog.outOfStock} />
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       </div>
     </Container>
