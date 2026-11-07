@@ -38,7 +38,9 @@ type Props = {
   cutting: BuilderChoice[];
   extras: BuilderChoice[];
   packaging: BuilderChoice[];
-  defaultOccasion?: "none" | "udhiyah";
+  defaultOccasion?: (typeof occasions)[number];
+  /** Occasion → message, for occasions whose orders can't include head, intestines, tripe … (e.g. Eid). */
+  noExtras?: Record<string, string>;
 };
 
 const occasions = ["none", "udhiyah", "aqiqah", "sadaqah", "other"] as const;
@@ -174,12 +176,15 @@ export function OrderBuilder({
   extras,
   packaging,
   defaultOccasion = "none",
+  noExtras = {},
 }: Props) {
   const o = t.order;
   const [sizeId, setSizeId] = useState<string | null>(null);
   const [cuttingId, setCuttingId] = useState<string | null>(null);
   const [extraIds, setExtraIds] = useState<string[]>(
-    extras.filter((e) => e.available && e.selectedByDefault).map((e) => e.id), // none ticked unless set in the admin
+    noExtras[defaultOccasion]
+      ? []
+      : extras.filter((e) => e.available && e.selectedByDefault).map((e) => e.id), // none ticked unless set in the admin
   );
   const [packagingId, setPackagingId] = useState<string | null>(null); // customer must choose
   const [quantity, setQuantity] = useState(1);
@@ -193,6 +198,8 @@ export function OrderBuilder({
   const [pending, startTransition] = useTransition();
 
   const size = sizes.find((s) => s.id === sizeId) ?? null;
+  /** Message when the chosen occasion can't include head, intestines, tripe … (e.g. Eid sacrifices). */
+  const occasionNote = noExtras[occasion] ?? null;
   const unit = useMemo(
     () =>
       size?.priceFils != null
@@ -391,18 +398,19 @@ export function OrderBuilder({
 
       {extras.length ? (
         <Step n={3} title={o.stepExtras}>
+          {/* For some occasions (e.g. Eid Al-Adha sacrifices) these can't be chosen at all. */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {extras.map((e) => (
               <label
                 key={e.id}
                 className={`flex min-h-11 items-center gap-2 border p-3 text-sm ${
-                  e.available ? "border-line bg-white" : "border-line bg-ivory/60 text-muted"
+                  e.available && !occasionNote ? "border-line bg-white" : "border-line bg-ivory/60 text-muted"
                 }`}
               >
                 <input
                   type="checkbox"
                   className="h-5 w-5 accent-green"
-                  disabled={!e.available}
+                  disabled={!e.available || !!occasionNote}
                   checked={extraIds.includes(e.id)}
                   onChange={(ev) =>
                     setExtraIds((ids) => (ev.target.checked ? [...ids, e.id] : ids.filter((x) => x !== e.id)))
@@ -415,7 +423,14 @@ export function OrderBuilder({
               </label>
             ))}
           </div>
-          {extras.some((e) => !e.available) ? (
+          {occasionNote ? (
+            <div
+              className="mt-2 rounded-brand border border-gold/60 bg-gold/10 p-3 text-sm text-charcoal"
+              data-testid="extras-note"
+            >
+              <p>{occasionNote}</p>
+            </div>
+          ) : extras.some((e) => !e.available) ? (
             <div
               className="mt-2 rounded-brand border border-gold/60 bg-gold/10 p-3 text-sm text-charcoal"
               data-testid="extras-note"
@@ -504,7 +519,11 @@ export function OrderBuilder({
             <span className="mb-1 block text-xs font-semibold text-muted">{o.occasion}</span>
             <select
               value={occasion}
-              onChange={(e) => setOccasion(e.target.value as (typeof occasions)[number])}
+              onChange={(e) => {
+                const next = e.target.value as (typeof occasions)[number];
+                setOccasion(next);
+                if (noExtras[next]) setExtraIds([]);
+              }}
               className="min-h-11 w-full rounded-brand border border-line bg-white px-3 text-sm"
               name="occasion"
             >

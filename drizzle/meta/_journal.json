@@ -78,6 +78,13 @@
       "when": 1794064109078,
       "tag": "0010_eid_extras_note",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794066014790,
+      "tag": "0011_seasonal_no_extras",
+      "breakpoints": true
     }
   ]
 }

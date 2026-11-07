@@ -175,13 +175,48 @@ test("customers can optionally open a cutting photo and choose from it", async (
   await expect(page.getByTestId("cutting-dialog")).toHaveCount(0);
 });
 
-test("switched-off 'Order includes' show the Eid message, never 'out of stock'", async ({ page }) => {
+const EID_NOTE = "لا تشمل أضاحي عيد الأضحى الرأس والمصران والكرش حسب أنظمة وتعليمات المسالخ الحكومية.";
+
+test("normal orders can add head, intestines and tripe", async ({ page }) => {
+  await page.goto("/ar/sheep/naeemi");
+  const builder = page.getByTestId("order-builder");
+  await expect(page.locator("select[name=occasion]")).toHaveValue("none");
+  for (const box of await builder.getByTestId("extra-choice").all()) await expect(box).toBeEnabled();
+  await expect(builder.getByTestId("extras-note")).toHaveCount(0);
+});
+
+test("from the Eid banner: head, intestines and tripe are off with the Eid message", async ({ page }) => {
+  await page.goto("/ar/seasonal/eid-al-adha");
+  await page.getByTestId("breed-card").filter({ hasText: "نعيمي" }).click();
+  await expect(page.locator("select[name=occasion]")).toHaveValue("udhiyah");
+  const builder = page.getByTestId("order-builder");
+  for (const box of await builder.getByTestId("extra-choice").all()) await expect(box).toBeDisabled();
+  await expect(builder.getByTestId("extras-note")).toHaveText(EID_NOTE);
+  await expect(page.locator("#step-cutting").locator("..")).not.toContainText("نفدت الكمية");
+
+  // Changing the occasion to a normal order brings them back.
+  await page.locator("select[name=occasion]").selectOption("aqiqah");
+  for (const box of await builder.getByTestId("extra-choice").all()) await expect(box).toBeEnabled();
+  await expect(builder.getByTestId("extras-note")).toHaveCount(0);
+});
+
+test("choosing Udhiyah by hand clears and locks the extras", async ({ page }) => {
+  await page.goto("/ar/sheep/naeemi");
+  const builder = page.getByTestId("order-builder");
+  const first = builder.getByTestId("extra-choice").first();
+  await first.check();
+  await page.locator("select[name=occasion]").selectOption("udhiyah");
+  await expect(first).not.toBeChecked();
+  await expect(first).toBeDisabled();
+  await expect(builder.getByTestId("extras-note")).toHaveText(EID_NOTE);
+});
+
+test("an extra switched off in the admin shows 'not available', never 'out of stock'", async ({ page }) => {
   await sql`update extras set is_available = false`;
   await page.goto("/ar/sheep/naeemi");
   const builder = page.getByTestId("order-builder");
   for (const box of await builder.getByTestId("extra-choice").all()) await expect(box).toBeDisabled();
-  const note = builder.getByTestId("extras-note");
-  await expect(note).toHaveText("غير متاح خلال عيد الأضحى حسب أنظمة وتعليمات المسالخ الحكومية.");
+  await expect(builder.getByTestId("extras-note")).toContainText("غير متاح حالياً");
   await expect(page.locator("#step-cutting").locator("..")).not.toContainText("نفدت الكمية");
   // ordering still works without them
   await builder.getByTestId("option-row").first().click();

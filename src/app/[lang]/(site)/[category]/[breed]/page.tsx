@@ -12,6 +12,8 @@ import { isBreedInStock, isOptionAvailable } from "@/lib/availability";
 import { formatAge, formatWeight } from "@/lib/format";
 import { alternates, siteUrl } from "@/lib/site";
 import { getOrderChoices } from "@/server/cart";
+import { schema } from "@/server/db";
+import { noExtrasOccasions } from "@/server/occasion-rules";
 import { getBreed } from "@/server/catalog";
 
 export async function generateMetadata({
@@ -36,6 +38,9 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
   if (!found) notFound();
   const choices = await getOrderChoices(found.category.id);
   const { occasion } = await searchParams;
+  // ?occasion=udhiyah (from the Eid page) pre-selects the occasion in the order form
+  const occasionParam = schema.occasions.find((o) => o !== "none" && o === occasion);
+  const noExtraRules = await noExtrasOccasions();
   const { breed, category } = found;
   const name = pick(lang, breed.nameEn, breed.nameAr);
   const categoryName = pick(lang, category.nameEn, category.nameAr);
@@ -87,7 +92,7 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
           label={t.catalog.switchBreed}
           items={category.breeds.map((b) => ({
             key: b.id,
-            href: `/${lang}/${category.slug}/${b.slug}${occasion === "udhiyah" ? "?occasion=udhiyah" : ""}`,
+            href: `/${lang}/${category.slug}/${b.slug}${occasionParam ? `?occasion=${occasionParam}` : ""}`,
             label: pick(lang, b.nameEn, b.nameAr),
             image: b.photoUrl,
             active: b.id === breed.id,
@@ -112,7 +117,10 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
               lang={lang}
               t={{ order: t.order, catalog: t.catalog }}
               inStock={inStock}
-              defaultOccasion={occasion === "udhiyah" ? "udhiyah" : "none"}
+              defaultOccasion={occasionParam ?? "none"}
+              noExtras={Object.fromEntries(
+                noExtraRules.map((r) => [r.occasion, pick(lang, r.noteEn, r.noteAr) || t.order.notAvailable]),
+              )}
               sizes={breed.options.map((o) => ({
                 id: o.id,
                 label: pick(lang, o.labelEn, o.labelAr) ?? "",

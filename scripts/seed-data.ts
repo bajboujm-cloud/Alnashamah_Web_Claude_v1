@@ -176,16 +176,10 @@ export const cuttingSeed = [
   ["mufattah", "Mufattah", "مفطّح"],
 ].map(([slug, nameEn, nameAr], i) => ({ slug, nameEn, nameAr, sortOrder: i + 1 }));
 
-/** Shown to customers when these are switched off (during Eid, government slaughterhouses keep them). */
-const eidNote = {
-  unavailableNoteEn: "Not available during Eid Al-Adha due to government slaughterhouse regulations.",
-  unavailableNoteAr: "غير متاح خلال عيد الأضحى حسب أنظمة وتعليمات المسالخ الحكومية.",
-};
-
 export const extrasSeed = [
-  { slug: "head", nameEn: "Head", nameAr: "الرأس", sortOrder: 1, ...eidNote },
-  { slug: "intestines", nameEn: "Intestines", nameAr: "المصران", sortOrder: 2, ...eidNote },
-  { slug: "tripe", nameEn: "Tripe", nameAr: "الكرش", sortOrder: 3, ...eidNote },
+  { slug: "head", nameEn: "Head", nameAr: "الرأس", sortOrder: 1 },
+  { slug: "intestines", nameEn: "Intestines", nameAr: "المصران", sortOrder: 2 },
+  { slug: "tripe", nameEn: "Tripe", nameAr: "الكرش", sortOrder: 3 },
 ];
 
 export const packagingSeed = [
@@ -229,6 +223,11 @@ export const seasonalSeed = [
     illustrationUrl: "/illustrations/eid-al-adha.svg",
     isActive: true,
     sortOrder: 1,
+    occasion: "udhiyah" as const,
+    // Government slaughterhouses keep the head, intestines and tripe of Eid sacrifices.
+    noExtras: true,
+    noExtrasNoteEn: "Not included with Eid Al-Adha sacrifices due to government slaughterhouse regulations.",
+    noExtrasNoteAr: "لا تشمل أضاحي عيد الأضحى الرأس والمصران والكرش حسب أنظمة وتعليمات المسالخ الحكومية.",
     categories: ["sheep", "goats"],
   },
 ];

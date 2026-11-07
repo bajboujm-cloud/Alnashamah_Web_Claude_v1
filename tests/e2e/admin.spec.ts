@@ -32,6 +32,7 @@ test.afterAll(async () => {
     and category_id = (select id from categories where slug = 'sheep')`;
   await sql`update categories set status = 'coming_soon' where slug in ('cattle', 'camels')`;
   await sql`update seasonal_collections set is_active = true where slug = 'eid-al-adha'`;
+  await sql`update seasonal_collections set no_extras = true where slug = 'eid-al-adha'`;
   await sql`delete from site_texts`;
   await sql`update breeds set is_visible = true`;
   await sql`delete from promotions`;
@@ -214,6 +215,26 @@ test("one-tap hide for a category and for the Eid offer", async () => {
   await page.goto("/en");
   await expect(page.getByTestId("category-card")).toHaveCount(4);
   await expect(page.locator('header a[href="/en/seasonal/eid-al-adha"]').first()).toBeAttached();
+});
+
+test("the Eid 'no head/intestines/tripe' rule can be switched off and on", async () => {
+  await page.goto("/en/admin/seasonal");
+  const eid = page.getByTestId("admin-seasonal").first();
+  const sw = eid.getByTestId("no-extras-switch");
+  await expect(sw).toHaveAttribute("aria-checked", "false"); // extras blocked for Eid
+  await sw.click();
+  await expect(sw).toHaveAttribute("aria-checked", "true");
+  await expect(sw).not.toHaveAttribute("data-pending");
+  await page.goto("/en/sheep/naeemi?occasion=udhiyah");
+  const builder = page.getByTestId("order-builder");
+  for (const box of await builder.getByTestId("extra-choice").all()) await expect(box).toBeEnabled();
+
+  await page.goto("/en/admin/seasonal");
+  await sw.click();
+  await expect(sw).toHaveAttribute("aria-checked", "false");
+  await expect(sw).not.toHaveAttribute("data-pending");
+  await page.goto("/en/sheep/naeemi?occasion=udhiyah");
+  for (const box of await builder.getByTestId("extra-choice").all()) await expect(box).toBeDisabled();
 });
 
 test("website wording can be edited and reset", async () => {

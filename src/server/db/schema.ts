@@ -191,6 +191,14 @@ export const seasonalCollections = pgTable("seasonal_collections", {
   /** Optional visibility window; null = no limit. */
   startsAt: timestamp("starts_at", { withTimezone: true }),
   endsAt: timestamp("ends_at", { withTimezone: true }),
+  /** Orders with this occasion belong to this offer (e.g. Eid Al-Adha ↔ "udhiyah"). */
+  occasion: text("occasion", { enum: ["none", "udhiyah", "aqiqah", "sadaqah", "other"] })
+    .notNull()
+    .default("none"),
+  /** When on, "Order includes" (head, intestines, tripe …) can't be chosen for this occasion. */
+  noExtras: boolean("no_extras").notNull().default(false),
+  noExtrasNoteEn: text("no_extras_note_en").notNull().default(""),
+  noExtrasNoteAr: text("no_extras_note_ar").notNull().default(""),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 });

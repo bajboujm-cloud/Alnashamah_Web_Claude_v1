@@ -289,7 +289,14 @@
       "active": "Show on website",
       "startsAt": "Show from (optional)",
       "endsAt": "Show until (optional)",
-      "eligible": "Breeds included"
+      "eligible": "Breeds included",
+      "occasion": "Occasion of these orders",
+      "occasionHelp": "Customers coming from this offer get this occasion pre-selected.",
+      "noExtras": "“Order includes” not available for these orders (e.g. Eid slaughterhouse rules)",
+      "noExtrasNoteEn": "Message to customers (English)",
+      "noExtrasNoteAr": "Message to customers (Arabic)",
+      "extrasAllowed": "Head/intestines/tripe allowed",
+      "extrasBlocked": "Head/intestines/tripe not included"
     },
     "simple": {
       "cuttingTitle": "Cutting options",

@@ -63,7 +63,7 @@ export default async function SeasonalPage({ params }: PageProps<"/[lang]/season
               key={b.id}
               locale={lang}
               t={t.catalog}
-              href={`/${lang}/${b.category.slug}/${b.slug}${collection.slug.includes("adha") ? "?occasion=udhiyah" : ""}`}
+              href={`/${lang}/${b.category.slug}/${b.slug}${collection.occasion !== "none" ? `?occasion=${collection.occasion}` : ""}`}
               breed={b}
               categoryName={pick(lang, b.category.nameEn, b.category.nameAr)}
             />

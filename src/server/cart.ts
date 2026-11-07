@@ -5,6 +5,7 @@ import { isOptionAvailable } from "@/lib/availability";
 import { cartTotals, clampQuantity, lineFils, unitFils, type PricedLine } from "@/lib/pricing";
 import { db, schema as s } from "@/server/db";
 import { env } from "@/server/env";
+import { noExtrasOccasions } from "@/server/occasion-rules";
 
 /**
  * Shopping cart. The cart id lives in an httpOnly cookie; every line is re-checked against the live
@@ -93,7 +94,9 @@ export async function resolveLine(input: LineInput) {
 
   const cutting = choices.cutting.find((c) => c.id === input.cuttingOptionId) ?? null;
   const packaging = choices.packaging.find((p) => p.id === input.packagingOptionId) ?? null;
-  const extras = choices.extras.filter((e) => input.extraIds.includes(e.id));
+  // Some occasions (e.g. Eid Al-Adha sacrifices) never include head, intestines, tripe …
+  const noExtras = (await noExtrasOccasions()).some((r) => r.occasion === input.occasion);
+  const extras = noExtras ? [] : choices.extras.filter((e) => input.extraIds.includes(e.id));
   if (!problem) {
     if (choices.cutting.some((c) => c.isAvailable) && !cutting) problem = "chooseCutting";
     else if (choices.packaging.some((p) => p.isAvailable) && !packaging) problem = "choosePackaging";

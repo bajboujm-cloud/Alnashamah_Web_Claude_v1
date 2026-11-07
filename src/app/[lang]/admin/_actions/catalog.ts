@@ -163,6 +163,13 @@ export async function saveSeasonal(_prev: FormState, data: FormData): Promise<Fo
           isActive: flag(data, "isActive"),
           startsAt: startsAt as Date | null,
           endsAt: endsAt as Date | null,
+          occasion:
+            (["none", "udhiyah", "aqiqah", "sadaqah", "other"] as const).find(
+              (o) => o === text(data, "occasion"),
+            ) ?? "none",
+          noExtras: flag(data, "noExtras"),
+          noExtrasNoteEn: text(data, "noExtrasNoteEn", 300),
+          noExtrasNoteAr: text(data, "noExtrasNoteAr", 300),
         }
       : {};
 
@@ -212,6 +219,15 @@ export async function setSeasonalVisible(id: string, visible: boolean) {
   if (!isUuid(id)) return;
   await db.update(s.seasonalCollections).set({ isActive: visible }).where(eq(s.seasonalCollections.id, id));
   await audit(user, visible ? "show" : "hide", "seasonal", id);
+  refresh();
+}
+
+/** One-tap: whether orders for this offer's occasion may include head, intestines, tripe … */
+export async function setSeasonalExtrasAllowed(id: string, allowed: boolean) {
+  const user = await authorize("catalog.prices");
+  if (!isUuid(id)) return;
+  await db.update(s.seasonalCollections).set({ noExtras: !allowed }).where(eq(s.seasonalCollections.id, id));
+  await audit(user, allowed ? "extras-allowed" : "extras-not-included", "seasonal", id);
   refresh();
 }
 
