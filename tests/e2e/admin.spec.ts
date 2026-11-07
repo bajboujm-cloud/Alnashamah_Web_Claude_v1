@@ -317,3 +317,58 @@ test("promotions slide on the home page and can be switched off", async () => {
   await page.goto("/en");
   await expect(page.getByTestId("promo-slider")).toHaveCount(0);
 });
+
+test("categories, breeds, cuts, order includes and packaging can be moved up and down", async () => {
+  // Breed: Najdi above Naeemi
+  await page.goto("/en/admin/breeds");
+  await page.locator('[data-testid=admin-breed][data-slug="sheep/najdi"]').getByTestId("move-up").click();
+  await expect(page.locator("[data-testid=admin-breed]").first()).toHaveAttribute("data-slug", "sheep/najdi");
+  await page.goto("/en/sheep");
+  await expect(page.getByTestId("breed-card").first()).toContainText("Najdi");
+  await page.goto("/en/admin/breeds");
+  await page.locator('[data-testid=admin-breed][data-slug="sheep/najdi"]').getByTestId("move-down").click();
+  await expect(page.locator("[data-testid=admin-breed]").first()).toHaveAttribute(
+    "data-slug",
+    "sheep/naeemi",
+  );
+
+  // Category: Goats above Sheep
+  await page.goto("/en/admin/categories");
+  await page.locator('[data-testid=admin-category][data-slug="goats"]').getByTestId("move-up").click();
+  await expect(page.locator("[data-testid=admin-category]").first()).toHaveAttribute("data-slug", "goats");
+  await page.goto("/en");
+  await expect(page.getByTestId("category-card").first()).toContainText("Goats");
+  await page.goto("/en/admin/categories");
+  await page.locator('[data-testid=admin-category][data-slug="goats"]').getByTestId("move-down").click();
+  await expect(page.locator("[data-testid=admin-category]").first()).toHaveAttribute("data-slug", "sheep");
+
+  // Packaging: Carton first
+  await page.goto("/en/admin/packaging");
+  await page.getByTestId("simple-item").filter({ hasText: "Carton box" }).getByTestId("move-up").click();
+  await expect(page.getByTestId("simple-item").first()).toContainText("Carton box");
+  await page.goto("/en/sheep/naeemi");
+  await expect(page.getByTestId("packaging-choice").first()).toContainText("Carton box");
+  await page.goto("/en/admin/packaging");
+  await page.getByTestId("simple-item").filter({ hasText: "Carton box" }).getByTestId("move-down").click();
+  await expect(page.getByTestId("simple-item").first()).toContainText("Slaughterhouse bag");
+
+  // The first item can't move up, the last can't move down.
+  await page.goto("/en/admin/extras");
+  await expect(page.getByTestId("simple-item").first().getByTestId("move-up")).toBeDisabled();
+  await expect(page.getByTestId("simple-item").last().getByTestId("move-down")).toBeDisabled();
+});
+
+test("admin lists fit the phone screen (nothing cut off at the sides)", async ({}, info) => {
+  test.skip(info.project.name !== "phone", "phone layout only");
+  for (const path of ["breeds", "categories", "cutting", "extras", "packaging"]) {
+    await page.goto(`/en/admin/${path}`);
+    const overflow = await page.evaluate(() => {
+      const width = document.documentElement.clientWidth;
+      return [...document.querySelectorAll("main *")].filter((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && (r.left < -1 || r.right > width + 1);
+      }).length;
+    });
+    expect(overflow, path).toBe(0);
+  }
+});

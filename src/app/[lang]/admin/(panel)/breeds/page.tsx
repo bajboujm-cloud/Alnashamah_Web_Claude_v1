@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MoveButtons } from "@/components/admin/MoveButtons";
 import { PageTitle } from "@/components/admin/PageTitle";
 import { Switch } from "@/components/admin/Switch";
 import { hasLocale, pick } from "@/i18n/config";
@@ -46,14 +47,14 @@ export default async function BreedsPage({ params }: PageProps<"/[lang]/admin/br
             <section key={cat.id}>
               <h2 className="font-display mb-3 text-xl text-green">{pick(lang, cat.nameEn, cat.nameAr)}</h2>
               <div className="grid gap-3 lg:grid-cols-2">
-                {cat.breeds.map((b) => (
+                {cat.breeds.map((b, i) => (
                   <article
                     key={b.id}
-                    className={`border bg-white ${!b.isVisible ? "border-dashed border-muted bg-ivory/60" : b.isAvailable ? "border-line" : "border-danger/40"}`}
+                    className={`min-w-0 border bg-white ${!b.isVisible ? "border-dashed border-muted bg-ivory/60" : b.isAvailable ? "border-line" : "border-danger/40"}`}
                     data-testid="admin-breed"
                     data-slug={`${cat.slug}/${b.slug}`}
                   >
-                    <header className="flex items-center gap-3 border-b border-line p-3">
+                    <header className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line p-3">
                       <div className="relative h-12 w-16 shrink-0 overflow-hidden bg-ivory-200">
                         <Image
                           src={b.photoUrl ?? "/brand/mark.png"}
@@ -79,7 +80,17 @@ export default async function BreedsPage({ params }: PageProps<"/[lang]/admin/br
                           </Link>
                         ) : null}
                       </div>
-                      <div className="flex shrink-0 flex-col items-start">
+                      {canAdd ? (
+                        <MoveButtons
+                          kind="breed"
+                          id={b.id}
+                          first={i === 0}
+                          last={i === cat.breeds.length - 1}
+                          labels={{ up: t.common.moveUp, down: t.common.moveDown }}
+                        />
+                      ) : null}
+                      {/* Switches on their own line so the header never gets too wide on phones. */}
+                      <div className="flex basis-full flex-wrap items-center gap-x-5">
                         {canToggle ? (
                           <Switch
                             checked={b.isAvailable}

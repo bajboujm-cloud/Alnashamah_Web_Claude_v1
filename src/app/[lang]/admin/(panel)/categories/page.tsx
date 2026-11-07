@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ActionForm } from "@/components/admin/ActionForm";
+import { MoveButtons } from "@/components/admin/MoveButtons";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { Select, SubmitButton, TextArea, TextInput } from "@/components/admin/fields";
 import { ImageField } from "@/components/admin/ImageField";
@@ -82,14 +83,14 @@ export default async function CategoriesPage({ params }: PageProps<"/[lang]/admi
     <>
       <PageTitle title={t.categories.title} />
       <div className="space-y-4">
-        {cats.map((c) => (
+        {cats.map((c, i) => (
           <div
             key={c.id}
-            className={`flex items-start gap-3 border bg-white p-1 ${c.status === "hidden" ? "border-danger/40" : "border-line"}`}
+            className={`flex flex-wrap items-start gap-3 border bg-white p-1 ${c.status === "hidden" ? "border-danger/40" : "border-line"}`}
             data-testid="admin-category"
             data-slug={c.slug}
           >
-            <details className="min-w-0 flex-1">
+            <details className="min-w-0 flex-1 open:order-last open:basis-full">
               <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-3 p-3">
                 <span className="font-semibold text-green">{pick(lang, c.nameEn, c.nameAr)}</span>
                 <span className="text-xs text-muted">
@@ -116,7 +117,14 @@ export default async function CategoriesPage({ params }: PageProps<"/[lang]/admi
               </div>
             </details>
             {full ? (
-              <div className="shrink-0 p-2">
+              <div className="flex shrink-0 flex-col items-end gap-1 p-2">
+                <MoveButtons
+                  kind="category"
+                  id={c.id}
+                  first={i === 0}
+                  last={i === cats.length - 1}
+                  labels={{ up: t.common.moveUp, down: t.common.moveDown }}
+                />
                 <Switch
                   checked={c.status !== "hidden"}
                   label={`${pick(lang, c.nameEn, c.nameAr)} — ${t.common.visibilityHint}`}

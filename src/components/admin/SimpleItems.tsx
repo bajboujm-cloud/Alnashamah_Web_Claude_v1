@@ -10,6 +10,7 @@ import { ActionForm } from "./ActionForm";
 import { ConfirmButton } from "./ConfirmButton";
 import { Checkbox, SubmitButton, TextArea, TextInput } from "./fields";
 import { ImageField } from "./ImageField";
+import { MoveButtons } from "./MoveButtons";
 import { PageTitle } from "./PageTitle";
 import { Switch } from "./Switch";
 
@@ -155,10 +156,10 @@ export async function SimpleItems({
     <>
       <PageTitle title={title} help={help} />
       <div className="space-y-3">
-        {items.map((item) => (
+        {items.map((item, i) => (
           <div key={item.id} className="border border-line bg-white" data-testid="simple-item">
-            <div className="flex items-center gap-3 p-3">
-              <details className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-3 p-3">
+              <details className="min-w-0 flex-1 open:order-last open:basis-full">
                 <summary className="cursor-pointer">
                   <span className="font-semibold text-green">{pick(lang, item.nameEn, item.nameAr)}</span>{" "}
                   <span className="text-sm text-muted">
@@ -180,6 +181,15 @@ export async function SimpleItems({
                   ) : null}
                 </div>
               </details>
+              {full ? (
+                <MoveButtons
+                  kind={kind}
+                  id={item.id}
+                  first={i === 0}
+                  last={i === items.length - 1}
+                  labels={{ up: t.common.moveUp, down: t.common.moveDown }}
+                />
+              ) : null}
               {canToggle ? (
                 <Switch
                   checked={item.isAvailable}

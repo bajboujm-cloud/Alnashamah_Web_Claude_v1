@@ -396,3 +396,54 @@ export async function saveSettings(_prev: FormState, data: FormData): Promise<Fo
     return ok();
   });
 }
+
+/* ------------------------------------ ordering ------------------------------------ */
+
+const orderTables = {
+  category: s.categories,
+  breed: s.breeds,
+  cutting: s.cuttingOptions,
+  extras: s.extras,
+  packaging: s.packagingOptions,
+} as const;
+type OrderKind = keyof typeof orderTables;
+
+/** Moves an item one place up or down (breeds move within their own category). */
+export async function moveItem(data: FormData) {
+  const user = await authorize("catalog.prices");
+  const kind = text(data, "kind") as OrderKind;
+  const id = text(data, "id");
+  const dir = text(data, "dir") === "up" ? -1 : 1;
+  if (!(kind in orderTables) || !isUuid(id)) return;
+
+  let rows: { id: string }[];
+  if (kind === "breed") {
+    const [me] = await db
+      .select({ categoryId: s.breeds.categoryId })
+      .from(s.breeds)
+      .where(eq(s.breeds.id, id));
+    if (!me) return;
+    rows = await db
+      .select({ id: s.breeds.id })
+      .from(s.breeds)
+      .where(eq(s.breeds.categoryId, me.categoryId))
+      .orderBy(asc(s.breeds.sortOrder), asc(s.breeds.createdAt));
+  } else {
+    const table = orderTables[kind];
+    rows = await db.select({ id: table.id }).from(table).orderBy(asc(table.sortOrder), asc(table.createdAt));
+  }
+  const i = rows.findIndex((r) => r.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= rows.length) return;
+  [rows[i], rows[j]] = [rows[j], rows[i]];
+  const table = orderTables[kind];
+  await db.transaction(async (tx) => {
+    for (const [index, r] of rows.entries())
+      await tx
+        .update(table)
+        .set({ sortOrder: index + 1 } as never)
+        .where(eq(table.id, r.id));
+  });
+  await audit(user, dir < 0 ? "move-up" : "move-down", kind, id);
+  refresh();
+}
