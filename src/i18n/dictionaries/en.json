@@ -124,7 +124,9 @@
     "discount": "{n}% off",
     "share": "Share",
     "shareText": "Have a look at {name} from Al Nashamah",
-    "copied": "Link copied"
+    "copied": "Link copied",
+    "switchBreed": "Other breeds",
+    "switchCategory": "Categories"
   },
   "footer": {
     "about": "A trusted, modern identity for livestock trading in the UAE.",

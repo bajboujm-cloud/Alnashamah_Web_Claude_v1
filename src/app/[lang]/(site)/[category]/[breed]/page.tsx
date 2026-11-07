@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/Container";
 import { OrderBuilder } from "@/components/OrderBuilder";
 import { ShareButton } from "@/components/ShareButton";
+import { Switcher } from "@/components/Switcher";
 import { OutOfStockBadge } from "@/components/StockBadge";
 import { hasLocale, pick } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -80,6 +81,20 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
           {name}
         </span>
       </nav>
+
+      <div className="mx-auto max-w-3xl">
+        <Switcher
+          label={t.catalog.switchBreed}
+          items={category.breeds.map((b) => ({
+            key: b.id,
+            href: `/${lang}/${category.slug}/${b.slug}${occasion === "udhiyah" ? "?occasion=udhiyah" : ""}`,
+            label: pick(lang, b.nameEn, b.nameAr),
+            image: b.photoUrl,
+            active: b.id === breed.id,
+            dim: !isBreedInStock(b),
+          }))}
+        />
+      </div>
 
       {/* Breed name, then straight into the order (the photo and description are on the category card). */}
       <div className="mx-auto max-w-3xl">

@@ -48,7 +48,10 @@ test("breed page shows the name, then straight into the order (no photo or descr
 }) => {
   await page.goto("/en/sheep/naeemi");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Naeemi");
-  await expect(page.locator("main img")).toHaveCount(0);
+  // The only pictures are the small round ones in the breed switcher.
+  const allImages = await page.locator("main img").count();
+  const switcherImages = await page.getByTestId("switcher").locator("img").count();
+  expect(allImages).toBe(switcherImages);
   await expect(page.getByText("The Gulf's favourite breed")).toHaveCount(0);
   await expect(page.getByTestId("order-builder")).toBeVisible();
 });
@@ -90,4 +93,24 @@ test("a size with an old price shows a discount badge on the breed card", async 
 test("breed page has a share button", async ({ page }) => {
   await page.goto("/ar/goats/kashmiri");
   await expect(page.getByTestId("share-button")).toContainText("مشاركة");
+});
+
+test("breed switcher jumps between breeds of the same category", async ({ page }) => {
+  await page.goto("/en/sheep/naeemi");
+  const items = page.getByTestId("switcher").getByTestId("switcher-item");
+  await expect(items).toHaveCount(5);
+  await expect(items.filter({ hasText: "Naeemi" })).toHaveAttribute("aria-current", "page");
+  await items.filter({ hasText: "Najdi" }).click();
+  await expect(page).toHaveURL(/\/en\/sheep\/najdi$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Najdi");
+});
+
+test("category switcher jumps between categories", async ({ page }) => {
+  await page.goto("/ar/sheep");
+  const items = page.getByTestId("switcher").getByTestId("switcher-item");
+  await expect(items).toHaveCount(4);
+  await expect(items.filter({ hasText: "غنم" })).toHaveAttribute("aria-current", "page");
+  await items.filter({ hasText: "ماعز" }).click();
+  await expect(page).toHaveURL(/\/ar\/goats$/);
+  await expect(page.getByTestId("breed-card")).toHaveCount(3);
 });
