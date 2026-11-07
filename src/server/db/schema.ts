@@ -149,7 +149,7 @@ export const extras = pgTable("extras", {
   nameEn: text("name_en").notNull(),
   nameAr: text("name_ar").notNull(),
   priceFils: integer("price_fils").notNull().default(0),
-  selectedByDefault: boolean("selected_by_default").notNull().default(true),
+  selectedByDefault: boolean("selected_by_default").notNull().default(false),
   isAvailable: boolean("is_available").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,

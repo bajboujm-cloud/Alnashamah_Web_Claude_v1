@@ -447,7 +447,10 @@
       "tooMany": "Your cart is full (20 items).",
       "invalid": "Something went wrong. Please try again."
     },
-    "required": "Required"
+    "required": "Required",
+    "viewPhoto": "View photo",
+    "chooseThisCut": "Choose this cut",
+    "close": "Close"
   },
   "cart": {
     "title": "Your cart",

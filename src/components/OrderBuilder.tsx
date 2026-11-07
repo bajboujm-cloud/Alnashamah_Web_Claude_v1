@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
 import { addToCart, type AddResult } from "@/app/actions/cart";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -95,6 +95,73 @@ const Tick = () => (
   </span>
 );
 
+/** Large photo of a cutting option. Optional: customers can also just tap the card. */
+function PhotoDialog({
+  choice,
+  labels,
+  price,
+  onChoose,
+  onClose,
+}: {
+  choice: BuilderChoice;
+  labels: { choose: string; close: string };
+  price: string;
+  onChoose: () => void;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    ref.current?.showModal();
+  }, []);
+  return (
+    <dialog
+      ref={ref}
+      onClose={onClose}
+      onClick={(e) => e.target === ref.current && onClose()} // tap outside to close
+      aria-label={choice.name}
+      className="m-auto w-[min(92vw,40rem)] border-t-4 border-gold bg-white p-0 backdrop:bg-charcoal/70"
+      data-testid="cutting-dialog"
+    >
+      <div className="relative aspect-[4/3] w-full bg-ivory-200">
+        {choice.photoUrl ? (
+          <Image
+            src={choice.photoUrl}
+            alt={choice.name}
+            fill
+            sizes="(max-width: 700px) 92vw, 640px"
+            className="object-contain"
+          />
+        ) : null}
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+        <div>
+          <p className="font-display text-lg text-green">{choice.name}</p>
+          {price ? <p className="text-sm text-muted">{price}</p> : null}
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="min-h-11 rounded-brand border border-line px-4 text-sm text-green"
+          >
+            {labels.close}
+          </button>
+          {choice.available ? (
+            <button
+              type="button"
+              onClick={onChoose}
+              className="min-h-11 rounded-brand bg-green px-4 text-sm font-semibold text-ivory"
+              data-testid="cutting-dialog-choose"
+            >
+              {labels.choose}
+            </button>
+          ) : null}
+        </div>
+      </div>
+    </dialog>
+  );
+}
+
 /** Step-by-step order: size → cutting → extras → packaging → quantity & notes, with a live total. */
 export function OrderBuilder({
   lang,
@@ -107,19 +174,20 @@ export function OrderBuilder({
   defaultOccasion = "none",
 }: Props) {
   const o = t.order;
-  const firstPackaging = packaging.find((p) => p.available)?.id ?? null;
   const [sizeId, setSizeId] = useState<string | null>(null);
   const [cuttingId, setCuttingId] = useState<string | null>(null);
   const [extraIds, setExtraIds] = useState<string[]>(
-    extras.filter((e) => e.available && e.selectedByDefault).map((e) => e.id),
+    extras.filter((e) => e.available && e.selectedByDefault).map((e) => e.id), // none ticked unless set in the admin
   );
-  const [packagingId, setPackagingId] = useState<string | null>(firstPackaging);
+  const [packagingId, setPackagingId] = useState<string | null>(null); // customer must choose
   const [quantity, setQuantity] = useState(1);
   const [occasion, setOccasion] = useState<(typeof occasions)[number]>(defaultOccasion);
   const [onBehalfOf, setOnBehalfOf] = useState("");
   const [notes, setNotes] = useState("");
   const [result, setResult] = useState<AddResult | { ok: false; problem: "chooseSize" } | null>(null);
   const [missing, setMissing] = useState<string | null>(null);
+  /** Cutting option whose photo is shown large (optional — tapping a card still selects it directly). */
+  const [zoom, setZoom] = useState<BuilderChoice | null>(null);
   const [pending, startTransition] = useTransition();
 
   const size = sizes.find((s) => s.id === sizeId) ?? null;
@@ -259,33 +327,56 @@ export function OrderBuilder({
             data-testid="cutting-list"
           >
             {cutting.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                role="radio"
-                aria-checked={cuttingId === c.id}
-                disabled={!c.available}
-                onClick={() => setCuttingId(c.id)}
-                className={`${cardClass(cuttingId === c.id, c.available)} w-full flex-col items-stretch`}
-                data-testid="cutting-choice"
-              >
-                {cuttingId === c.id ? <Tick /> : null}
-                {c.photoUrl ? (
-                  <span className="relative block aspect-[4/3] w-full overflow-hidden bg-ivory-200">
-                    <Image
-                      src={c.photoUrl}
-                      alt=""
-                      fill
-                      sizes="(max-width: 640px) 50vw, 200px"
-                      className="object-cover"
-                    />
+              <div key={c.id} className="relative">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={cuttingId === c.id}
+                  disabled={!c.available}
+                  onClick={() => setCuttingId(c.id)}
+                  className={`${cardClass(cuttingId === c.id, c.available)} h-full w-full flex-col items-stretch`}
+                  data-testid="cutting-choice"
+                >
+                  {cuttingId === c.id ? <Tick /> : null}
+                  {c.photoUrl ? (
+                    <span className="relative block aspect-[4/3] w-full overflow-hidden bg-ivory-200">
+                      <Image
+                        src={c.photoUrl}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 50vw, 200px"
+                        className="object-cover"
+                      />
+                    </span>
+                  ) : null}
+                  <span className="text-sm font-semibold text-green">{c.name}</span>
+                  <span className="text-xs text-muted">
+                    {c.available ? plus(c.priceFils) : t.catalog.outOfStock}
                   </span>
+                </button>
+                {c.photoUrl ? (
+                  <button
+                    type="button"
+                    onClick={() => setZoom(c)}
+                    aria-label={`${o.viewPhoto}: ${c.name}`}
+                    className="absolute start-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-green/85 text-ivory hover:bg-green"
+                    data-testid="cutting-zoom"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      aria-hidden
+                    >
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="M20 20l-3.5-3.5M11 8v6M8 11h6" strokeLinecap="round" />
+                    </svg>
+                  </button>
                 ) : null}
-                <span className="text-sm font-semibold text-green">{c.name}</span>
-                <span className="text-xs text-muted">
-                  {c.available ? plus(c.priceFils) : t.catalog.outOfStock}
-                </span>
-              </button>
+              </div>
             ))}
           </div>
         </Step>
@@ -427,6 +518,19 @@ export function OrderBuilder({
           </label>
         </div>
       </Step>
+
+      {zoom ? (
+        <PhotoDialog
+          choice={zoom}
+          labels={{ choose: o.chooseThisCut, close: o.close }}
+          price={zoom.available ? plus(zoom.priceFils) : t.catalog.outOfStock}
+          onChoose={() => {
+            setCuttingId(zoom.id);
+            setZoom(null);
+          }}
+          onClose={() => setZoom(null)}
+        />
+      ) : null}
 
       {/* Sticky total + add button (stays visible while choosing on phones). */}
       <div className="sticky bottom-16 z-20 -mx-4 border-t-2 border-gold bg-green px-4 py-3 text-ivory sm:mx-0 md:bottom-0">

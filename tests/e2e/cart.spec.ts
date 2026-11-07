@@ -12,6 +12,7 @@ async function buildNaeemi(page: Page, quantity = 1) {
   await builder.getByTestId("option-row").first().click(); // Small · AED 1,143
   await builder.getByTestId("cutting-choice").first().click();
   await builder.getByTestId("packaging-choice").filter({ hasText: "Foam box with ice" }).click(); // + AED 25
+  await builder.getByTestId("extra-choice").first().check(); // Head (nothing is ticked by default)
   for (let i = 1; i < quantity; i++) await builder.getByRole("button", { name: "+", exact: true }).click();
   return builder;
 }
@@ -79,6 +80,7 @@ test("coming from the Eid page pre-selects Udhiyah, and the cart works in Arabic
   const builder = page.getByTestId("order-builder");
   await builder.getByTestId("option-row").first().click();
   await builder.getByTestId("cutting-choice").first().click();
+  await builder.getByTestId("packaging-choice").first().click(); // slaughterhouse bag, free
   await page.locator("input[name=onBehalfOf]").fill("محمد");
   await builder.getByTestId("add-to-cart").click();
   await expect(builder.getByTestId("builder-message")).toContainText("تمت الإضافة");

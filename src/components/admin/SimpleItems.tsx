@@ -91,7 +91,7 @@ function ItemForm({
             <Checkbox
               label={t.simple.defaultSelected}
               name="selectedByDefault"
-              defaultChecked={item?.selectedByDefault ?? true}
+              defaultChecked={item?.selectedByDefault ?? false}
             />
           </div>
         ) : null}

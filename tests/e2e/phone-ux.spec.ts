@@ -1,3 +1,5 @@
+import { mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import { expect, test } from "@playwright/test";
 import { sql } from "./db";
 
@@ -7,6 +9,7 @@ const naeemiSmall = sql`select o.id from breed_options o join breeds b on b.id =
 test.afterAll(async () => {
   const [{ id }] = await naeemiSmall;
   await sql`update breed_options set compare_at_price_fils = null where id = ${id}`;
+  await sql`update cutting_options set photo_url = null where slug = 'arabic-8'`;
 });
 
 test("phones get the bottom menu bar and the category strip; desktops don't", async ({ page }, info) => {
@@ -25,10 +28,10 @@ test("order builder shows Required tags and ticks the chosen cards", async ({ pa
   await page.goto("/en/sheep/naeemi");
   const builder = page.getByTestId("order-builder");
   await expect(builder.getByTestId("required-tag")).toHaveCount(3); // size, cutting, packaging
-  await expect(builder.getByTestId("tick")).toHaveCount(1); // packaging pre-selected
+  await expect(builder.getByTestId("tick")).toHaveCount(0); // nothing pre-selected
   await builder.getByTestId("option-row").first().click();
   await builder.getByTestId("cutting-choice").first().click();
-  await expect(builder.getByTestId("tick")).toHaveCount(3);
+  await expect(builder.getByTestId("tick")).toHaveCount(2);
 });
 
 test("cutting choices are boxes, two per row on phones, without widening the page", async ({
@@ -113,4 +116,50 @@ test("category switcher jumps between categories", async ({ page }) => {
   await items.filter({ hasText: "ماعز" }).click();
   await expect(page).toHaveURL(/\/ar\/goats$/);
   await expect(page.getByTestId("breed-card")).toHaveCount(3);
+});
+
+test("nothing in 'Order includes' or packaging is pre-selected; packaging must be chosen", async ({
+  page,
+}) => {
+  await page.goto("/en/sheep/naeemi");
+  const builder = page.getByTestId("order-builder");
+  for (const box of await builder.getByTestId("extra-choice").all()) await expect(box).not.toBeChecked();
+  for (const p of await builder.getByTestId("packaging-choice").all())
+    await expect(p).toHaveAttribute("aria-checked", "false");
+  await builder.getByTestId("option-row").first().click();
+  await builder.getByTestId("cutting-choice").first().click();
+  await builder.getByTestId("add-to-cart").click();
+  await expect(builder.getByTestId("builder-message")).toHaveText("Please choose the packaging.");
+  await expect(page.locator("#step-packaging")).toHaveAttribute("data-missing", "true");
+});
+
+test("customers can optionally open a cutting photo and choose from it", async ({ page }) => {
+  // a small real image in local storage, linked to the first cutting option
+  const key = "cutting/00000000-aaaa-bbbb-cccc-000000000001.png";
+  const dir = path.join(process.env.STORAGE_DIR ?? ".storage", "cutting");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    path.join(dir, "00000000-aaaa-bbbb-cccc-000000000001.png"),
+    Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+      "base64",
+    ),
+  );
+  await sql`update cutting_options set photo_url = ${"/files/" + key} where slug = 'arabic-8'`;
+
+  await page.goto("/en/sheep/naeemi");
+  const builder = page.getByTestId("order-builder");
+  await expect(builder.getByTestId("cutting-zoom")).toHaveCount(1);
+  await builder.getByTestId("cutting-zoom").click();
+  const dialog = page.getByTestId("cutting-dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText("Arabic cut – 8 pieces");
+  await dialog.getByTestId("cutting-dialog-choose").click();
+  await expect(dialog).toHaveCount(0);
+  await expect(builder.getByTestId("cutting-choice").first()).toHaveAttribute("aria-checked", "true");
+
+  // Viewing is optional: tapping the card selects it directly.
+  await builder.getByTestId("cutting-choice").nth(1).click();
+  await expect(builder.getByTestId("cutting-choice").nth(1)).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByTestId("cutting-dialog")).toHaveCount(0);
 });

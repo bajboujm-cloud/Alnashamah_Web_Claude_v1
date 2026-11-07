@@ -79,17 +79,6 @@ export default async function CategoryPage({ params }: PageProps<"/[lang]/[categ
       {switcher}
       {/* Category image beside the name; the description sits under the name, never over the image. */}
       <div className="mb-8 flex items-start gap-6">
-        {category.illustrationUrl ? (
-          <div className="relative hidden aspect-[3/2] w-36 shrink-0 overflow-hidden sm:block">
-            <Image
-              src={category.illustrationUrl}
-              alt=""
-              fill
-              sizes="144px"
-              className={category.illustrationUrl.endsWith(".svg") ? "object-contain" : "object-cover"}
-            />
-          </div>
-        ) : null}
         <div className="min-w-0 flex-1">
           <SectionHeading as="h1" title={name} />
           <p className="-mt-4 max-w-2xl text-muted">
