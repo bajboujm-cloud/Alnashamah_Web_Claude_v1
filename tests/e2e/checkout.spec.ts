@@ -26,9 +26,18 @@ async function verifyPhone(page: Page, phone: string) {
   await box.getByTestId("confirm-code").click();
 }
 
+/** Taps the map to drop the delivery pin. */
+async function pin(page: Page) {
+  const map = page.getByTestId("map");
+  await expect(map.locator(".leaflet-container, .gm-style").first().or(map)).toBeVisible();
+  await map.click({ position: { x: 120, y: 120 } });
+  await expect(page.getByTestId("pin-set")).toBeVisible();
+}
+
 test.afterAll(async () => {
-  await sql`update settings set value = 'false'::jsonb where key = 'delivery.pickup_enabled'`;
-  await sql`update delivery_zones set fee_fils = null`;
+  await sql`update settings set value = 'true'::jsonb where key = 'delivery.pickup_enabled'`;
+  await sql`update delivery_zones set fee_fils = 0`;
+  await sql`update settings set value = '""'::jsonb where key = 'delivery.pickup_address_en'`;
   await sql`delete from delivery_blackout_dates`;
 });
 
@@ -37,9 +46,10 @@ test("an empty cart can't go to checkout", async ({ page }) => {
   await expect(page).toHaveURL(/\/ar\/cart$/);
 });
 
-test("guest checkout: verify the mobile, add the address, review with 'delivery fee to be confirmed'", async ({
+test("guest checkout: verify the mobile, add the address, review (fee not set = 'to be confirmed')", async ({
   page,
 }) => {
+  await sql`update delivery_zones set fee_fils = null where slug = 'dubai'`;
   await addSheep(page);
   await page.goto("/ar/cart");
   await page.getByTestId("go-checkout").click();
@@ -60,10 +70,17 @@ test("guest checkout: verify the mobile, add the address, review with 'delivery 
   await form.locator("input[name=area]").fill("البرشاء");
   await form.locator("input[name=street]").fill("شارع 12، فيلا 4");
   await form.getByTestId("save-checkout").click();
+  await expect(page.getByTestId("checkout-error")).toHaveText("يرجى تحديد موقعك على الخريطة.");
+  await pin(page);
+  await form.getByTestId("save-checkout").click();
 
   const review = page.getByTestId("review");
   await expect(review).toBeVisible();
   await expect(review.getByTestId("review-address")).toContainText("دبي — البرشاء");
+  await expect(review.getByTestId("review-map-link")).toHaveAttribute(
+    "href",
+    /^https:\/\/www\.google\.com\/maps\/search\/\?api=1&query=2\d\.\d{6},5\d\.\d{6}$/,
+  );
   await expect(page.getByTestId("summary-delivery")).toHaveText("سيتم تأكيدها");
   await expect(page.getByTestId("fee-note")).toBeVisible();
   await expect(page.getByTestId("checkout-total")).toHaveText("1,143 د.إ");
@@ -116,9 +133,12 @@ test("members: sign in, save an address at checkout, find it in the account, sig
   await form.locator("select[name=zoneId]").selectOption({ label: "Abu Dhabi" });
   await form.locator("input[name=area]").fill("Khalifa City");
   await form.locator("input[name=street]").fill("Street 5, Villa 10");
+  await pin(page);
   await expect(form.locator("input[name=saveAddress]")).toBeChecked();
   await form.getByTestId("save-checkout").click();
   await expect(page.getByTestId("review")).toContainText("Abu Dhabi — Khalifa City");
+  await expect(page.getByTestId("summary-delivery")).toHaveText("Free"); // delivery included
+  await expect(page.getByTestId("fee-note")).toHaveCount(0);
 
   // Next time the saved address is offered first.
   await page.reload();
@@ -181,6 +201,7 @@ test("a delivery fee set for the emirate is added to the total", async ({ page }
   await form.locator("select[name=zoneId]").selectOption({ label: "Sharjah" });
   await form.locator("input[name=area]").fill("Al Nahda");
   await form.locator("input[name=street]").fill("Tower 3, Flat 1201");
+  await pin(page);
   await form.getByTestId("save-checkout").click();
   await expect(page.getByTestId("review")).toBeVisible();
   await expect(page.getByTestId("summary-delivery")).toHaveText("AED 30");
@@ -198,9 +219,39 @@ test("checkout fits the phone screen (nothing cut off at the sides)", async ({ p
   const overflow = await page.evaluate(() => {
     const width = document.documentElement.clientWidth;
     return [...document.querySelectorAll("main *")].filter((el) => {
+      if (el.closest("[data-testid=map]") && el.getAttribute("data-testid") !== "map") return false; // map tiles are clipped by the map box
       const r = el.getBoundingClientRect();
       return r.width > 0 && (r.left < -1 || r.right > width + 1);
     }).length;
   });
   expect(overflow).toBe(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test("terms and conditions: in both languages, linked from the footer and checkout, with company details", async ({
+  page,
+}) => {
+  await sql`update settings set value = '"CN-1234567"'::jsonb where key = 'company.trade_license_no'`;
+  await page.goto("/ar");
+  await page.getByRole("contentinfo").getByRole("link", { name: "الشروط والأحكام" }).click();
+  await expect(page).toHaveURL(/\/ar\/terms$/);
+  const terms = page.getByTestId("terms");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("الشروط والأحكام");
+  await expect(terms).toContainText("رخصة تجارية رقم CN-1234567");
+  await expect(terms).toContainText("لا تشمل أضاحي عيد الأضحى الرأس والمصران والكرش");
+  await expect(terms.locator("h2")).toHaveCount(16);
+  await page.goto("/en/terms");
+  await expect(page.getByTestId("terms")).toContainText("Federal Law No. 15 of 2020 on Consumer Protection");
+  await sql`update settings set value = '""'::jsonb where key = 'company.trade_license_no'`;
+
+  // the checkbox at checkout links to the terms
+  await addSheep(page);
+  await page.goto("/en/checkout");
+  await page.getByTestId("mode-guest").click();
+  await verifyPhone(page, newPhone());
+  const form = page.getByTestId("checkout-form");
+  await form.locator("input[name=name]").fill("Ali");
+  await form.locator("input[name=fulfilment][value=pickup]").check();
+  await form.getByTestId("save-checkout").click();
+  await expect(page.getByTestId("terms-link")).toHaveAttribute("href", "/en/terms");
 });

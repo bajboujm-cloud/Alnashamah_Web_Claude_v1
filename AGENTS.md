@@ -59,6 +59,9 @@ pnpm e2e                  # browser tests (tests/e2e), desktop + phone, needs th
   Pages: `checkout/`, `account/`, `account/login/`. Checkout choices (address, pick-up, date, slot) are saved
   on the cart by `src/app/actions/checkout.ts`; totals with delivery in `src/server/checkout.ts` + `orderTotals()`.
   Delivery rules (Dubai time, cut-off, blackout days) in `src/lib/delivery.ts`; admin screen `admin/(panel)/delivery`.
+  Map pin (required for a new delivery address): `src/components/MapPin.tsx` — Google Maps when
+  `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set, free OpenStreetMap (Leaflet) otherwise; UAE bounds check in `src/lib/geo.ts`.
+- `src/content/terms.ts` — Terms & conditions (AR/EN draft for lawyer review), page `terms/`; company details from settings.
 - `src/lib/availability.ts` — stock rules (breed off ⇒ all its options out of stock; out-of-stock items are shown
   with a label, never hidden). Reuse these everywhere (pages, admin, checkout, API).
 - `scripts/seed.ts` + `scripts/seed-data.ts` — starting catalogue. The seed only adds missing rows and never

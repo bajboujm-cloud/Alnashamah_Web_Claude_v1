@@ -99,6 +99,13 @@
       "when": 1794080259424,
       "tag": "0013_customers_checkout",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1794083294372,
+      "tag": "0014_free_delivery_pickup",
+      "breakpoints": true
     }
   ]
 }

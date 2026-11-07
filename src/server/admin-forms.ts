@@ -43,6 +43,8 @@ export const RESERVED_SLUGS = new Set([
   "checkout",
   "account",
   "orders",
+  "terms",
+  "privacy",
 ]);
 
 export const isSlug = (v: string) => /^[a-z0-9]+(-[a-z0-9]+)*$/.test(v) && v.length <= 60;

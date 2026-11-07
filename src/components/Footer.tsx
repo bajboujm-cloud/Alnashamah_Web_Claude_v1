@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { Container } from "./Container";
@@ -35,6 +36,9 @@ export function Footer({
               {t.footer.contact}
             </a>
           ) : null}
+          <Link href={`/${locale}/terms`} className="text-sm text-ivory/85 underline hover:text-gold">
+            {t.footer.terms}
+          </Link>
           <a href="https://alnashamah.ae" className="text-sm text-gold" lang="en" dir="ltr">
             alnashamah.ae
           </a>

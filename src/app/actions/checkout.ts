@@ -4,6 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { refresh } from "next/cache";
 import { isBookable } from "@/lib/delivery";
 import { isEmail } from "@/lib/email";
+import { inUae } from "@/lib/geo";
 import { readCartId } from "@/server/cart";
 import { getDeliverySetup } from "@/server/checkout";
 import { readCustomer } from "@/server/customer/session";
@@ -20,6 +21,9 @@ export type CheckoutInput = {
   area: string;
   street: string;
   landmark: string;
+  /** Map pin (required for a new delivery address). */
+  latitude: number | null;
+  longitude: number | null;
   saveAddress: boolean;
   date: string;
   slotId: string;
@@ -83,6 +87,7 @@ export async function saveCheckout(raw: CheckoutInput): Promise<CheckoutResult> 
         if (!setup.zones.some((z) => z.id === v.zoneId)) bad.push("zoneId");
         if (v.area.length < 2) bad.push("area");
         if (v.street.length < 3) bad.push("street");
+        if (!inUae({ lat: raw?.latitude, lng: raw?.longitude })) bad.push("pin");
       }
     }
 
@@ -98,6 +103,8 @@ export async function saveCheckout(raw: CheckoutInput): Promise<CheckoutResult> 
         area: v.area,
         street: v.street,
         landmark: v.landmark,
+        latitude: Number((raw.latitude as number).toFixed(6)),
+        longitude: Number((raw.longitude as number).toFixed(6)),
         isSaved: me.kind === "member" && !!raw?.saveAddress,
       };
       // Re-use the unsaved address from an earlier try instead of piling up copies.

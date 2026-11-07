@@ -5,7 +5,7 @@ import { siteUrl } from "@/lib/site";
 import { getCategoryWithBreeds, getSeasonalCollections, getVisibleCategories } from "@/server/catalog";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const paths = ["", "/livestock"];
+  const paths = ["", "/livestock", "/terms"];
   const categories = await getVisibleCategories();
   for (const c of categories) {
     paths.push(`/${c.slug}`);

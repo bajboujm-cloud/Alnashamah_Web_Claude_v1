@@ -42,3 +42,21 @@ describe("orderTotals", () => {
     expect(t.totalFils).toBe(212_100);
   });
 });
+
+import { googleMapsLink, inUae } from "@/lib/geo";
+
+describe("map pins", () => {
+  it("accepts pins inside the UAE only", () => {
+    expect(inUae({ lat: 25.2048, lng: 55.2708 })).toBe(true); // Dubai
+    expect(inUae({ lat: 24.4539, lng: 54.3773 })).toBe(true); // Abu Dhabi
+    expect(inUae({ lat: 24.7136, lng: 46.6753 })).toBe(false); // Riyadh
+    expect(inUae({ lat: 51.5, lng: -0.12 })).toBe(false);
+    expect(inUae({ lat: Number.NaN, lng: 55 })).toBe(false);
+    expect(inUae({ lat: "25", lng: "55" })).toBe(false);
+  });
+  it("links to Google Maps", () => {
+    expect(googleMapsLink({ lat: 25.2048, lng: 55.2708 })).toBe(
+      "https://www.google.com/maps/search/?api=1&query=25.204800,55.270800",
+    );
+  });
+});

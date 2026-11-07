@@ -251,7 +251,9 @@ database migrations, env vars or CI. After Phase 1, create one small GitHub issu
 - **Phase 4 ✅** — customer phone-OTP login (members) and verified-guest checkout, saved addresses and account
   page, delivery or pick-up, date & time slot (cut-off, blackout days), delivery fee per emirate ("to be confirmed"
   while empty), review step; admin "Delivery" screen. Payment button stays off until Phase 5.
-  Still to do later: change of phone number with re-verification, verified email as a backup, map pin.
+  Owner decisions (7 Nov 2026): delivery included (fee 0 = "Free"), one all-day slot, pick-up allowed, map pin
+  required for delivery (Google Maps at go-live, OpenStreetMap on the laptop), draft Terms & conditions page.
+  Still to do later: change of phone number with re-verification, verified email as a backup, privacy policy page.
 - **Phase 5** — mock payment + webhook, orders, VAT, PDF invoice, emails.
 - **Phase 6** — order tracking, admin order management, coupons, Eid Al-Adha collection, reports.
 - **Phase 7** — SEO, PWA, accessibility/performance/security hardening, go-live checklist and

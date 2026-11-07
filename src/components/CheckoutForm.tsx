@@ -4,13 +4,17 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition, type ReactNode } from "react";
 import { saveCheckout, type CheckoutInput } from "@/app/actions/checkout";
 import type { Dictionary } from "@/i18n/dictionaries";
+import { UAE_CENTRE, type LatLng } from "@/lib/geo";
+import { MapPin } from "./MapPin";
 
 type Option = { id: string; label: string };
+type Zone = Option & { centre: LatLng | null };
 
 export type CheckoutFormProps = {
   t: Dictionary["checkout"];
   isMember: boolean;
-  zones: Option[];
+  zones: Zone[];
+  lang: string;
   slots: Option[];
   savedAddresses: Option[];
   pickup: { enabled: boolean; address: string };
@@ -45,6 +49,7 @@ export function CheckoutForm({
   t,
   isMember,
   zones,
+  lang,
   slots,
   savedAddresses,
   pickup,
@@ -85,9 +90,11 @@ export function CheckoutForm({
       setMessage(
         fields.includes("date")
           ? t.dateUnavailable
-          : fields.includes("email") && fields.length === 1
+          : fields.length === 1 && fields[0] === "email"
             ? t.invalidEmail
-            : t.fix,
+            : fields.length === 1 && fields[0] === "pin"
+              ? t.pinRequired
+              : t.fix,
       );
       setTimeout(
         () => document.querySelector("[data-bad]")?.scrollIntoView({ behavior: "smooth", block: "center" }),
@@ -250,6 +257,26 @@ export function CheckoutForm({
                       name="landmark"
                     />
                   </Field>
+                </div>
+                <div className="sm:col-span-2">
+                  <MapPin
+                    lang={lang}
+                    value={
+                      v.latitude != null && v.longitude != null ? { lat: v.latitude, lng: v.longitude } : null
+                    }
+                    centre={zones.find((z) => z.id === v.zoneId)?.centre ?? UAE_CENTRE}
+                    onChange={(p) => setV((x) => ({ ...x, latitude: p.lat, longitude: p.lng }))}
+                    invalid={bad.includes("pin")}
+                    labels={{
+                      title: t.mapTitle,
+                      help: t.mapHelp,
+                      useMyLocation: t.useMyLocation,
+                      locating: t.locating,
+                      locationDenied: t.locationDenied,
+                      pinSet: t.pinSet,
+                      openMap: t.openMap,
+                    }}
+                  />
                 </div>
                 {isMember ? (
                   <label className="flex min-h-11 items-center gap-3 text-sm sm:col-span-2">

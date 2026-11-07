@@ -6,6 +6,7 @@ import { Container } from "@/components/Container";
 import { SectionHeading } from "@/components/SectionHeading";
 import { hasLocale, pick } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
+import { googleMapsLink } from "@/lib/geo";
 import { formatPhone } from "@/lib/phone";
 import { savedAddresses } from "@/server/checkout";
 import { readCustomer } from "@/server/customer/session";
@@ -62,6 +63,16 @@ export default async function AccountPage({ params }: PageProps<"/[lang]/account
                     {lang === "ar" ? "، " : ", "}
                     {ad.street}
                     {ad.landmark ? ` · ${ad.landmark}` : ""}
+                    {ad.latitude != null && ad.longitude != null ? (
+                      <a
+                        href={googleMapsLink({ lat: ad.latitude, lng: ad.longitude })}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ms-2 whitespace-nowrap text-gold-deep underline"
+                      >
+                        📍 {t.checkout.openMap}
+                      </a>
+                    ) : null}
                   </span>
                   <form action={deleteAddress.bind(null, ad.id)}>
                     <button type="submit" className="min-h-11 shrink-0 px-2 text-danger underline">

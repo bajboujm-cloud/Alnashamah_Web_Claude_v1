@@ -133,7 +133,8 @@
   "footer": {
     "about": "A trusted, modern identity for livestock trading in the UAE.",
     "rights": "All rights reserved.",
-    "contact": "Contact us on WhatsApp"
+    "contact": "Contact us on WhatsApp",
+    "terms": "Terms & conditions"
   },
   "errors": {
     "notFoundTitle": "Page not found",
@@ -608,12 +609,22 @@
     "pickupAt": "Pick up at",
     "when": "When",
     "contact": "Contact",
-    "acceptTerms": "I agree to the terms and conditions.",
+    "acceptTerms": "I agree to the {link}.",
     "pay": "Continue to payment",
     "paySoon": "Online payment opens in the next update.",
     "backToCart": "Back to cart",
     "edit": "Edit",
-    "noDeliveryOn": "No deliveries on:"
+    "noDeliveryOn": "No deliveries on:",
+    "deliveryFree": "Free",
+    "mapTitle": "Your location on the map",
+    "mapHelp": "Tap the map or drag the pin to your door — it helps the driver find you.",
+    "useMyLocation": "Use my current location",
+    "locating": "Finding you…",
+    "locationDenied": "We couldn't get your location. Please tap the map instead.",
+    "pinSet": "Location pinned ✓",
+    "openMap": "Open in Google Maps",
+    "pinRequired": "Please pin your location on the map.",
+    "termsLink": "terms and conditions"
   },
   "account": {
     "title": "My account",
@@ -630,5 +641,9 @@
     "signOutAll": "Sign out of all devices",
     "orders": "My orders",
     "ordersSoon": "Your orders will appear here once online payment opens."
+  },
+  "terms": {
+    "title": "Terms and conditions",
+    "updated": "Last updated: {date}"
   }
 }

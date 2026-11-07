@@ -246,7 +246,8 @@ export const deliveryZoneSeed = [
   slug,
   nameEn,
   nameAr,
-  feeFils: null as number | null,
+  // Delivery is included in the price (free) unless the owner sets a fee in the admin.
+  feeFils: 0 as number | null,
   sortOrder: i + 1,
 }));
 
@@ -262,8 +263,8 @@ export const settingsSeed: Record<string, unknown> = {
   "company.email": "",
   "tax.vat_rate_percent": 5,
   "tax.prices_include_vat": true,
-  // Pick-up from the shop: off until the owner decides.
-  "delivery.pickup_enabled": false,
+  // Customers may pick up from the shop (address set in the admin "Delivery" screen).
+  "delivery.pickup_enabled": true,
   "delivery.pickup_address_en": "",
   "delivery.pickup_address_ar": "",
 };

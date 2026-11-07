@@ -12,6 +12,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import { addDays, BOOKING_DAYS, dubaiToday, isBookable } from "@/lib/delivery";
 import { formatDay } from "@/lib/dates";
 import { formatAed } from "@/lib/format";
+import { EMIRATE_CENTRES, googleMapsLink } from "@/lib/geo";
 import { formatPhone } from "@/lib/phone";
 import { getCheckout, getDeliverySetup, savedAddresses } from "@/server/checkout";
 import { readCustomer } from "@/server/customer/session";
@@ -92,7 +93,12 @@ export default async function CheckoutPage({ params }: PageProps<"/[lang]/checko
                 <CheckoutForm
                   t={c}
                   isMember={customer.kind === "member"}
-                  zones={setup.zones.map((z) => ({ id: z.id, label: zoneName(z) }))}
+                  lang={lang}
+                  zones={setup.zones.map((z) => ({
+                    id: z.id,
+                    label: zoneName(z),
+                    centre: EMIRATE_CENTRES[z.slug] ?? null,
+                  }))}
                   slots={setup.slots.map((s) => ({ id: s.id, label: pick(lang, s.nameEn, s.nameAr) }))}
                   savedAddresses={saved.map((a) => ({ id: a.id, label: describe(a) }))}
                   pickup={{ enabled: setup.pickup.enabled, address: pickupAddress }}
@@ -116,6 +122,8 @@ export default async function CheckoutPage({ params }: PageProps<"/[lang]/checko
                     area: current && !current.isSaved ? current.area : "",
                     street: current && !current.isSaved ? current.street : "",
                     landmark: current && !current.isSaved ? current.landmark : "",
+                    latitude: current && !current.isSaved ? current.latitude : null,
+                    longitude: current && !current.isSaved ? current.longitude : null,
                     saveAddress: customer.kind === "member",
                     date: checkout.deliveryDate ?? firstDate,
                     slotId: checkout.slot?.id ?? firstSlot?.id ?? "",
@@ -141,6 +149,19 @@ export default async function CheckoutPage({ params }: PageProps<"/[lang]/checko
                           : current
                             ? describe(current)
                             : ""}
+                        {checkout.fulfilment === "delivery" &&
+                        current?.latitude != null &&
+                        current.longitude != null ? (
+                          <a
+                            href={googleMapsLink({ lat: current.latitude, lng: current.longitude })}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ms-2 text-gold-deep underline"
+                            data-testid="review-map-link"
+                          >
+                            📍 {c.openMap}
+                          </a>
+                        ) : null}
                       </dd>
                     </div>
                     <div>
@@ -159,8 +180,19 @@ export default async function CheckoutPage({ params }: PageProps<"/[lang]/checko
                     </div>
                   </dl>
                   <label className="mt-5 flex min-h-11 items-center gap-3 text-sm">
-                    <input type="checkbox" className="h-5 w-5 accent-green" disabled />
-                    {c.acceptTerms}
+                    <input type="checkbox" className="h-5 w-5 accent-green" name="acceptTerms" />
+                    <span>
+                      {c.acceptTerms.split("{link}")[0]}
+                      <Link
+                        href={`/${lang}/terms`}
+                        target="_blank"
+                        className="text-gold-deep underline"
+                        data-testid="terms-link"
+                      >
+                        {c.termsLink}
+                      </Link>
+                      {c.acceptTerms.split("{link}")[1]}
+                    </span>
                   </label>
                   <button
                     type="button"
@@ -206,7 +238,9 @@ export default async function CheckoutPage({ params }: PageProps<"/[lang]/checko
                   ? c.pickupFree
                   : checkout.feeTbc
                     ? c.deliveryTbc
-                    : formatAed(checkout.totals.deliveryFils, lang)}
+                    : checkout.totals.deliveryFils === 0
+                      ? c.deliveryFree
+                      : formatAed(checkout.totals.deliveryFils, lang)}
               </dd>
             </div>
             <div className="flex justify-between gap-3">

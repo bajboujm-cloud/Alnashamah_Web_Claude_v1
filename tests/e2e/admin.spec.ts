@@ -33,10 +33,10 @@ test.afterAll(async () => {
   await sql`update categories set status = 'coming_soon' where slug in ('cattle', 'camels')`;
   await sql`update seasonal_collections set is_active = true where slug = 'eid-al-adha'`;
   await sql`update seasonal_collections set no_extras = true where slug = 'eid-al-adha'`;
-  await sql`update delivery_zones set fee_fils = null, is_active = true`;
+  await sql`update delivery_zones set fee_fils = 0, is_active = true`;
   await sql`delete from delivery_blackout_dates`;
   await sql`delete from delivery_slots where name_en = 'Evening'`;
-  await sql`update settings set value = 'false'::jsonb where key = 'delivery.pickup_enabled'`;
+  await sql`update settings set value = 'true'::jsonb where key = 'delivery.pickup_enabled'`;
   await sql`delete from site_texts`;
   await sql`update breeds set is_visible = true`;
   await sql`delete from promotions`;
@@ -269,12 +269,12 @@ test("delivery set-up: fee per emirate, extra time slot, day off and pick-up", a
   await expect(off.locator("li")).toContainText("Holiday");
 
   const pickup = page.getByTestId("admin-pickup");
-  await pickup.locator("input[name=enabled]").check();
+  await pickup.locator("input[name=enabled]").uncheck();
   await pickup.locator("input[name=addressEn]").fill("Al Aweer Market, Shop 12");
   await pickup.getByRole("button", { name: "Save" }).click();
   await expect(pickup.getByTestId("form-message")).toHaveText("Saved ✓");
   const [p] = await sql`select value from settings where key = 'delivery.pickup_enabled'`;
-  expect(p.value).toBe(true);
+  expect(p.value).toBe(false);
 });
 
 test("website wording can be edited and reset", async () => {
