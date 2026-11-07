@@ -748,7 +748,10 @@ export function OrderBuilder({
       ) : null}
 
       {/* Sticky total + add button (stays visible while choosing on phones). */}
-      <div className="sticky bottom-16 z-20 -mx-4 border-t-2 border-gold bg-green px-4 py-3 text-ivory sm:mx-0 md:bottom-0">
+      <div
+        data-order-bar
+        className="sticky bottom-16 z-20 -mx-4 border-t-2 border-gold bg-green px-4 py-3 text-ivory sm:mx-0 md:bottom-0"
+      >
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs text-ivory/75">{o.total}</p>

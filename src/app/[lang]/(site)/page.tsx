@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BreedCard } from "@/components/BreedCard";
 import { CategoryCard } from "@/components/CategoryCard";
+import { HashLink } from "@/components/HashLink";
 import { Container } from "@/components/Container";
 import { SectionHeading } from "@/components/SectionHeading";
 import { hasLocale, pick } from "@/i18n/config";
@@ -68,18 +69,18 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
             <div className="mt-6 hidden h-px w-24 bg-gold sm:block" aria-hidden />
             <p className="mt-6 hidden max-w-xl text-ivory/85 sm:block">{t.home.heroText}</p>
             <div className="mt-4 flex flex-wrap gap-3 sm:mt-8">
-              <Link
+              <HashLink
                 href={`/${lang}#categories`}
                 className="rounded-brand bg-gold px-4 py-2 text-sm font-semibold text-green-900 hover:bg-ivory sm:px-6 sm:py-3 sm:text-base"
               >
                 {t.home.heroCta}
-              </Link>
-              <Link
+              </HashLink>
+              <HashLink
                 href={`/${lang}#how`}
                 className="hidden rounded-brand border border-ivory/40 px-6 py-3 text-ivory hover:border-gold sm:inline-block"
               >
                 {t.home.heroSecondary}
-              </Link>
+              </HashLink>
             </div>
           </div>
           <Image

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { Container } from "./Container";
+import { HashLink } from "./HashLink";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { Logo } from "./Logo";
 
@@ -34,13 +35,13 @@ export function Header({
         </Link>
         <nav aria-label={t.nav.menu} className="hidden items-center gap-6 text-sm text-charcoal md:flex">
           {links.map((l) => (
-            <Link
+            <HashLink
               key={l.href}
               href={l.href}
               className="hover:text-green hover:underline decoration-gold underline-offset-8"
             >
               {l.label}
-            </Link>
+            </HashLink>
           ))}
         </nav>
         <div className="flex items-center gap-2">
@@ -98,13 +99,13 @@ export function Header({
               className="absolute end-0 z-20 mt-2 w-56 border border-line bg-white p-2"
             >
               {links.map((l) => (
-                <Link
+                <HashLink
                   key={l.href}
                   href={l.href}
                   className="block rounded-brand px-3 py-3 text-sm hover:bg-ivory"
                 >
                   {l.label}
-                </Link>
+                </HashLink>
               ))}
             </nav>
           </details>

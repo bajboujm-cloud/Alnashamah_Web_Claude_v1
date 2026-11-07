@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { BackToTop } from "@/components/BackToTop";
 import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -33,6 +34,7 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[la
         {children}
       </main>
       <Footer locale={lang} t={t} whatsapp={brand.whatsapp} logo={brand.logoReverse} />
+      <BackToTop label={t.nav.backToTop} />
       {brand.whatsapp ? <WhatsAppButton number={brand.whatsapp} label={t.footer.contact} /> : null}
       {/* Space so the phone menu bar never covers the end of the page. */}
       <div className="h-16 md:hidden" aria-hidden />

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { BreedCard } from "@/components/BreedCard";
 import { Container } from "@/components/Container";
@@ -38,28 +37,21 @@ export default async function SeasonalPage({ params }: PageProps<"/[lang]/season
 
   return (
     <>
-      <section className="border-b border-gold/50 bg-white">
-        <Container className="grid items-center gap-8 py-12 md:grid-cols-[1fr_auto]">
-          <div>
-            <p className="label-tracked">{t.home.seasonalLabel}</p>
-            <h1 className="font-display mt-2 text-3xl text-green sm:text-4xl">
-              {pick(lang, collection.nameEn, collection.nameAr)}
-            </h1>
-            <div className="mt-4 h-px w-24 bg-gold" aria-hidden />
-            <p className="mt-4 max-w-2xl text-muted">
-              {pick(lang, collection.descriptionEn, collection.descriptionAr)}
-            </p>
-          </div>
-          {collection.illustrationUrl ? (
-            <Image
-              src={collection.illustrationUrl}
-              alt=""
-              width={240}
-              height={160}
-              priority
-              className="h-auto w-64"
-            />
-          ) : null}
+      {/* Green banner like the home page welcome (same size, no photo). */}
+      <section
+        className="brand-pattern relative overflow-hidden bg-green text-ivory"
+        data-testid="season-hero"
+      >
+        <div className="absolute inset-y-0 start-0 w-1.5 bg-gold" aria-hidden />
+        <Container className="py-6 sm:py-20">
+          <p className="label-tracked !text-gold">{t.home.seasonalLabel}</p>
+          <h1 className="font-display mt-2 text-2xl leading-tight sm:mt-4 sm:text-5xl">
+            {pick(lang, collection.nameEn, collection.nameAr)}
+          </h1>
+          <div className="mt-6 hidden h-px w-24 bg-gold sm:block" aria-hidden />
+          <p className="mt-3 max-w-2xl text-sm text-ivory/85 sm:mt-6 sm:text-base">
+            {pick(lang, collection.descriptionEn, collection.descriptionAr)}
+          </p>
         </Container>
       </section>
       {/* Breeds straight away, grouped by category (Sheep, then Goats …). */}

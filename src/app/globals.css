@@ -85,3 +85,19 @@ html[lang="ar"] .label-tracked {
     animation: none !important;
   }
 }
+
+/* Floating buttons (WhatsApp, back to top): above the phone menu bar, and above the order bar on breed pages. */
+.floating-btn {
+  bottom: 5rem;
+}
+body:has([data-order-bar]) .floating-btn {
+  bottom: 10.5rem;
+}
+@media (min-width: 48rem) {
+  .floating-btn {
+    bottom: 1.25rem;
+  }
+  body:has([data-order-bar]) .floating-btn {
+    bottom: 7rem;
+  }
+}

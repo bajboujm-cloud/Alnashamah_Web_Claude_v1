@@ -333,3 +333,34 @@ test("the server refuses a too-young Udhiyah even if the page is bypassed", asyn
   await expect(page.locator("[data-problem=tooYoung]").first()).toContainText("أصغر من العمر المطلوب");
   await sql`delete from cart_items where id = ${line.id}`;
 });
+
+test("menu links to a section scroll there every time, even when pressed twice", async ({ page }, info) => {
+  test.skip(info.project.name !== "desktop", "desktop menu");
+  await page.goto("/en");
+  const faq = page.getByRole("banner").getByRole("link", { name: "FAQ" });
+  await faq.click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await faq.click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
+  await expect(page.locator("#faq")).toBeInViewport();
+});
+
+test("back-to-top arrow appears after scrolling and returns to the top", async ({ page }) => {
+  await page.goto("/ar");
+  const btn = page.getByTestId("back-to-top");
+  await expect(btn).toHaveCSS("opacity", "0");
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect(btn).toHaveCSS("opacity", "1");
+  await btn.click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+});
+
+test("Eid page opens with a green banner and no photo", async ({ page }) => {
+  await page.goto("/ar/seasonal/eid-al-adha");
+  const hero = page.getByTestId("season-hero");
+  await expect(hero).toHaveClass(/bg-green/);
+  await expect(hero.locator("img")).toHaveCount(0);
+  await expect(hero.getByRole("heading", { level: 1 })).toHaveText("أضحية عيد الأضحى / القربان");
+});
