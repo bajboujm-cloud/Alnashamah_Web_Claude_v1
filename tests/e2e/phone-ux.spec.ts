@@ -229,68 +229,75 @@ test("an extra switched off in the admin shows 'not available', never 'out of st
 
 const SHEEP_RULE = "الأضحية أو العقيقة (غنم) يجب أن يكون عمرها 6 أشهر فأكثر.";
 
-test("Udhiyah: sizes under 6 months (sheep) turn red and can't be added", async ({ page }) => {
+test("Udhiyah: tapping a size under 6 months (sheep) opens the age popup instead of selecting it", async ({
+  page,
+}) => {
   await page.goto("/ar/sheep/naeemi?occasion=udhiyah");
   const builder = page.getByTestId("order-builder");
   const rule = builder.getByTestId("age-rule");
   await expect(rule).toHaveText(SHEEP_RULE);
-  await expect(rule).toHaveAttribute("data-error", "false");
   const rows = builder.getByTestId("option-row");
   await expect(rows.nth(0)).toHaveAttribute("data-too-young", "true"); // 2–4 months
   await expect(rows.nth(1)).toHaveAttribute("data-too-young", "true"); // 4–6 months
   await expect(rows.nth(2)).not.toHaveAttribute("data-too-young"); // 6–8 months
 
-  await rows.nth(0).click();
-  await expect(rule).toHaveAttribute("data-error", "true");
-  await expect(page.locator("#step-size")).toHaveAttribute("data-missing", "false");
-  await expect(builder.getByTestId("age-rule-occasion")).toHaveText(SHEEP_RULE);
-  await builder.getByTestId("cutting-choice").first().click();
-  await builder.getByTestId("packaging-choice").first().click();
-  await builder.getByTestId("add-to-cart").click();
-  // A popup explains and offers one-tap fixes; nothing is added.
   const dialog = page.getByTestId("age-dialog");
+  await rows.nth(0).click();
   await expect(dialog).toBeVisible();
   await expect(dialog.getByTestId("age-dialog-message")).toHaveText(SHEEP_RULE);
-  await expect(builder.getByTestId("builder-message")).toHaveCount(0);
   await dialog.getByTestId("age-dialog-close").click();
   await expect(dialog).toHaveCount(0);
-  await expect(rows.nth(0)).toHaveAttribute("aria-checked", "true"); // closing changes nothing
+  await expect(rows.nth(0)).toHaveAttribute("aria-checked", "false"); // not selected
 
-  await builder.getByTestId("add-to-cart").click();
+  await rows.nth(1).click();
   await expect(dialog.getByTestId("age-dialog-pick")).toHaveText("اختيار كبير (6–8 أشهر) – 1,240 د.إ");
   await dialog.getByTestId("age-dialog-pick").click();
   await expect(dialog).toHaveCount(0);
   await expect(rows.nth(2)).toHaveAttribute("aria-checked", "true");
   await expect(rule).toHaveAttribute("data-error", "false");
-  await expect(builder.getByTestId("age-rule-occasion")).toHaveCount(0);
+  await builder.getByTestId("cutting-choice").first().click();
+  await builder.getByTestId("packaging-choice").first().click();
   await builder.getByTestId("add-to-cart").click();
   await expect(builder.getByTestId("builder-message")).toContainText("تمت الإضافة");
 });
 
-test("age popup: 'not an Udhiyah or Aqiqah' keeps the size; no old-enough size offers another breed", async ({
+test("choosing Udhiyah after a small size opens the popup; 'not an Udhiyah' keeps the size", async ({
   page,
 }) => {
   await page.goto("/ar/sheep/naeemi");
   const builder = page.getByTestId("order-builder");
-  await builder.getByTestId("option-row").first().click();
+  const rows = builder.getByTestId("option-row");
+  await rows.first().click();
   await builder.getByTestId("cutting-choice").first().click();
   await builder.getByTestId("packaging-choice").first().click();
-  await page.locator("select[name=occasion]").selectOption("aqiqah");
-  await builder.getByTestId("add-to-cart").click();
   const dialog = page.getByTestId("age-dialog");
+  await page.locator("select[name=occasion]").selectOption("aqiqah");
+  await expect(dialog).toBeVisible();
+  await dialog.getByTestId("age-dialog-close").click();
+  // Closing leaves it red; Add to cart asks again and adds nothing.
+  await expect(builder.getByTestId("age-rule")).toHaveAttribute("data-error", "true");
+  await builder.getByTestId("add-to-cart").click();
+  await expect(dialog).toBeVisible();
+  await expect(builder.getByTestId("builder-message")).toHaveCount(0);
   await dialog.getByTestId("age-dialog-not-sacrifice").click();
-  await expect(dialog).toHaveCount(0);
   await expect(page.locator("select[name=occasion]")).toHaveValue("none");
-  await expect(builder.getByTestId("option-row").first()).toHaveAttribute("aria-checked", "true");
+  await expect(rows.first()).toHaveAttribute("aria-checked", "true");
   await builder.getByTestId("add-to-cart").click();
   await expect(builder.getByTestId("builder-message")).toContainText("تمت الإضافة");
 
-  // Local goats are all under 12 months: the popup offers another breed instead.
+  // From the Eid page, "not an Udhiyah" selects the size that was tapped, as a normal order.
+  await page.goto("/ar/sheep/naeemi?occasion=udhiyah");
+  await rows.first().click();
+  await dialog.getByTestId("age-dialog-not-sacrifice").click();
+  await expect(page.locator("select[name=occasion]")).toHaveValue("none");
+  await expect(rows.first()).toHaveAttribute("aria-checked", "true");
+});
+
+test("no size old enough: the popup offers another breed", async ({ page }) => {
   await page.goto("/ar/goats/local?occasion=udhiyah");
+  const builder = page.getByTestId("order-builder");
   await builder.getByTestId("option-row").first().click();
-  await builder.getByTestId("cutting-choice").first().click();
-  await builder.getByTestId("packaging-choice").first().click();
-  await builder.getByTestId("add-to-cart").click();
+  const dialog = page.getByTestId("age-dialog");
   await expect(dialog.getByTestId("age-dialog-pick")).toHaveCount(0);
   await dialog.getByTestId("age-dialog-other-breed").click();
   await expect(page).toHaveURL(/\/ar\/goats$/);
@@ -340,8 +347,11 @@ test("menu links to a section scroll there every time, even when pressed twice",
   const faq = page.getByRole("banner").getByRole("link", { name: "FAQ" });
   await faq.click();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await expect(page.locator("#faq")).toBeInViewport();
+  // back to the top (repeat until the smooth scroll has finished)
+  await expect
+    .poll(() => page.evaluate(() => (window.scrollTo({ top: 0, behavior: "instant" }), window.scrollY)))
+    .toBe(0);
   await faq.click();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
   await expect(page.locator("#faq")).toBeInViewport();

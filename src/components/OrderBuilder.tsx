@@ -300,7 +300,8 @@ export function OrderBuilder({
   const tooYoung = (s: BuilderSize) => !!ageRule && isTooYoung(occasion, ageRule.minMonths, s.ageMin);
   const sizeTooYoung = !!size && tooYoung(size);
   /** Popup shown when Add to cart is pressed with a size that is too young. */
-  const [ageDialog, setAgeDialog] = useState(false);
+  /** Age popup; `tapped` = the too-young size the customer just tapped (not selected unless they confirm). */
+  const [ageDialog, setAgeDialog] = useState<{ tapped: BuilderSize | null } | null>(null);
   /** Nearest size (in list order) that is old enough and can be ordered. */
   const olderSize = sizes.find((s) => s.available && s.priceFils != null && !tooYoung(s)) ?? null;
   /** Message when the chosen occasion can't include head, intestines, tripe … (e.g. Eid sacrifices). */
@@ -334,7 +335,7 @@ export function OrderBuilder({
     if (!size) return needs("step-size", "chooseSize");
     if (sizeTooYoung) {
       setResult(null);
-      setAgeDialog(true);
+      setAgeDialog({ tapped: null });
       return;
     }
     if (cutting.some((c) => c.available) && !cuttingId) return needs("step-cutting", "chooseCutting");
@@ -408,7 +409,11 @@ export function OrderBuilder({
                 role="radio"
                 aria-checked={sizeId === s.id}
                 disabled={!can}
-                onClick={() => setSizeId(s.id)}
+                onClick={() => {
+                  // Too young for the chosen Udhiyah / Aqiqah: explain straight away instead of selecting it.
+                  if (young) return setAgeDialog({ tapped: s });
+                  setSizeId(s.id);
+                }}
                 className={`${
                   young && sizeId === s.id
                     ? "relative flex items-center gap-3 border border-danger bg-danger/5 p-3 pe-8 text-start ring-2 ring-danger"
@@ -662,6 +667,9 @@ export function OrderBuilder({
                 const next = e.target.value as (typeof occasions)[number];
                 setOccasion(next);
                 if (noExtras[next]) setExtraIds([]);
+                // The chosen size is too young for the new occasion: explain straight away.
+                if (size && ageRule && isTooYoung(next, ageRule.minMonths, size.ageMin))
+                  setAgeDialog({ tapped: null });
               }}
               className="min-h-11 w-full rounded-brand border border-line bg-white px-3 text-sm"
               name="occasion"
@@ -724,14 +732,15 @@ export function OrderBuilder({
           onPick={() => {
             if (olderSize) setSizeId(olderSize.id);
             setMissing(null);
-            setAgeDialog(false);
+            setAgeDialog(null);
           }}
           onNotSacrifice={() => {
             setOccasion("none");
+            if (ageDialog.tapped) setSizeId(ageDialog.tapped.id); // they wanted this size for a normal order
             setMissing(null);
-            setAgeDialog(false);
+            setAgeDialog(null);
           }}
-          onClose={() => setAgeDialog(false)}
+          onClose={() => setAgeDialog(null)}
         />
       ) : null}
       {zoom ? (
