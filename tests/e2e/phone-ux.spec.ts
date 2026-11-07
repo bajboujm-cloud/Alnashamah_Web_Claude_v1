@@ -12,16 +12,25 @@ test.afterAll(async () => {
   await sql`update cutting_options set photo_url = null where slug = 'arabic-8'`;
 });
 
-test("phones get the bottom menu bar and the category strip; desktops don't", async ({ page }, info) => {
+test("phones get the bottom menu bar; desktops don't", async ({ page }, info) => {
   await page.goto("/ar");
   const phone = info.project.name === "phone";
   await expect(page.getByTestId("bottom-nav")).toBeVisible({ visible: phone });
-  await expect(page.getByTestId("category-strip")).toBeVisible({ visible: phone });
   if (!phone) return;
   await expect(page.getByTestId("bottom-nav").getByRole("link")).toHaveCount(3); // home, livestock, cart
   await expect(page.getByTestId("bottom-nav")).toContainText("قريباً"); // orders + account come later
-  await page.getByTestId("category-strip").getByRole("link", { name: /ماعز/ }).click();
-  await expect(page).toHaveURL(/\/ar\/goats$/);
+});
+
+test("phone home: short welcome, then Eid banner, then categories on the first screen", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "phone", "phone layout only");
+  await page.goto("/ar");
+  const eid = page.getByRole("link", { name: "عروض عيد الأضحى" });
+  const categories = page.locator("#categories");
+  const [eidBox, catBox] = [await eid.boundingBox(), await categories.boundingBox()];
+  expect(eidBox!.y).toBeLessThan(catBox!.y);
+  await expect(categories).toBeInViewport();
 });
 
 test("order builder shows Required tags and ticks the chosen cards", async ({ page }) => {

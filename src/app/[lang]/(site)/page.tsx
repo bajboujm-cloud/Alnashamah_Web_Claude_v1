@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BreedCard } from "@/components/BreedCard";
 import { CategoryCard } from "@/components/CategoryCard";
-import { CategoryStrip } from "@/components/CategoryStrip";
 import { Container } from "@/components/Container";
 import { SectionHeading } from "@/components/SectionHeading";
 import { hasLocale, pick } from "@/i18n/config";
@@ -37,12 +36,6 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
 
   return (
     <>
-      <CategoryStrip
-        locale={lang}
-        categories={categories}
-        soonLabel={t.catalog.comingSoon}
-        label={t.home.categoriesLabel}
-      />
       <PromoSlider
         rtl={lang === "ar"}
         labels={{
@@ -65,22 +58,25 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
       {/* Hero */}
       <section className="brand-pattern relative overflow-hidden bg-green text-ivory">
         <div className="absolute inset-y-0 start-0 w-1.5 bg-gold" aria-hidden />
-        <Container className="grid items-center gap-10 py-16 sm:py-20 md:grid-cols-[1.2fr_1fr]">
+        <Container className="grid grid-cols-[1fr_6.5rem] items-center gap-4 py-6 sm:grid-cols-1 sm:gap-10 sm:py-20 md:grid-cols-[1.2fr_1fr]">
           <div>
             <p className="label-tracked !text-gold">{t.home.heroEyebrow}</p>
-            <h1 className="font-display mt-4 text-3xl leading-tight sm:text-5xl">{t.home.heroTitle}</h1>
-            <div className="mt-6 h-px w-24 bg-gold" aria-hidden />
-            <p className="mt-6 max-w-xl text-ivory/85">{t.home.heroText}</p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <h1 className="font-display mt-2 text-2xl leading-tight sm:mt-4 sm:text-5xl">
+              {t.home.heroTitle}
+            </h1>
+            {/* On phones the welcome stays short so the Eid banner and categories show on the first screen. */}
+            <div className="mt-6 hidden h-px w-24 bg-gold sm:block" aria-hidden />
+            <p className="mt-6 hidden max-w-xl text-ivory/85 sm:block">{t.home.heroText}</p>
+            <div className="mt-4 flex flex-wrap gap-3 sm:mt-8">
               <Link
                 href={`/${lang}#categories`}
-                className="rounded-brand bg-gold px-6 py-3 font-semibold text-green-900 hover:bg-ivory"
+                className="rounded-brand bg-gold px-4 py-2 text-sm font-semibold text-green-900 hover:bg-ivory sm:px-6 sm:py-3 sm:text-base"
               >
                 {t.home.heroCta}
               </Link>
               <Link
                 href={`/${lang}#how`}
-                className="rounded-brand border border-ivory/40 px-6 py-3 text-ivory hover:border-gold"
+                className="hidden rounded-brand border border-ivory/40 px-6 py-3 text-ivory hover:border-gold sm:inline-block"
               >
                 {t.home.heroSecondary}
               </Link>
@@ -93,7 +89,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
             height={229}
             priority
             unoptimized={brand.heroImage.endsWith(".svg")}
-            className="mx-auto h-auto max-h-72 w-full max-w-sm object-contain"
+            className="mx-auto h-auto max-h-72 w-full max-w-[6.5rem] object-contain sm:max-w-sm"
           />
         </Container>
       </section>
@@ -101,18 +97,28 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
       {/* Seasonal banner */}
       {activeSeasons.map((s) => (
         <section key={s.id} className="border-b border-gold/50 bg-white">
-          <Container className="grid items-center gap-6 py-8 sm:grid-cols-[auto_1fr_auto]">
+          <Container className="grid grid-cols-[4.5rem_1fr] items-center gap-x-3 gap-y-3 py-4 sm:grid-cols-[auto_1fr_auto] sm:gap-6 sm:py-8">
             {s.illustrationUrl ? (
-              <Image src={s.illustrationUrl} alt="" width={240} height={160} className="h-auto w-40" />
+              <Image
+                src={s.illustrationUrl}
+                alt=""
+                width={240}
+                height={160}
+                className="h-auto w-[4.5rem] sm:w-40"
+              />
             ) : null}
             <div>
               <p className="label-tracked">{t.home.seasonalLabel}</p>
-              <h2 className="font-display mt-1 text-2xl text-green">{pick(lang, s.nameEn, s.nameAr)}</h2>
-              <p className="mt-2 text-sm text-muted">{pick(lang, s.descriptionEn, s.descriptionAr)}</p>
+              <h2 className="font-display mt-1 text-lg text-green sm:text-2xl">
+                {pick(lang, s.nameEn, s.nameAr)}
+              </h2>
+              <p className="mt-2 hidden text-sm text-muted sm:block">
+                {pick(lang, s.descriptionEn, s.descriptionAr)}
+              </p>
             </div>
             <Link
               href={`/${lang}/seasonal/${s.slug}`}
-              className="justify-self-start rounded-brand bg-green px-5 py-3 text-sm font-semibold text-ivory hover:bg-green-700 sm:justify-self-end"
+              className="col-span-2 justify-self-start rounded-brand bg-green px-4 py-2 text-sm font-semibold text-ivory hover:bg-green-700 sm:col-span-1 sm:justify-self-end sm:px-5 sm:py-3"
             >
               {t.home.seasonalCta}
             </Link>
@@ -120,7 +126,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         </section>
       ))}
 
-      <Container className="mt-16 space-y-20">
+      <Container className="mt-8 space-y-20 sm:mt-16">
         <section aria-labelledby="categories">
           <SectionHeading id="categories" title={t.home.categoriesTitle} label={t.home.categoriesLabel} />
           <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
