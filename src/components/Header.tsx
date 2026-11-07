@@ -21,7 +21,7 @@ export function Header({
   cartCount: number;
 }) {
   const links = [
-    { href: `/${locale}#categories`, label: t.nav.categories },
+    { href: `/${locale}/livestock`, label: t.nav.categories },
     ...seasonal.map((s) => ({ href: `/${locale}/seasonal/${s.slug}`, label: s.label })),
     { href: `/${locale}#how`, label: t.nav.howItWorks },
     { href: `/${locale}#faq`, label: t.nav.faq },

@@ -43,18 +43,28 @@ const occasions = ["none", "udhiyah", "aqiqah", "sadaqah", "other"] as const;
 
 function Step({
   n,
+  id,
   title,
   required,
+  missing = false,
   children,
 }: {
   n: number;
+  /** Anchor used to scroll to this step when something is missing. */
+  id?: string;
   title: string;
   /** Label of the "Required" tag, shown when this step must be completed. */
   required?: string;
+  /** True while the customer tried to add to cart without choosing here. */
+  missing?: boolean;
   children: ReactNode;
 }) {
   return (
-    <section className="border-t border-line pt-5">
+    <section
+      id={id}
+      className="scroll-mt-24 border-t border-line pt-5 data-[missing=true]:rounded-brand data-[missing=true]:bg-danger/5 data-[missing=true]:ring-2 data-[missing=true]:ring-danger/40"
+      data-missing={missing}
+    >
       <h3 className="font-display mb-3 flex items-center gap-2 text-lg text-green">
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gold text-sm text-green-900">
           {n}
@@ -109,6 +119,7 @@ export function OrderBuilder({
   const [onBehalfOf, setOnBehalfOf] = useState("");
   const [notes, setNotes] = useState("");
   const [result, setResult] = useState<AddResult | { ok: false; problem: "chooseSize" } | null>(null);
+  const [missing, setMissing] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const size = sizes.find((s) => s.id === sizeId) ?? null;
@@ -127,21 +138,39 @@ export function OrderBuilder({
   const price = (fils: number) => (fils === 0 ? t.catalog.free : formatAed(fils, lang));
   const plus = (fils: number) => (fils === 0 ? "" : `+ ${formatAed(fils, lang)}`);
 
+  /** Shows the message and scrolls to the step that still needs a choice. */
+  function needs(
+    step: "step-size" | "step-cutting" | "step-packaging",
+    problem: "chooseSize" | "chooseCutting" | "choosePackaging",
+  ) {
+    setResult({ ok: false, problem } as AddResult);
+    setMissing(step);
+    document.getElementById(step)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   function submit() {
-    if (!size) return setResult({ ok: false, problem: "chooseSize" });
+    if (!size) return needs("step-size", "chooseSize");
+    if (cutting.some((c) => c.available) && !cuttingId) return needs("step-cutting", "chooseCutting");
+    if (packaging.some((p) => p.available) && !packagingId) return needs("step-packaging", "choosePackaging");
+    setMissing(null);
     startTransition(async () => {
-      setResult(
-        await addToCart({
-          breedOptionId: size.id,
-          cuttingOptionId: cuttingId,
-          packagingOptionId: packagingId,
-          extraIds,
-          quantity,
-          occasion,
-          onBehalfOf,
-          notes,
-        }),
-      );
+      try {
+        setResult(
+          await addToCart({
+            breedOptionId: size.id,
+            cuttingOptionId: cuttingId,
+            packagingOptionId: packagingId,
+            extraIds,
+            quantity,
+            occasion,
+            onBehalfOf,
+            notes,
+          }),
+        );
+      } catch {
+        // e.g. the connection dropped or the server had a problem: show a friendly message, not a crash
+        setResult({ ok: false, problem: "invalid" });
+      }
     });
   }
 
@@ -159,7 +188,13 @@ export function OrderBuilder({
       <h2 className="font-display text-2xl text-green">{o.title}</h2>
       {!inStock ? <p className="text-sm font-semibold text-danger">{o.outOfStockNote}</p> : null}
 
-      <Step n={1} title={o.stepSize} required={o.required}>
+      <Step
+        n={1}
+        id="step-size"
+        title={o.stepSize}
+        required={o.required}
+        missing={missing === "step-size" && !sizeId}
+      >
         <div className="grid gap-2" role="radiogroup" aria-label={o.stepSize}>
           {sizes.map((s) => {
             const can = s.available && s.priceFils != null;
@@ -212,11 +247,13 @@ export function OrderBuilder({
       {cutting.length ? (
         <Step
           n={2}
+          id="step-cutting"
+          missing={missing === "step-cutting" && !cuttingId}
           title={o.stepCutting}
           required={cutting.some((c) => c.available) ? o.required : undefined}
         >
           <div
-            className="flex snap-x gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 sm:overflow-visible"
+            className="grid grid-cols-2 gap-2 sm:grid-cols-3"
             role="radiogroup"
             aria-label={o.stepCutting}
             data-testid="cutting-list"
@@ -229,7 +266,7 @@ export function OrderBuilder({
                 aria-checked={cuttingId === c.id}
                 disabled={!c.available}
                 onClick={() => setCuttingId(c.id)}
-                className={`${cardClass(cuttingId === c.id, c.available)} w-36 shrink-0 snap-start flex-col items-stretch sm:w-full`}
+                className={`${cardClass(cuttingId === c.id, c.available)} w-full flex-col items-stretch`}
                 data-testid="cutting-choice"
               >
                 {cuttingId === c.id ? <Tick /> : null}
@@ -286,6 +323,8 @@ export function OrderBuilder({
       {packaging.length ? (
         <Step
           n={4}
+          id="step-packaging"
+          missing={missing === "step-packaging" && !packagingId}
           title={o.stepPackaging}
           required={packaging.some((p) => p.available) ? o.required : undefined}
         >

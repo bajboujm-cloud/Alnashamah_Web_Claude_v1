@@ -31,20 +31,47 @@ test("order builder shows Required tags and ticks the chosen cards", async ({ pa
   await expect(builder.getByTestId("tick")).toHaveCount(3);
 });
 
-test("cutting cards scroll sideways on phones without widening the page", async ({ page }, info) => {
+test("cutting choices are boxes, two per row on phones, without widening the page", async ({
+  page,
+}, info) => {
   test.skip(info.project.name !== "phone", "phone layout only");
   await page.goto("/ar/sheep/naeemi");
-  const list = page.getByTestId("cutting-list");
-  const { scroll, client } = await list.evaluate((el) => ({
-    scroll: el.scrollWidth,
-    client: el.clientWidth,
-  }));
-  expect(scroll).toBeGreaterThan(client);
-  // Several cards fit on the screen side by side.
-  const first = await page.getByTestId("cutting-choice").first().boundingBox();
-  expect(first!.width).toBeLessThan(client / 2);
+  const [a, b] = [page.getByTestId("cutting-choice").nth(0), page.getByTestId("cutting-choice").nth(1)];
+  const [boxA, boxB] = [await a.boundingBox(), await b.boundingBox()];
+  expect(Math.abs(boxA!.y - boxB!.y)).toBeLessThan(2);
   const pageWidth = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(pageWidth).toBeLessThanOrEqual(0);
+});
+
+test("breed page shows the name, then straight into the order (no photo or description)", async ({
+  page,
+}) => {
+  await page.goto("/en/sheep/naeemi");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Naeemi");
+  await expect(page.locator("main img")).toHaveCount(0);
+  await expect(page.getByText("The Gulf's favourite breed")).toHaveCount(0);
+  await expect(page.getByTestId("order-builder")).toBeVisible();
+});
+
+test("Livestock button opens the page with all categories", async ({ page }, info) => {
+  await page.goto("/en/sheep/naeemi");
+  if (info.project.name === "phone")
+    await page.getByTestId("bottom-nav").getByRole("link", { name: "Livestock" }).click();
+  else await page.locator("header nav").getByRole("link", { name: "Livestock" }).click();
+  await expect(page).toHaveURL(/\/en\/livestock$/);
+  await expect(page.getByTestId("category-card")).toHaveCount(4);
+});
+
+test("adding without a cutting choice points to the cutting step", async ({ page }) => {
+  await page.goto("/en/sheep/naeemi");
+  const builder = page.getByTestId("order-builder");
+  await builder.getByTestId("option-row").first().click();
+  await builder.getByTestId("add-to-cart").click();
+  await expect(builder.getByTestId("builder-message")).toHaveText("Please choose how to cut it.");
+  await expect(page.locator("#step-cutting")).toHaveAttribute("data-missing", "true");
+  await expect(page.locator("#step-cutting")).toBeInViewport();
+  await builder.getByTestId("cutting-choice").first().click();
+  await expect(page.locator("#step-cutting")).toHaveAttribute("data-missing", "false");
 });
 
 test("a size with an old price shows a discount badge on the breed card", async ({ page }) => {

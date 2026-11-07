@@ -50,7 +50,7 @@ export function BottomNav({
     },
     {
       key: "livestock",
-      href: `/${locale}#categories`,
+      href: `/${locale}/livestock`,
       label: labels.livestock,
       icon: (
         <Icon
@@ -119,7 +119,7 @@ export function BottomNav({
       ? pathname === `/${locale}`
       : i.key === "cart"
         ? pathname.startsWith(`/${locale}/cart`)
-        : false;
+        : i.key === "livestock" && pathname.startsWith(`/${locale}/livestock`);
 
   return (
     <nav

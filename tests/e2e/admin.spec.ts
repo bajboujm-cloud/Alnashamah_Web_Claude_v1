@@ -142,10 +142,11 @@ test("editing a size and uploading a photo updates the website", async () => {
   await expect(first).toContainText("3–5 months");
   await expect(first).toContainText("9–11 kg");
   await expect(first).toContainText("AED 950");
-  await expect(page.locator('main img[alt="Local"]').first()).toHaveAttribute(
-    "src",
-    /files%2Fbreeds|\/files\/breeds/,
-  );
+  // The breed photo shows on its card on the category page.
+  await page.goto("/en/sheep");
+  await expect(
+    page.getByTestId("breed-card").filter({ hasText: "Local" }).locator('img[alt="Local"]'),
+  ).toHaveAttribute("src", /files%2Fbreeds|\/files\/breeds/);
 });
 
 test("a fake image file is refused", async () => {

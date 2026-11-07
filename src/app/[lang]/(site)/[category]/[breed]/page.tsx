@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BreedPhoto } from "@/components/BreedPhoto";
 import { Container } from "@/components/Container";
 import { OrderBuilder } from "@/components/OrderBuilder";
 import { ShareButton } from "@/components/ShareButton";
@@ -82,30 +81,18 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
         </span>
       </nav>
 
-      {/* Photo kept the same size as a breed card on the category page (about 22rem wide). */}
-      <div className="grid items-start gap-10 md:grid-cols-[22rem_1fr]">
-        <div className="w-full max-w-60 border-s-4 border-gold md:max-w-none">
-          <BreedPhoto
-            src={breed.photoUrl}
-            alt={name}
-            placeholderLabel={t.catalog.photoSoon}
-            sizes="(max-width: 768px) 240px, 352px"
-            priority
-          />
-        </div>
+      {/* Breed name, then straight into the order (the photo and description are on the category card). */}
+      <div className="mx-auto max-w-3xl">
         <div className="min-w-0">
-          <p className="label-tracked">{categoryName}</p>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <h1 className="font-display text-3xl text-green sm:text-4xl">{name}</h1>
             {!inStock && <OutOfStockBadge label={t.catalog.outOfStock} />}
             <span className="ms-auto">
               <ShareButton label={t.catalog.share} text={t.catalog.shareText.replace("{name}", name)} />
             </span>
           </div>
-          <div className="mt-4 h-px bg-gold/70" aria-hidden />
-          <p className="mt-4 text-muted">{pick(lang, breed.descriptionEn, breed.descriptionAr)}</p>
 
-          <div className="mt-8">
+          <div className="mt-6">
             <OrderBuilder
               lang={lang}
               t={{ order: t.order, catalog: t.catalog }}
