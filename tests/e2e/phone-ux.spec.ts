@@ -247,14 +247,53 @@ test("Udhiyah: sizes under 6 months (sheep) turn red and can't be added", async 
   await builder.getByTestId("cutting-choice").first().click();
   await builder.getByTestId("packaging-choice").first().click();
   await builder.getByTestId("add-to-cart").click();
-  await expect(builder.getByTestId("builder-message")).toContainText("أصغر من العمر المطلوب");
-  await expect(page.locator("#step-size")).toHaveAttribute("data-missing", "true");
+  // A popup explains and offers one-tap fixes; nothing is added.
+  const dialog = page.getByTestId("age-dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByTestId("age-dialog-message")).toHaveText(SHEEP_RULE);
+  await expect(builder.getByTestId("builder-message")).toHaveCount(0);
+  await dialog.getByTestId("age-dialog-close").click();
+  await expect(dialog).toHaveCount(0);
+  await expect(rows.nth(0)).toHaveAttribute("aria-checked", "true"); // closing changes nothing
 
-  await rows.nth(2).click();
+  await builder.getByTestId("add-to-cart").click();
+  await expect(dialog.getByTestId("age-dialog-pick")).toHaveText("اختيار كبير (6–8 أشهر) – 1,240 د.إ");
+  await dialog.getByTestId("age-dialog-pick").click();
+  await expect(dialog).toHaveCount(0);
+  await expect(rows.nth(2)).toHaveAttribute("aria-checked", "true");
   await expect(rule).toHaveAttribute("data-error", "false");
   await expect(builder.getByTestId("age-rule-occasion")).toHaveCount(0);
   await builder.getByTestId("add-to-cart").click();
   await expect(builder.getByTestId("builder-message")).toContainText("تمت الإضافة");
+});
+
+test("age popup: 'not an Udhiyah or Aqiqah' keeps the size; no old-enough size offers another breed", async ({
+  page,
+}) => {
+  await page.goto("/ar/sheep/naeemi");
+  const builder = page.getByTestId("order-builder");
+  await builder.getByTestId("option-row").first().click();
+  await builder.getByTestId("cutting-choice").first().click();
+  await builder.getByTestId("packaging-choice").first().click();
+  await page.locator("select[name=occasion]").selectOption("aqiqah");
+  await builder.getByTestId("add-to-cart").click();
+  const dialog = page.getByTestId("age-dialog");
+  await dialog.getByTestId("age-dialog-not-sacrifice").click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator("select[name=occasion]")).toHaveValue("none");
+  await expect(builder.getByTestId("option-row").first()).toHaveAttribute("aria-checked", "true");
+  await builder.getByTestId("add-to-cart").click();
+  await expect(builder.getByTestId("builder-message")).toContainText("تمت الإضافة");
+
+  // Local goats are all under 12 months: the popup offers another breed instead.
+  await page.goto("/ar/goats/local?occasion=udhiyah");
+  await builder.getByTestId("option-row").first().click();
+  await builder.getByTestId("cutting-choice").first().click();
+  await builder.getByTestId("packaging-choice").first().click();
+  await builder.getByTestId("add-to-cart").click();
+  await expect(dialog.getByTestId("age-dialog-pick")).toHaveCount(0);
+  await dialog.getByTestId("age-dialog-other-breed").click();
+  await expect(page).toHaveURL(/\/ar\/goats$/);
 });
 
 test("Aqiqah on goats needs 12+ months; normal orders have no age rule", async ({ page }) => {

@@ -467,7 +467,12 @@
     "notAvailable": "غير متاح حالياً",
     "zoomHint": "اضغط 🔍 على أي تقطيع لرؤية صورته بحجم أكبر.",
     "ageRule": "الأضحية أو العقيقة ({category}) يجب أن يكون عمرها {age} فأكثر.",
-    "tooYoungTag": "أصغر من العمر المطلوب"
+    "tooYoungTag": "أصغر من العمر المطلوب",
+    "ageDialogTitle": "العمر غير مناسب",
+    "ageDialogPick": "اختيار {size} ({age}) – {price}",
+    "ageDialogOtherBreed": "اختر سلالة أخرى",
+    "ageDialogNotSacrifice": "ليس أضحية أو عقيقة",
+    "ageDialogNoSize": "لا يوجد حجم من هذه السلالة بالعمر المطلوب حالياً."
   },
   "cart": {
     "title": "سلة المشتريات",

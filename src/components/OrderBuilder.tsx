@@ -46,6 +46,8 @@ type Props = {
   noExtras?: Record<string, string>;
   /** Udhiyah / Aqiqah minimum age for this category, with the message to show (e.g. sheep 6+ months). */
   ageRule?: { minMonths: number; message: string } | null;
+  /** Where "Choose another breed" goes when no size of this breed is old enough. */
+  otherBreedsHref?: string;
 };
 
 const occasions = ["none", "udhiyah", "aqiqah", "sadaqah", "other"] as const;
@@ -171,6 +173,94 @@ function PhotoDialog({
   );
 }
 
+/** Popup when Add to cart is pressed with a size too young for an Udhiyah / Aqiqah, with one-tap fixes. */
+function AgeDialog({
+  title,
+  message,
+  pickLabel,
+  noSizeLabel,
+  otherBreed,
+  notSacrificeLabel,
+  closeLabel,
+  onPick,
+  onNotSacrifice,
+  onClose,
+}: {
+  title: string;
+  message: string;
+  /** Button text for the nearest size that is old enough; null when there is none. */
+  pickLabel: string | null;
+  noSizeLabel: string;
+  otherBreed: { label: string; href: string } | null;
+  notSacrificeLabel: string;
+  closeLabel: string;
+  onPick: () => void;
+  onNotSacrifice: () => void;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    ref.current?.showModal();
+  }, []);
+  return (
+    <dialog
+      ref={ref}
+      onClose={onClose}
+      onClick={(e) => e.target === ref.current && onClose()} // tap outside to close
+      aria-labelledby="age-dialog-title"
+      className="m-auto w-[min(92vw,28rem)] rounded-brand border-t-4 border-danger bg-white p-0 backdrop:bg-charcoal/70"
+      data-testid="age-dialog"
+    >
+      <div className="relative p-5">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={closeLabel}
+          className="absolute end-2 top-2 flex h-11 w-11 items-center justify-center text-xl text-muted hover:text-green"
+          data-testid="age-dialog-close"
+        >
+          ×
+        </button>
+        <h3 id="age-dialog-title" className="font-display pe-10 text-xl text-danger">
+          {title}
+        </h3>
+        <p className="mt-2 text-sm text-charcoal" data-testid="age-dialog-message">
+          {message}
+        </p>
+        {!pickLabel ? <p className="mt-1 text-sm text-muted">{noSizeLabel}</p> : null}
+        <div className="mt-5 grid gap-2">
+          {pickLabel ? (
+            <button
+              type="button"
+              onClick={onPick}
+              className="min-h-11 rounded-brand bg-green px-4 py-2 text-sm font-semibold text-ivory hover:bg-green-700"
+              data-testid="age-dialog-pick"
+            >
+              {pickLabel}
+            </button>
+          ) : otherBreed ? (
+            <Link
+              href={otherBreed.href}
+              className="flex min-h-11 items-center justify-center rounded-brand bg-green px-4 py-2 text-sm font-semibold text-ivory hover:bg-green-700"
+              data-testid="age-dialog-other-breed"
+            >
+              {otherBreed.label}
+            </Link>
+          ) : null}
+          <button
+            type="button"
+            onClick={onNotSacrifice}
+            className="min-h-11 rounded-brand border border-green px-4 py-2 text-sm font-semibold text-green hover:bg-green/5"
+            data-testid="age-dialog-not-sacrifice"
+          >
+            {notSacrificeLabel}
+          </button>
+        </div>
+      </div>
+    </dialog>
+  );
+}
+
 /** Step-by-step order: size → cutting → extras → packaging → quantity & notes, with a live total. */
 export function OrderBuilder({
   lang,
@@ -183,6 +273,7 @@ export function OrderBuilder({
   defaultOccasion = "none",
   noExtras = {},
   ageRule = null,
+  otherBreedsHref,
 }: Props) {
   const o = t.order;
   const [sizeId, setSizeId] = useState<string | null>(null);
@@ -208,6 +299,10 @@ export function OrderBuilder({
   const ageRuleOn = !!ageRule && ageRuleApplies(occasion, ageRule.minMonths);
   const tooYoung = (s: BuilderSize) => !!ageRule && isTooYoung(occasion, ageRule.minMonths, s.ageMin);
   const sizeTooYoung = !!size && tooYoung(size);
+  /** Popup shown when Add to cart is pressed with a size that is too young. */
+  const [ageDialog, setAgeDialog] = useState(false);
+  /** Nearest size (in list order) that is old enough and can be ordered. */
+  const olderSize = sizes.find((s) => s.available && s.priceFils != null && !tooYoung(s)) ?? null;
   /** Message when the chosen occasion can't include head, intestines, tripe … (e.g. Eid sacrifices). */
   const occasionNote = noExtras[occasion] ?? null;
   const unit = useMemo(
@@ -237,7 +332,11 @@ export function OrderBuilder({
 
   function submit() {
     if (!size) return needs("step-size", "chooseSize");
-    if (sizeTooYoung) return needs("step-size", "tooYoung");
+    if (sizeTooYoung) {
+      setResult(null);
+      setAgeDialog(true);
+      return;
+    }
     if (cutting.some((c) => c.available) && !cuttingId) return needs("step-cutting", "chooseCutting");
     if (packaging.some((p) => p.available) && !packagingId) return needs("step-packaging", "choosePackaging");
     setMissing(null);
@@ -606,6 +705,35 @@ export function OrderBuilder({
         </div>
       </Step>
 
+      {ageDialog && ageRule ? (
+        <AgeDialog
+          title={o.ageDialogTitle}
+          message={ageRule.message}
+          pickLabel={
+            olderSize
+              ? o.ageDialogPick
+                  .replace("{size}", olderSize.label)
+                  .replace("{age}", olderSize.age)
+                  .replace("{price}", formatAed(olderSize.priceFils as number, lang))
+              : null
+          }
+          noSizeLabel={o.ageDialogNoSize}
+          otherBreed={otherBreedsHref ? { label: o.ageDialogOtherBreed, href: otherBreedsHref } : null}
+          notSacrificeLabel={o.ageDialogNotSacrifice}
+          closeLabel={o.close}
+          onPick={() => {
+            if (olderSize) setSizeId(olderSize.id);
+            setMissing(null);
+            setAgeDialog(false);
+          }}
+          onNotSacrifice={() => {
+            setOccasion("none");
+            setMissing(null);
+            setAgeDialog(false);
+          }}
+          onClose={() => setAgeDialog(false)}
+        />
+      ) : null}
       {zoom ? (
         <PhotoDialog
           choice={zoom}

@@ -467,7 +467,12 @@
     "notAvailable": "Not available at the moment",
     "zoomHint": "Tap 🔍 on a cut to see its photo larger.",
     "ageRule": "An Udhiyah or Aqiqah ({category}) must be {age} or older.",
-    "tooYoungTag": "Below the required age"
+    "tooYoungTag": "Below the required age",
+    "ageDialogTitle": "Age not suitable",
+    "ageDialogPick": "Choose {size} ({age}) – {price}",
+    "ageDialogOtherBreed": "Choose another breed",
+    "ageDialogNotSacrifice": "It's not an Udhiyah or Aqiqah",
+    "ageDialogNoSize": "No size of this breed is old enough at the moment."
   },
   "cart": {
     "title": "Your cart",

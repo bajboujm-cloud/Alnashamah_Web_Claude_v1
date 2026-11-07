@@ -117,6 +117,7 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
               lang={lang}
               t={{ order: t.order, catalog: t.catalog }}
               inStock={inStock}
+              otherBreedsHref={`/${lang}/${category.slug}`}
               ageRule={
                 category.sacrificeMinAgeMonths
                   ? {
