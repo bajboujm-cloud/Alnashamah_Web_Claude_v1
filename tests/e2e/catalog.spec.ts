@@ -1,10 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { setBreedAvailable, setOptionAvailable, sql } from "./db";
+import { setBreedAvailable, setOptionAvailable } from "./db";
 
 test.afterAll(async () => {
   await setBreedAvailable("sheep", "herri", true);
   await setOptionAvailable("sheep", "naeemi", 2, true);
-  await sql.end();
 });
 
 test("root sends Arabic browsers to /ar and English browsers to /en", async ({ browser }) => {

@@ -19,6 +19,27 @@ export function fromPriceFils(breed: BreedLike): number | null {
   return prices.length ? Math.min(...prices) : null;
 }
 
+/**
+ * The "from" offer shown on breed cards: the cheapest orderable size, with its old (crossed-out) price
+ * when one is set and higher. Null when no orderable size has a price.
+ */
+export function fromOffer(
+  breed: BreedLike<OptionLike & { compareAtPriceFils?: number | null }>,
+): { priceFils: number; compareAtFils: number | null } | null {
+  const offers = breed.options
+    .filter((o) => isOptionAvailable(breed, o) && o.priceFils != null)
+    .sort((a, b) => (a.priceFils as number) - (b.priceFils as number));
+  const best = offers[0];
+  if (!best) return null;
+  const price = best.priceFils as number;
+  const old = best.compareAtPriceFils ?? null;
+  return { priceFils: price, compareAtFils: old != null && old > price ? old : null };
+}
+
+/** Whole-number discount percentage, e.g. 1,143 → 1,029 = 10. */
+export const discountPercent = (priceFils: number, compareAtFils: number) =>
+  Math.round(((compareAtFils - priceFils) / compareAtFils) * 100);
+
 /** A seasonal collection is visible when switched on and today is inside its optional window. */
 export function isSeasonVisible(
   c: { isActive: boolean; startsAt: Date | null; endsAt: Date | null },

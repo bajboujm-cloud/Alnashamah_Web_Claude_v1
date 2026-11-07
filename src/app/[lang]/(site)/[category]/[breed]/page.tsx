@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { BreedPhoto } from "@/components/BreedPhoto";
 import { Container } from "@/components/Container";
 import { OrderBuilder } from "@/components/OrderBuilder";
+import { ShareButton } from "@/components/ShareButton";
 import { OutOfStockBadge } from "@/components/StockBadge";
 import { hasLocale, pick } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -92,11 +93,14 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
             priority
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="label-tracked">{categoryName}</p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <h1 className="font-display text-3xl text-green sm:text-4xl">{name}</h1>
             {!inStock && <OutOfStockBadge label={t.catalog.outOfStock} />}
+            <span className="ms-auto">
+              <ShareButton label={t.catalog.share} text={t.catalog.shareText.replace("{name}", name)} />
+            </span>
           </div>
           <div className="mt-4 h-px bg-gold/70" aria-hidden />
           <p className="mt-4 text-muted">{pick(lang, breed.descriptionEn, breed.descriptionAr)}</p>

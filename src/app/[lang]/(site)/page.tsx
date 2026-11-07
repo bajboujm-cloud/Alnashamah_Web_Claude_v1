@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BreedCard } from "@/components/BreedCard";
 import { CategoryCard } from "@/components/CategoryCard";
+import { CategoryStrip } from "@/components/CategoryStrip";
 import { Container } from "@/components/Container";
 import { SectionHeading } from "@/components/SectionHeading";
 import { hasLocale, pick } from "@/i18n/config";
@@ -36,6 +37,12 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
 
   return (
     <>
+      <CategoryStrip
+        locale={lang}
+        categories={categories}
+        soonLabel={t.catalog.comingSoon}
+        label={t.home.categoriesLabel}
+      />
       <PromoSlider
         rtl={lang === "ar"}
         labels={{

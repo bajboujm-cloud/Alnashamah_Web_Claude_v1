@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -33,6 +34,21 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[la
       </main>
       <Footer locale={lang} t={t} whatsapp={brand.whatsapp} logo={brand.logoReverse} />
       {brand.whatsapp ? <WhatsAppButton number={brand.whatsapp} label={t.footer.contact} /> : null}
+      {/* Space so the phone menu bar never covers the end of the page. */}
+      <div className="h-16 md:hidden" aria-hidden />
+      <BottomNav
+        locale={lang}
+        cartCount={cartCount}
+        labels={{
+          menu: t.nav.mainMenu,
+          home: t.nav.home,
+          livestock: t.nav.categories,
+          cart: t.nav.cart,
+          orders: t.nav.orders,
+          account: t.nav.account,
+          soon: t.nav.soon,
+        }}
+      />
     </>
   );
 }

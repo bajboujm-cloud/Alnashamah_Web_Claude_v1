@@ -41,7 +41,18 @@ type Props = {
 
 const occasions = ["none", "udhiyah", "aqiqah", "sadaqah", "other"] as const;
 
-function Step({ n, title, children }: { n: number; title: string; children: ReactNode }) {
+function Step({
+  n,
+  title,
+  required,
+  children,
+}: {
+  n: number;
+  title: string;
+  /** Label of the "Required" tag, shown when this step must be completed. */
+  required?: string;
+  children: ReactNode;
+}) {
   return (
     <section className="border-t border-line pt-5">
       <h3 className="font-display mb-3 flex items-center gap-2 text-lg text-green">
@@ -49,11 +60,30 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
           {n}
         </span>
         {title}
+        {required ? (
+          <span
+            className="rounded-brand border border-danger/40 px-1.5 py-0.5 font-sans text-[11px] font-semibold text-danger"
+            data-testid="required-tag"
+          >
+            {required}
+          </span>
+        ) : null}
       </h3>
       {children}
     </section>
   );
 }
+
+/** Round ✓ in the corner of the chosen card. */
+const Tick = () => (
+  <span
+    className="absolute end-1.5 top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-green text-[11px] text-ivory"
+    aria-hidden
+    data-testid="tick"
+  >
+    ✓
+  </span>
+);
 
 /** Step-by-step order: size → cutting → extras → packaging → quantity & notes, with a live total. */
 export function OrderBuilder({
@@ -116,7 +146,7 @@ export function OrderBuilder({
   }
 
   const cardClass = (selected: boolean, available: boolean) =>
-    `relative flex w-full items-center gap-3 border p-3 text-start transition-colors ${
+    `relative flex items-center gap-3 border p-3 pe-8 text-start transition-colors ${
       !available
         ? "cursor-not-allowed border-line bg-ivory/60 text-muted"
         : selected
@@ -125,11 +155,11 @@ export function OrderBuilder({
     }`;
 
   return (
-    <div className="space-y-6" data-testid="order-builder">
+    <div className="min-w-0 space-y-6" data-testid="order-builder">
       <h2 className="font-display text-2xl text-green">{o.title}</h2>
       {!inStock ? <p className="text-sm font-semibold text-danger">{o.outOfStockNote}</p> : null}
 
-      <Step n={1} title={o.stepSize}>
+      <Step n={1} title={o.stepSize} required={o.required}>
         <div className="grid gap-2" role="radiogroup" aria-label={o.stepSize}>
           {sizes.map((s) => {
             const can = s.available && s.priceFils != null;
@@ -141,10 +171,11 @@ export function OrderBuilder({
                 aria-checked={sizeId === s.id}
                 disabled={!can}
                 onClick={() => setSizeId(s.id)}
-                className={cardClass(sizeId === s.id, can)}
+                className={`${cardClass(sizeId === s.id, can)} w-full`}
                 data-testid="option-row"
                 data-available={s.available}
               >
+                {sizeId === s.id ? <Tick /> : null}
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-2 font-semibold text-green">
                     {s.label}
@@ -179,8 +210,17 @@ export function OrderBuilder({
       </Step>
 
       {cutting.length ? (
-        <Step n={2} title={o.stepCutting}>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" role="radiogroup" aria-label={o.stepCutting}>
+        <Step
+          n={2}
+          title={o.stepCutting}
+          required={cutting.some((c) => c.available) ? o.required : undefined}
+        >
+          <div
+            className="flex snap-x gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 sm:overflow-visible"
+            role="radiogroup"
+            aria-label={o.stepCutting}
+            data-testid="cutting-list"
+          >
             {cutting.map((c) => (
               <button
                 key={c.id}
@@ -189,9 +229,10 @@ export function OrderBuilder({
                 aria-checked={cuttingId === c.id}
                 disabled={!c.available}
                 onClick={() => setCuttingId(c.id)}
-                className={`${cardClass(cuttingId === c.id, c.available)} flex-col items-stretch`}
+                className={`${cardClass(cuttingId === c.id, c.available)} w-36 shrink-0 snap-start flex-col items-stretch sm:w-full`}
                 data-testid="cutting-choice"
               >
+                {cuttingId === c.id ? <Tick /> : null}
                 {c.photoUrl ? (
                   <span className="relative block aspect-[4/3] w-full overflow-hidden bg-ivory-200">
                     <Image
@@ -243,7 +284,11 @@ export function OrderBuilder({
       ) : null}
 
       {packaging.length ? (
-        <Step n={4} title={o.stepPackaging}>
+        <Step
+          n={4}
+          title={o.stepPackaging}
+          required={packaging.some((p) => p.available) ? o.required : undefined}
+        >
           <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={o.stepPackaging}>
             {packaging.map((p) => (
               <button
@@ -253,9 +298,10 @@ export function OrderBuilder({
                 aria-checked={packagingId === p.id}
                 disabled={!p.available}
                 onClick={() => setPackagingId(p.id)}
-                className={`${cardClass(packagingId === p.id, p.available)} flex-col items-stretch`}
+                className={`${cardClass(packagingId === p.id, p.available)} w-full flex-col items-stretch`}
                 data-testid="packaging-choice"
               >
+                {packagingId === p.id ? <Tick /> : null}
                 {p.photoUrl ? (
                   <span className="relative block aspect-[4/3] w-full overflow-hidden bg-ivory-200">
                     <Image
@@ -344,7 +390,7 @@ export function OrderBuilder({
       </Step>
 
       {/* Sticky total + add button (stays visible while choosing on phones). */}
-      <div className="sticky bottom-0 z-20 -mx-4 border-t-2 border-gold bg-green px-4 py-3 text-ivory sm:mx-0">
+      <div className="sticky bottom-16 z-20 -mx-4 border-t-2 border-gold bg-green px-4 py-3 text-ivory sm:mx-0 md:bottom-0">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs text-ivory/75">{o.total}</p>

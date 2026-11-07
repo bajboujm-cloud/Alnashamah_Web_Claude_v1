@@ -14,7 +14,11 @@
     "switchLanguageLabel": "التبديل إلى العربية",
     "menu": "Menu",
     "skipToContent": "Skip to content",
-    "cart": "Cart"
+    "cart": "Cart",
+    "orders": "My orders",
+    "account": "Account",
+    "soon": "Soon",
+    "mainMenu": "Main menu"
   },
   "home": {
     "heroEyebrow": "Livestock Trading · UAE",
@@ -116,7 +120,11 @@
     "free": "Free",
     "noBreeds": "No breeds available yet.",
     "back": "Back",
-    "eligibleBreeds": "Eligible breeds"
+    "eligibleBreeds": "Eligible breeds",
+    "discount": "{n}% off",
+    "share": "Share",
+    "shareText": "Have a look at {name} from Al Nashamah",
+    "copied": "Link copied"
   },
   "footer": {
     "about": "A trusted, modern identity for livestock trading in the UAE.",
@@ -436,7 +444,8 @@
       "choiceUnavailable": "One of your choices is no longer available. Please choose again.",
       "tooMany": "Your cart is full (20 items).",
       "invalid": "Something went wrong. Please try again."
-    }
+    },
+    "required": "Required"
   },
   "cart": {
     "title": "Your cart",

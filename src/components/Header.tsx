@@ -47,7 +47,7 @@ export function Header({
           <Link
             href={`/${locale}/cart`}
             aria-label={`${t.nav.cart}${cartCount ? ` (${cartCount})` : ""}`}
-            className="relative flex h-11 w-11 items-center justify-center rounded-brand border border-line text-green hover:border-gold"
+            className="relative hidden h-11 w-11 items-center justify-center rounded-brand border border-line text-green hover:border-gold md:flex"
             data-testid="header-cart"
           >
             <svg
