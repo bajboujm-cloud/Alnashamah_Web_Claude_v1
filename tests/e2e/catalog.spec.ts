@@ -6,18 +6,24 @@ test.afterAll(async () => {
   await setOptionAvailable("sheep", "naeemi", 2, true);
 });
 
-test("root sends Arabic browsers to /ar and English browsers to /en", async ({ browser }) => {
-  const ar = await browser.newContext({ locale: "ar-AE" });
-  const arPage = await ar.newPage();
-  await arPage.goto("/");
-  await expect(arPage).toHaveURL(/\/ar$/);
-  await ar.close();
+test("alnashamah.ae opens in Arabic for everyone, unless the visitor chose English", async ({ browser }) => {
+  for (const locale of ["ar-AE", "en-US"]) {
+    const ctx = await browser.newContext({ locale });
+    const page = await ctx.newPage();
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/ar$/);
+    await page.goto("/sheep");
+    await expect(page).toHaveURL(/\/ar\/sheep$/);
+    await ctx.close();
+  }
 
-  const en = await browser.newContext({ locale: "en-US" });
-  const enPage = await en.newPage();
-  await enPage.goto("/");
-  await expect(enPage).toHaveURL(/\/en$/);
-  await en.close();
+  // Someone who switched to English keeps English next time.
+  const ctx = await browser.newContext({ locale: "ar-AE" });
+  await ctx.addCookies([{ name: "NEXT_LOCALE", value: "en", url: "http://localhost:3000" }]);
+  const page = await ctx.newPage();
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/en$/);
+  await ctx.close();
 });
 
 test("Arabic home is right-to-left with all four categories", async ({ page }) => {
