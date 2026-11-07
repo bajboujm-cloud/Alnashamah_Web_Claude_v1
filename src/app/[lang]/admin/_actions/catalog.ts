@@ -4,7 +4,7 @@ import { asc, count, eq, max } from "drizzle-orm";
 import { refresh } from "next/cache";
 import type { FormState } from "@/components/admin/form-state";
 import { audit } from "@/server/audit";
-import { aedToFils, flag, isSlug, isUuid, RESERVED_SLUGS, text, upload } from "@/server/admin-forms";
+import { aedToFils, flag, isSlug, isUuid, optInt, RESERVED_SLUGS, text, upload } from "@/server/admin-forms";
 import { can } from "@/server/auth/permissions";
 import { authorize, NotAllowedError } from "@/server/auth/staff";
 import { db, schema as s } from "@/server/db";
@@ -46,7 +46,10 @@ export async function saveCategory(_prev: FormState, data: FormData): Promise<Fo
     const v = names(data);
     const slug = text(data, "slug", 60);
     const status = text(data, "status") as "active" | "coming_soon" | "hidden";
+    const minAge = optInt(data, "sacrificeMinAgeMonths", 0, 120);
     const bad = [...(!v.nameEn ? ["nameEn"] : []), ...(!v.nameAr ? ["nameAr"] : [])];
+    if (full && minAge === "invalid") bad.push("sacrificeMinAgeMonths");
+    const sacrificeMinAgeMonths = minAge === "invalid" ? null : minAge;
     if (full && !isSlug(slug)) bad.push("slug");
     if (bad.length) return fail("invalid", bad);
     if (full && RESERVED_SLUGS.has(slug)) return fail("slugReserved", ["slug"]);
@@ -69,6 +72,7 @@ export async function saveCategory(_prev: FormState, data: FormData): Promise<Fo
           ...v,
           slug,
           status,
+          sacrificeMinAgeMonths,
           sortOrder: (next ?? 0) + 1,
           illustrationUrl: image?.ok ? image.url : null,
         })
@@ -85,7 +89,7 @@ export async function saveCategory(_prev: FormState, data: FormData): Promise<Fo
       : flag(data, "removeIllustration")
         ? null
         : before.illustrationUrl;
-    const update = { ...v, illustrationUrl, ...(full ? { slug, status } : {}) };
+    const update = { ...v, illustrationUrl, ...(full ? { slug, status, sacrificeMinAgeMonths } : {}) };
     await db.update(s.categories).set(update).where(eq(s.categories.id, id));
     if (illustrationUrl !== before.illustrationUrl) await deleteStoredFile(before.illustrationUrl);
     await audit(user, "update", "category", id, before, update);
@@ -163,6 +167,13 @@ export async function saveSeasonal(_prev: FormState, data: FormData): Promise<Fo
           isActive: flag(data, "isActive"),
           startsAt: startsAt as Date | null,
           endsAt: endsAt as Date | null,
+          occasion:
+            (["none", "udhiyah", "aqiqah", "sadaqah", "other"] as const).find(
+              (o) => o === text(data, "occasion"),
+            ) ?? "none",
+          noExtras: flag(data, "noExtras"),
+          noExtrasNoteEn: text(data, "noExtrasNoteEn", 300),
+          noExtrasNoteAr: text(data, "noExtrasNoteAr", 300),
         }
       : {};
 
@@ -215,6 +226,15 @@ export async function setSeasonalVisible(id: string, visible: boolean) {
   refresh();
 }
 
+/** One-tap: whether orders for this offer's occasion may include head, intestines, tripe … */
+export async function setSeasonalExtrasAllowed(id: string, allowed: boolean) {
+  const user = await authorize("catalog.prices");
+  if (!isUuid(id)) return;
+  await db.update(s.seasonalCollections).set({ noExtras: !allowed }).where(eq(s.seasonalCollections.id, id));
+  await audit(user, allowed ? "extras-allowed" : "extras-not-included", "seasonal", id);
+  refresh();
+}
+
 export async function deleteSeasonal(_prev: FormState, data: FormData): Promise<FormState> {
   return guarded(async () => {
     const user = await authorize("catalog.prices");
@@ -263,7 +283,12 @@ export async function saveSimple(_prev: FormState, data: FormData): Promise<Form
     if (full && (priceFils === "invalid" || priceFils === null)) bad.push("priceAed");
     if (bad.length) return fail("invalid", bad);
 
-    const content: Record<string, unknown> = { nameEn, nameAr };
+    const content: Record<string, unknown> = {
+      nameEn,
+      nameAr,
+      unavailableNoteEn: text(data, "unavailableNoteEn", 200),
+      unavailableNoteAr: text(data, "unavailableNoteAr", 200),
+    };
     if (kind !== "extras") {
       content.descriptionEn = text(data, "descriptionEn");
       content.descriptionAr = text(data, "descriptionAr");
@@ -390,4 +415,55 @@ export async function saveSettings(_prev: FormState, data: FormData): Promise<Fo
     refresh();
     return ok();
   });
+}
+
+/* ------------------------------------ ordering ------------------------------------ */
+
+const orderTables = {
+  category: s.categories,
+  breed: s.breeds,
+  cutting: s.cuttingOptions,
+  extras: s.extras,
+  packaging: s.packagingOptions,
+} as const;
+type OrderKind = keyof typeof orderTables;
+
+/** Moves an item one place up or down (breeds move within their own category). */
+export async function moveItem(data: FormData) {
+  const user = await authorize("catalog.prices");
+  const kind = text(data, "kind") as OrderKind;
+  const id = text(data, "id");
+  const dir = text(data, "dir") === "up" ? -1 : 1;
+  if (!(kind in orderTables) || !isUuid(id)) return;
+
+  let rows: { id: string }[];
+  if (kind === "breed") {
+    const [me] = await db
+      .select({ categoryId: s.breeds.categoryId })
+      .from(s.breeds)
+      .where(eq(s.breeds.id, id));
+    if (!me) return;
+    rows = await db
+      .select({ id: s.breeds.id })
+      .from(s.breeds)
+      .where(eq(s.breeds.categoryId, me.categoryId))
+      .orderBy(asc(s.breeds.sortOrder), asc(s.breeds.createdAt));
+  } else {
+    const table = orderTables[kind];
+    rows = await db.select({ id: table.id }).from(table).orderBy(asc(table.sortOrder), asc(table.createdAt));
+  }
+  const i = rows.findIndex((r) => r.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= rows.length) return;
+  [rows[i], rows[j]] = [rows[j], rows[i]];
+  const table = orderTables[kind];
+  await db.transaction(async (tx) => {
+    for (const [index, r] of rows.entries())
+      await tx
+        .update(table)
+        .set({ sortOrder: index + 1 } as never)
+        .where(eq(table.id, r.id));
+  });
+  await audit(user, dir < 0 ? "move-up" : "move-down", kind, id);
+  refresh();
 }

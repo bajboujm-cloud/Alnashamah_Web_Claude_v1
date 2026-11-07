@@ -32,6 +32,7 @@ test.afterAll(async () => {
     and category_id = (select id from categories where slug = 'sheep')`;
   await sql`update categories set status = 'coming_soon' where slug in ('cattle', 'camels')`;
   await sql`update seasonal_collections set is_active = true where slug = 'eid-al-adha'`;
+  await sql`update seasonal_collections set no_extras = true where slug = 'eid-al-adha'`;
   await sql`delete from site_texts`;
   await sql`update breeds set is_visible = true`;
   await sql`delete from promotions`;
@@ -142,10 +143,11 @@ test("editing a size and uploading a photo updates the website", async () => {
   await expect(first).toContainText("3–5 months");
   await expect(first).toContainText("9–11 kg");
   await expect(first).toContainText("AED 950");
-  await expect(page.locator('main img[alt="Local"]').first()).toHaveAttribute(
-    "src",
-    /files%2Fbreeds|\/files\/breeds/,
-  );
+  // The breed photo shows on its card on the category page.
+  await page.goto("/en/sheep");
+  await expect(
+    page.getByTestId("breed-card").filter({ hasText: "Local" }).locator('img[alt="Local"]'),
+  ).toHaveAttribute("src", /files%2Fbreeds|\/files\/breeds/);
 });
 
 test("a fake image file is refused", async () => {
@@ -196,6 +198,7 @@ test("one-tap hide for a category and for the Eid offer", async () => {
 
   await page.goto("/en");
   await expect(page.getByTestId("category-card")).toHaveCount(3);
+  await expect(page.getByTestId("season-tile")).toHaveCount(0);
   await expect(page.getByText("Eid Al-Adha Sacrifice / Qurban")).toHaveCount(0);
   await expect(page.locator('header a[href="/en/seasonal/eid-al-adha"]')).toHaveCount(0);
   expect((await page.goto("/en/seasonal/eid-al-adha"))?.status()).toBe(404);
@@ -213,6 +216,26 @@ test("one-tap hide for a category and for the Eid offer", async () => {
   await page.goto("/en");
   await expect(page.getByTestId("category-card")).toHaveCount(4);
   await expect(page.locator('header a[href="/en/seasonal/eid-al-adha"]').first()).toBeAttached();
+});
+
+test("the Eid 'no head/intestines/tripe' rule can be switched off and on", async () => {
+  await page.goto("/en/admin/seasonal");
+  const eid = page.getByTestId("admin-seasonal").first();
+  const sw = eid.getByTestId("no-extras-switch");
+  await expect(sw).toHaveAttribute("aria-checked", "false"); // extras blocked for Eid
+  await sw.click();
+  await expect(sw).toHaveAttribute("aria-checked", "true");
+  await expect(sw).not.toHaveAttribute("data-pending");
+  await page.goto("/en/sheep/naeemi?occasion=udhiyah");
+  const builder = page.getByTestId("order-builder");
+  for (const box of await builder.getByTestId("extra-choice").all()) await expect(box).toBeEnabled();
+
+  await page.goto("/en/admin/seasonal");
+  await sw.click();
+  await expect(sw).toHaveAttribute("aria-checked", "false");
+  await expect(sw).not.toHaveAttribute("data-pending");
+  await page.goto("/en/sheep/naeemi?occasion=udhiyah");
+  for (const box of await builder.getByTestId("extra-choice").all()) await expect(box).toBeDisabled();
 });
 
 test("website wording can be edited and reset", async () => {
@@ -315,4 +338,59 @@ test("promotions slide on the home page and can be switched off", async () => {
   await expect(sw).not.toHaveAttribute("data-pending");
   await page.goto("/en");
   await expect(page.getByTestId("promo-slider")).toHaveCount(0);
+});
+
+test("categories, breeds, cuts, order includes and packaging can be moved up and down", async () => {
+  // Breed: Najdi above Naeemi
+  await page.goto("/en/admin/breeds");
+  await page.locator('[data-testid=admin-breed][data-slug="sheep/najdi"]').getByTestId("move-up").click();
+  await expect(page.locator("[data-testid=admin-breed]").first()).toHaveAttribute("data-slug", "sheep/najdi");
+  await page.goto("/en/sheep");
+  await expect(page.getByTestId("breed-card").first()).toContainText("Najdi");
+  await page.goto("/en/admin/breeds");
+  await page.locator('[data-testid=admin-breed][data-slug="sheep/najdi"]').getByTestId("move-down").click();
+  await expect(page.locator("[data-testid=admin-breed]").first()).toHaveAttribute(
+    "data-slug",
+    "sheep/naeemi",
+  );
+
+  // Category: Goats above Sheep
+  await page.goto("/en/admin/categories");
+  await page.locator('[data-testid=admin-category][data-slug="goats"]').getByTestId("move-up").click();
+  await expect(page.locator("[data-testid=admin-category]").first()).toHaveAttribute("data-slug", "goats");
+  await page.goto("/en");
+  await expect(page.getByTestId("category-card").first()).toContainText("Goats");
+  await page.goto("/en/admin/categories");
+  await page.locator('[data-testid=admin-category][data-slug="goats"]').getByTestId("move-down").click();
+  await expect(page.locator("[data-testid=admin-category]").first()).toHaveAttribute("data-slug", "sheep");
+
+  // Packaging: Carton first
+  await page.goto("/en/admin/packaging");
+  await page.getByTestId("simple-item").filter({ hasText: "Carton box" }).getByTestId("move-up").click();
+  await expect(page.getByTestId("simple-item").first()).toContainText("Carton box");
+  await page.goto("/en/sheep/naeemi");
+  await expect(page.getByTestId("packaging-choice").first()).toContainText("Carton box");
+  await page.goto("/en/admin/packaging");
+  await page.getByTestId("simple-item").filter({ hasText: "Carton box" }).getByTestId("move-down").click();
+  await expect(page.getByTestId("simple-item").first()).toContainText("Slaughterhouse bag");
+
+  // The first item can't move up, the last can't move down.
+  await page.goto("/en/admin/extras");
+  await expect(page.getByTestId("simple-item").first().getByTestId("move-up")).toBeDisabled();
+  await expect(page.getByTestId("simple-item").last().getByTestId("move-down")).toBeDisabled();
+});
+
+test("admin lists fit the phone screen (nothing cut off at the sides)", async ({}, info) => {
+  test.skip(info.project.name !== "phone", "phone layout only");
+  for (const path of ["breeds", "categories", "cutting", "extras", "packaging"]) {
+    await page.goto(`/en/admin/${path}`);
+    const overflow = await page.evaluate(() => {
+      const width = document.documentElement.clientWidth;
+      return [...document.querySelectorAll("main *")].filter((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && (r.left < -1 || r.right > width + 1);
+      }).length;
+    });
+    expect(overflow, path).toBe(0);
+  }
 });

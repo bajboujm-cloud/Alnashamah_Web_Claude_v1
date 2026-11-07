@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { fromPriceFils, isBreedInStock, isOptionAvailable, isSeasonVisible } from "@/lib/availability";
+import {
+  discountPercent,
+  fromOffer,
+  fromPriceFils,
+  isBreedInStock,
+  isOptionAvailable,
+  isSeasonVisible,
+} from "@/lib/availability";
 
 const opt = (isAvailable: boolean, priceFils: number | null) => ({ isAvailable, priceFils });
 
@@ -34,5 +41,28 @@ describe("seasonal visibility", () => {
     expect(isSeasonVisible({ isActive: true, startsAt: null, endsAt: new Date("2027-05-09") }, now)).toBe(
       false,
     );
+  });
+});
+
+describe("discount on cards", () => {
+  const o = (priceFils: number | null, compareAtPriceFils: number | null, isAvailable = true) => ({
+    priceFils,
+    compareAtPriceFils,
+    isAvailable,
+  });
+  it("uses the cheapest orderable size and keeps its old price only when higher", () => {
+    expect(fromOffer({ isAvailable: true, options: [o(120000, null), o(102900, 114300)] })).toEqual({
+      priceFils: 102900,
+      compareAtFils: 114300,
+    });
+    expect(fromOffer({ isAvailable: true, options: [o(100000, 90000)] })).toEqual({
+      priceFils: 100000,
+      compareAtFils: null,
+    });
+    expect(fromOffer({ isAvailable: true, options: [o(50000, 90000, false), o(null, null)] })).toBeNull();
+  });
+  it("rounds the percentage", () => {
+    expect(discountPercent(102900, 114300)).toBe(10);
+    expect(discountPercent(75000, 100000)).toBe(25);
   });
 });

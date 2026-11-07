@@ -41,7 +41,7 @@ pnpm e2e                  # browser tests (tests/e2e), desktop + phone, needs th
 
 ## Project map
 
-- `src/app/[lang]/…` — pages; every page is under `/ar` or `/en`. `src/proxy.ts` redirects bare URLs.
+- `src/app/[lang]/…` — pages; every page is under `/ar` or `/en`. `src/proxy.ts` redirects bare URLs to Arabic (English only if the visitor chose it).
 - `src/i18n/` — locales and dictionaries (`ar.json` and `en.json` must have identical keys — a unit test enforces it).
   Owners can override any public text in the admin ("Website text" → `site_texts` table); `getDictionary()`
   applies those edits on top of the JSON files, so always read texts through it.

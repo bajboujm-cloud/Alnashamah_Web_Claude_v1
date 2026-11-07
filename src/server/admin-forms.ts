@@ -36,6 +36,7 @@ export function aedToFils(data: FormData, name: string): number | null | "invali
 export const RESERVED_SLUGS = new Set([
   "admin",
   "seasonal",
+  "livestock",
   "files",
   "api",
   "cart",

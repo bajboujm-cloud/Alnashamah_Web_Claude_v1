@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BreedPhoto } from "@/components/BreedPhoto";
 import { Container } from "@/components/Container";
 import { OrderBuilder } from "@/components/OrderBuilder";
+import { ShareButton } from "@/components/ShareButton";
+import { Switcher } from "@/components/Switcher";
 import { OutOfStockBadge } from "@/components/StockBadge";
 import { hasLocale, pick } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -11,6 +12,8 @@ import { isBreedInStock, isOptionAvailable } from "@/lib/availability";
 import { formatAge, formatWeight } from "@/lib/format";
 import { alternates, siteUrl } from "@/lib/site";
 import { getOrderChoices } from "@/server/cart";
+import { schema } from "@/server/db";
+import { noExtrasOccasions } from "@/server/occasion-rules";
 import { getBreed } from "@/server/catalog";
 
 export async function generateMetadata({
@@ -35,6 +38,9 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
   if (!found) notFound();
   const choices = await getOrderChoices(found.category.id);
   const { occasion } = await searchParams;
+  // ?occasion=udhiyah (from the Eid page) pre-selects the occasion in the order form
+  const occasionParam = schema.occasions.find((o) => o !== "none" && o === occasion);
+  const noExtraRules = await noExtrasOccasions();
   const { breed, category } = found;
   const name = pick(lang, breed.nameEn, breed.nameAr);
   const categoryName = pick(lang, category.nameEn, category.nameAr);
@@ -81,42 +87,67 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
         </span>
       </nav>
 
-      {/* Photo kept the same size as a breed card on the category page (about 22rem wide). */}
-      <div className="grid items-start gap-10 md:grid-cols-[22rem_1fr]">
-        <div className="w-full max-w-60 border-s-4 border-gold md:max-w-none">
-          <BreedPhoto
-            src={breed.photoUrl}
-            alt={name}
-            placeholderLabel={t.catalog.photoSoon}
-            sizes="(max-width: 768px) 240px, 352px"
-            priority
-          />
-        </div>
-        <div>
-          <p className="label-tracked">{categoryName}</p>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
+      <div className="mx-auto max-w-3xl">
+        <Switcher
+          label={t.catalog.switchBreed}
+          items={category.breeds.map((b) => ({
+            key: b.id,
+            href: `/${lang}/${category.slug}/${b.slug}${occasionParam ? `?occasion=${occasionParam}` : ""}`,
+            label: pick(lang, b.nameEn, b.nameAr),
+            image: b.photoUrl,
+            active: b.id === breed.id,
+            dim: !isBreedInStock(b),
+          }))}
+        />
+      </div>
+
+      {/* Breed name, then straight into the order (the photo and description are on the category card). */}
+      <div className="mx-auto max-w-3xl">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-3">
             <h1 className="font-display text-3xl text-green sm:text-4xl">{name}</h1>
             {!inStock && <OutOfStockBadge label={t.catalog.outOfStock} />}
+            <span className="ms-auto">
+              <ShareButton label={t.catalog.share} text={t.catalog.shareText.replace("{name}", name)} />
+            </span>
           </div>
-          <div className="mt-4 h-px bg-gold/70" aria-hidden />
-          <p className="mt-4 text-muted">{pick(lang, breed.descriptionEn, breed.descriptionAr)}</p>
 
-          <div className="mt-8">
+          <div className="mt-6">
             <OrderBuilder
               lang={lang}
               t={{ order: t.order, catalog: t.catalog }}
               inStock={inStock}
-              defaultOccasion={occasion === "udhiyah" ? "udhiyah" : "none"}
+              otherBreedsHref={`/${lang}/${category.slug}`}
+              ageRule={
+                category.sacrificeMinAgeMonths
+                  ? {
+                      minMonths: category.sacrificeMinAgeMonths,
+                      message: t.order.ageRule
+                        .replace("{category}", categoryName)
+                        .replace(
+                          "{age}",
+                          formatAge(category.sacrificeMinAgeMonths, category.sacrificeMinAgeMonths, lang) ??
+                            "",
+                        ),
+                    }
+                  : null
+              }
+              defaultOccasion={occasionParam ?? "none"}
+              noExtras={Object.fromEntries(
+                noExtraRules.map((r) => [r.occasion, pick(lang, r.noteEn, r.noteAr) || t.order.notAvailable]),
+              )}
               sizes={breed.options.map((o) => ({
                 id: o.id,
                 label: pick(lang, o.labelEn, o.labelAr) ?? "",
                 age: formatAge(o.ageMinMonths, o.ageMaxMonths, lang) ?? t.catalog.tbc,
                 weight: formatWeight(o.weightMinKg, o.weightMaxKg, lang) ?? t.catalog.tbc,
                 priceFils: o.priceFils,
+                ageMin: o.ageMinMonths,
                 compareAtFils: o.compareAtPriceFils,
                 available: isOptionAvailable(breed, o),
               }))}
               cutting={choices.cutting.map((c) => ({
+                unavailableNote: pick(lang, c.unavailableNoteEn, c.unavailableNoteAr),
                 id: c.id,
                 name: pick(lang, c.nameEn, c.nameAr),
                 photoUrl: c.photoUrl,
@@ -124,6 +155,7 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
                 available: c.isAvailable,
               }))}
               extras={choices.extras.map((e) => ({
+                unavailableNote: pick(lang, e.unavailableNoteEn, e.unavailableNoteAr),
                 id: e.id,
                 name: pick(lang, e.nameEn, e.nameAr),
                 priceFils: e.priceFils,
@@ -131,6 +163,7 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
                 selectedByDefault: e.selectedByDefault,
               }))}
               packaging={choices.packaging.map((p) => ({
+                unavailableNote: pick(lang, p.unavailableNoteEn, p.unavailableNoteAr),
                 id: p.id,
                 name: pick(lang, p.nameEn, p.nameAr),
                 photoUrl: p.photoUrl,

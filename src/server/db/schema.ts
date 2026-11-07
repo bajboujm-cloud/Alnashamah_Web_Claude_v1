@@ -42,6 +42,8 @@ export const categories = pgTable("categories", {
   /** Illustration / vector image shown on the category tile. */
   illustrationUrl: text("illustration_url"),
   status: categoryStatus("status").notNull().default("active"),
+  /** Minimum age (months) for an Udhiyah or Aqiqah from this category, e.g. sheep 6, goats 12. Empty = no rule. */
+  sacrificeMinAgeMonths: integer("sacrifice_min_age_months"),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 });
@@ -124,6 +126,9 @@ export const cuttingOptions = pgTable("cutting_options", {
   videoUrl: text("video_url"),
   priceFils: integer("price_fils").notNull().default(0),
   isAvailable: boolean("is_available").notNull().default(true),
+  /** Shown to customers instead of "out of stock" when this is switched off (e.g. Eid slaughterhouse rules). */
+  unavailableNoteEn: text("unavailable_note_en").notNull().default(""),
+  unavailableNoteAr: text("unavailable_note_ar").notNull().default(""),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 });
@@ -149,8 +154,11 @@ export const extras = pgTable("extras", {
   nameEn: text("name_en").notNull(),
   nameAr: text("name_ar").notNull(),
   priceFils: integer("price_fils").notNull().default(0),
-  selectedByDefault: boolean("selected_by_default").notNull().default(true),
+  selectedByDefault: boolean("selected_by_default").notNull().default(false),
   isAvailable: boolean("is_available").notNull().default(true),
+  /** Shown to customers instead of "out of stock" when this is switched off (e.g. Eid slaughterhouse rules). */
+  unavailableNoteEn: text("unavailable_note_en").notNull().default(""),
+  unavailableNoteAr: text("unavailable_note_ar").notNull().default(""),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 });
@@ -165,6 +173,9 @@ export const packagingOptions = pgTable("packaging_options", {
   photoUrl: text("photo_url"),
   priceFils: integer("price_fils").notNull().default(0),
   isAvailable: boolean("is_available").notNull().default(true),
+  /** Shown to customers instead of "out of stock" when this is switched off (e.g. Eid slaughterhouse rules). */
+  unavailableNoteEn: text("unavailable_note_en").notNull().default(""),
+  unavailableNoteAr: text("unavailable_note_ar").notNull().default(""),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 });
@@ -182,6 +193,14 @@ export const seasonalCollections = pgTable("seasonal_collections", {
   /** Optional visibility window; null = no limit. */
   startsAt: timestamp("starts_at", { withTimezone: true }),
   endsAt: timestamp("ends_at", { withTimezone: true }),
+  /** Orders with this occasion belong to this offer (e.g. Eid Al-Adha ↔ "udhiyah"). */
+  occasion: text("occasion", { enum: ["none", "udhiyah", "aqiqah", "sadaqah", "other"] })
+    .notNull()
+    .default("none"),
+  /** When on, "Order includes" (head, intestines, tripe …) can't be chosen for this occasion. */
+  noExtras: boolean("no_extras").notNull().default(false),
+  noExtrasNoteEn: text("no_extras_note_en").notNull().default(""),
+  noExtrasNoteAr: text("no_extras_note_ar").notNull().default(""),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 });

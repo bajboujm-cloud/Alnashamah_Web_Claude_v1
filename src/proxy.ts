@@ -1,21 +1,16 @@
-import { match } from "@formatjs/intl-localematcher";
-import Negotiator from "negotiator";
 import { NextResponse, type NextRequest } from "next/server";
-import { LOCALE_COOKIE, defaultLocale, hasLocale, locales } from "@/i18n/config";
+import { LOCALE_COOKIE, defaultLocale, hasLocale } from "@/i18n/config";
 
+/**
+ * Arabic is the default for everyone (alnashamah.ae → /ar), whatever the browser language.
+ * Only a visitor who picked English with the language button is sent back to English.
+ */
 function preferredLocale(request: NextRequest) {
   const saved = request.cookies.get(LOCALE_COOKIE)?.value;
-  if (saved && hasLocale(saved)) return saved;
-  const headers = { "accept-language": request.headers.get("accept-language") ?? "" };
-  const languages = new Negotiator({ headers }).languages();
-  try {
-    return match(languages, [...locales], defaultLocale);
-  } catch {
-    return defaultLocale;
-  }
+  return saved && hasLocale(saved) ? saved : defaultLocale;
 }
 
-/** Sends visitors without a language in the URL to /ar/... or /en/... */
+/** Sends visitors without a language in the URL to /ar/... (or /en/... if they chose English). */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const first = pathname.split("/")[1] ?? "";

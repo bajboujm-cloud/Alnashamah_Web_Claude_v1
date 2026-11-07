@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
-import { Checkbox, SubmitButton, TextArea, TextInput } from "@/components/admin/fields";
+import { Checkbox, Select, SubmitButton, TextArea, TextInput } from "@/components/admin/fields";
 import { ImageField } from "@/components/admin/ImageField";
 import { PageTitle } from "@/components/admin/PageTitle";
 import { hasLocale, pick, type Locale } from "@/i18n/config";
@@ -12,7 +12,12 @@ import { requireStaff } from "@/server/auth/staff";
 import { adminBreedsByCategory } from "@/server/admin-data";
 import { db } from "@/server/db";
 import { Switch } from "@/components/admin/Switch";
-import { deleteSeasonal, saveSeasonal, setSeasonalVisible } from "../../_actions/catalog";
+import {
+  deleteSeasonal,
+  saveSeasonal,
+  setSeasonalExtrasAllowed,
+  setSeasonalVisible,
+} from "../../_actions/catalog";
 
 const day = (d: Date | null) => (d ? new Date(d.getTime() + 4 * 3_600_000).toISOString().slice(0, 10) : ""); // UAE date
 
@@ -27,6 +32,10 @@ type Season = {
   isActive: boolean;
   startsAt: Date | null;
   endsAt: Date | null;
+  occasion: string;
+  noExtras: boolean;
+  noExtrasNoteEn: string;
+  noExtrasNoteAr: string;
   breedIds: string[];
 };
 type Cats = Awaited<ReturnType<typeof adminBreedsByCategory>>;
@@ -37,12 +46,15 @@ function SeasonForm({
   c,
   cats,
   full,
+  occasionLabels,
 }: {
   lang: Locale;
   t: Dictionary["admin"];
   c: Season | null;
   cats: Cats;
   full: boolean;
+  /** Occasion value → label in the admin's language. */
+  occasionLabels: Record<string, string>;
 }) {
   return (
     <ActionForm action={saveSeasonal} messages={t.msg} resetOnSuccess={!c} className="space-y-4">
@@ -87,9 +99,34 @@ function SeasonForm({
               type="date"
               defaultValue={day(c?.endsAt ?? null)}
             />
+            <Select
+              label={t.seasonal.occasion}
+              name="occasion"
+              defaultValue={c?.occasion ?? "none"}
+              options={Object.entries(occasionLabels).map(([value, label]) => ({ value, label }))}
+            />
           </>
         ) : null}
       </div>
+      {full ? (
+        <div className="space-y-3 border border-gold/50 bg-ivory/50 p-3" data-testid="no-extras-rule">
+          <Checkbox label={t.seasonal.noExtras} name="noExtras" defaultChecked={c?.noExtras ?? false} />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <TextInput
+              label={t.seasonal.noExtrasNoteEn}
+              name="noExtrasNoteEn"
+              defaultValue={c?.noExtrasNoteEn ?? ""}
+              dir="ltr"
+            />
+            <TextInput
+              label={t.seasonal.noExtrasNoteAr}
+              name="noExtrasNoteAr"
+              defaultValue={c?.noExtrasNoteAr ?? ""}
+              dir="rtl"
+            />
+          </div>
+        </div>
+      ) : null}
       {full ? (
         <fieldset>
           <legend className="mb-2 text-xs font-semibold text-muted">{t.seasonal.eligible}</legend>
@@ -125,7 +162,8 @@ export default async function SeasonalAdminPage({ params }: PageProps<"/[lang]/a
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   const user = await requireStaff(lang, "catalog.content");
-  const t = (await getDictionary(lang)).admin;
+  const dict = await getDictionary(lang);
+  const t = dict.admin;
   const full = can(user.role, "catalog.prices");
   const [cats, rows] = await Promise.all([
     adminBreedsByCategory(),
@@ -151,7 +189,14 @@ export default async function SeasonalAdminPage({ params }: PageProps<"/[lang]/a
                 {pick(lang, c.nameEn, c.nameAr)}
               </summary>
               <div className="border-t border-line p-4">
-                <SeasonForm lang={lang} t={t} c={c} cats={cats} full={full} />
+                <SeasonForm
+                  lang={lang}
+                  t={t}
+                  c={c}
+                  cats={cats}
+                  full={full}
+                  occasionLabels={dict.order.occasions}
+                />
                 {full ? (
                   <ActionForm
                     action={deleteSeasonal}
@@ -165,7 +210,7 @@ export default async function SeasonalAdminPage({ params }: PageProps<"/[lang]/a
               </div>
             </details>
             {full ? (
-              <div className="shrink-0 p-2">
+              <div className="flex shrink-0 flex-col items-start p-2">
                 <Switch
                   checked={c.isActive}
                   label={`${pick(lang, c.nameEn, c.nameAr)} — ${t.common.visibilityHint}`}
@@ -173,6 +218,14 @@ export default async function SeasonalAdminPage({ params }: PageProps<"/[lang]/a
                   offLabel={t.common.hiddenLabel}
                   action={setSeasonalVisible.bind(null, c.id)}
                   testId="visibility-switch"
+                />
+                <Switch
+                  checked={!c.noExtras}
+                  label={`${pick(lang, c.nameEn, c.nameAr)} — ${t.seasonal.noExtras}`}
+                  onLabel={t.seasonal.extrasAllowed}
+                  offLabel={t.seasonal.extrasBlocked}
+                  action={setSeasonalExtrasAllowed.bind(null, c.id)}
+                  testId="no-extras-switch"
                 />
               </div>
             ) : null}
@@ -182,7 +235,7 @@ export default async function SeasonalAdminPage({ params }: PageProps<"/[lang]/a
       {full ? (
         <section className="mt-10 border border-dashed border-gold bg-white p-4">
           <h2 className="font-display mb-4 text-lg text-green">{t.seasonal.newTitle}</h2>
-          <SeasonForm lang={lang} t={t} c={null} cats={cats} full />
+          <SeasonForm lang={lang} t={t} c={null} cats={cats} full occasionLabels={dict.order.occasions} />
         </section>
       ) : null}
     </>

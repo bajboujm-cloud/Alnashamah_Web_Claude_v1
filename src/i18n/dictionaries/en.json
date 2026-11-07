@@ -14,7 +14,12 @@
     "switchLanguageLabel": "التبديل إلى العربية",
     "menu": "Menu",
     "skipToContent": "Skip to content",
-    "cart": "Cart"
+    "cart": "Cart",
+    "orders": "My orders",
+    "account": "Account",
+    "soon": "Soon",
+    "mainMenu": "Main menu",
+    "backToTop": "Back to top"
   },
   "home": {
     "heroEyebrow": "Livestock Trading · UAE",
@@ -116,7 +121,13 @@
     "free": "Free",
     "noBreeds": "No breeds available yet.",
     "back": "Back",
-    "eligibleBreeds": "Eligible breeds"
+    "eligibleBreeds": "Eligible breeds",
+    "discount": "{n}% off",
+    "share": "Share",
+    "shareText": "Have a look at {name} from Al Nashamah",
+    "copied": "Link copied",
+    "switchBreed": "Other breeds",
+    "switchCategory": "Categories"
   },
   "footer": {
     "about": "A trusted, modern identity for livestock trading in the UAE.",
@@ -270,7 +281,9 @@
       "active": "Active",
       "comingSoon": "Coming soon",
       "hidden": "Hidden",
-      "breedCount": "breeds"
+      "breedCount": "breeds",
+      "sacrificeMinAge": "Minimum age for Udhiyah / Aqiqah (months)",
+      "sacrificeMinAgeHelp": "Sizes younger than this can't be ordered as an Udhiyah or Aqiqah (e.g. sheep 6, goats 12). Leave empty for no rule."
     },
     "seasonal": {
       "title": "Seasonal offers",
@@ -279,7 +292,14 @@
       "active": "Show on website",
       "startsAt": "Show from (optional)",
       "endsAt": "Show until (optional)",
-      "eligible": "Breeds included"
+      "eligible": "Breeds included",
+      "occasion": "Occasion of these orders",
+      "occasionHelp": "Customers coming from this offer get this occasion pre-selected.",
+      "noExtras": "“Order includes” not available for these orders (e.g. Eid slaughterhouse rules)",
+      "noExtrasNoteEn": "Message to customers (English)",
+      "noExtrasNoteAr": "Message to customers (Arabic)",
+      "extrasAllowed": "Head/intestines/tripe allowed",
+      "extrasBlocked": "Head/intestines/tripe not included"
     },
     "simple": {
       "cuttingTitle": "Cutting options",
@@ -290,7 +310,10 @@
       "packagingHelp": "Price per animal.",
       "defaultSelected": "Ticked by default",
       "videoUrl": "Video link (optional)",
-      "addItem": "Add option"
+      "addItem": "Add option",
+      "unavailableNoteEn": "Message to customers when switched off (English)",
+      "unavailableNoteAr": "Message to customers when switched off (Arabic)",
+      "unavailableNoteHelp": "Customers see this instead of \"Out of stock\", e.g. \"Not available during Eid due to government slaughterhouse regulations\". Empty = \"Not available at the moment\"."
     },
     "settings": {
       "title": "Business settings",
@@ -431,12 +454,26 @@
     "problems": {
       "unavailable": "Sorry, this size is no longer available.",
       "noPrice": "This size has no price yet.",
+      "tooYoung": "This size is too young for an Udhiyah or Aqiqah. Please choose an older size.",
       "chooseCutting": "Please choose how to cut it.",
       "choosePackaging": "Please choose the packaging.",
       "choiceUnavailable": "One of your choices is no longer available. Please choose again.",
       "tooMany": "Your cart is full (20 items).",
       "invalid": "Something went wrong. Please try again."
-    }
+    },
+    "required": "Required",
+    "viewPhoto": "View photo",
+    "chooseThisCut": "Choose this cut",
+    "close": "Close",
+    "notAvailable": "Not available at the moment",
+    "zoomHint": "Tap 🔍 on a cut to see its photo larger.",
+    "ageRule": "An Udhiyah or Aqiqah ({category}) must be {age} or older.",
+    "tooYoungTag": "Below the required age",
+    "ageDialogTitle": "Age not suitable",
+    "ageDialogPick": "Choose {size} ({age}) – {price}",
+    "ageDialogOtherBreed": "Choose another breed",
+    "ageDialogNotSacrifice": "It's not an Udhiyah or Aqiqah",
+    "ageDialogNoSize": "No size of this breed is old enough at the moment."
   },
   "cart": {
     "title": "Your cart",
@@ -467,6 +504,7 @@
     "checkoutSoon": "Checkout — sign-in or guest, delivery address and payment — opens in the next update.",
     "unavailableLine": "No longer available — please remove it.",
     "fixLines": "Remove the items marked above to continue.",
-    "none": "—"
+    "none": "—",
+    "tooYoungLine": "Too young for an Udhiyah or Aqiqah — remove it, or add an older size."
   }
 }

@@ -15,6 +15,7 @@ export const categorySeed = [
     descriptionAr: "أغنام طازجة وصحية من سلالات محلية وإقليمية موثوقة.",
     illustrationUrl: "/illustrations/sheep.svg",
     status: "active" as const,
+    sacrificeMinAgeMonths: 6,
     sortOrder: 1,
   },
   {
@@ -25,6 +26,7 @@ export const categorySeed = [
     descriptionAr: "لحم ماعز طري، مختار بعناية ومجهز حسب طلبك.",
     illustrationUrl: "/illustrations/goats.svg",
     status: "active" as const,
+    sacrificeMinAgeMonths: 12,
     sortOrder: 2,
   },
   {
@@ -223,6 +225,11 @@ export const seasonalSeed = [
     illustrationUrl: "/illustrations/eid-al-adha.svg",
     isActive: true,
     sortOrder: 1,
+    occasion: "udhiyah" as const,
+    // Government slaughterhouses keep the head, intestines and tripe of Eid sacrifices.
+    noExtras: true,
+    noExtrasNoteEn: "Not included with Eid Al-Adha sacrifices due to government slaughterhouse regulations.",
+    noExtrasNoteAr: "لا تشمل أضاحي عيد الأضحى الرأس والمصران والكرش حسب أنظمة وتعليمات المسالخ الحكومية.",
     categories: ["sheep", "goats"],
   },
 ];

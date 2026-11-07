@@ -12,6 +12,7 @@ async function buildNaeemi(page: Page, quantity = 1) {
   await builder.getByTestId("option-row").first().click(); // Small · AED 1,143
   await builder.getByTestId("cutting-choice").first().click();
   await builder.getByTestId("packaging-choice").filter({ hasText: "Foam box with ice" }).click(); // + AED 25
+  await builder.getByTestId("extra-choice").first().check(); // Head (nothing is ticked by default)
   for (let i = 1; i < quantity; i++) await builder.getByRole("button", { name: "+", exact: true }).click();
   return builder;
 }
@@ -77,13 +78,14 @@ test("coming from the Eid page pre-selects Udhiyah, and the cart works in Arabic
   await page.getByTestId("breed-card").filter({ hasText: "نعيمي" }).click();
   await expect(page.locator("select[name=occasion]")).toHaveValue("udhiyah");
   const builder = page.getByTestId("order-builder");
-  await builder.getByTestId("option-row").first().click();
+  await builder.getByTestId("option-row").nth(2).click(); // 6–8 months: old enough for an Udhiyah
   await builder.getByTestId("cutting-choice").first().click();
+  await builder.getByTestId("packaging-choice").first().click(); // slaughterhouse bag, free
   await page.locator("input[name=onBehalfOf]").fill("محمد");
   await builder.getByTestId("add-to-cart").click();
   await expect(builder.getByTestId("builder-message")).toContainText("تمت الإضافة");
   await page.goto("/ar/cart");
   await expect(page.getByTestId("cart-line")).toContainText("أضحية");
   await expect(page.getByTestId("cart-line")).toContainText("محمد");
-  await expect(page.getByTestId("cart-total")).toHaveText("1,143 د.إ");
+  await expect(page.getByTestId("cart-total")).toHaveText("1,240 د.إ");
 });

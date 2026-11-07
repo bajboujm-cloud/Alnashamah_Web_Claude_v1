@@ -1,24 +1,29 @@
 import { expect, test } from "@playwright/test";
-import { setBreedAvailable, setOptionAvailable, sql } from "./db";
+import { setBreedAvailable, setOptionAvailable } from "./db";
 
 test.afterAll(async () => {
   await setBreedAvailable("sheep", "herri", true);
   await setOptionAvailable("sheep", "naeemi", 2, true);
-  await sql.end();
 });
 
-test("root sends Arabic browsers to /ar and English browsers to /en", async ({ browser }) => {
-  const ar = await browser.newContext({ locale: "ar-AE" });
-  const arPage = await ar.newPage();
-  await arPage.goto("/");
-  await expect(arPage).toHaveURL(/\/ar$/);
-  await ar.close();
+test("alnashamah.ae opens in Arabic for everyone, unless the visitor chose English", async ({ browser }) => {
+  for (const locale of ["ar-AE", "en-US"]) {
+    const ctx = await browser.newContext({ locale });
+    const page = await ctx.newPage();
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/ar$/);
+    await page.goto("/sheep");
+    await expect(page).toHaveURL(/\/ar\/sheep$/);
+    await ctx.close();
+  }
 
-  const en = await browser.newContext({ locale: "en-US" });
-  const enPage = await en.newPage();
-  await enPage.goto("/");
-  await expect(enPage).toHaveURL(/\/en$/);
-  await en.close();
+  // Someone who switched to English keeps English next time.
+  const ctx = await browser.newContext({ locale: "ar-AE" });
+  await ctx.addCookies([{ name: "NEXT_LOCALE", value: "en", url: "http://localhost:3000" }]);
+  const page = await ctx.newPage();
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/en$/);
+  await ctx.close();
 });
 
 test("Arabic home is right-to-left with all four categories", async ({ page }) => {
@@ -90,6 +95,25 @@ test("coming-soon category and Eid page", async ({ page }) => {
   await expect(page.getByText("Coming soon").first()).toBeVisible();
   await page.goto("/en/seasonal/eid-al-adha");
   await expect(page.getByTestId("breed-card")).toHaveCount(8);
+  // breeds straight away, grouped under Sheep then Goats
+  const groups = page.getByTestId("season-group");
+  await expect(groups).toHaveCount(2);
+  await expect(groups.nth(0).getByRole("heading", { level: 2 })).toHaveText("Sheep");
+  await expect(groups.nth(0).getByTestId("breed-card")).toHaveCount(5);
+  await expect(groups.nth(1).getByRole("heading", { level: 2 })).toHaveText("Goats");
+  await expect(groups.nth(1).getByTestId("breed-card")).toHaveCount(3);
+});
+
+test("while Eid is on, it also shows first among the categories", async ({ page }) => {
+  await page.goto("/en");
+  const tile = page.getByTestId("season-tile");
+  await expect(tile).toHaveCount(1);
+  await expect(tile).toContainText("Eid Al-Adha");
+  await expect(tile).toContainText("Seasonal");
+  await page.goto("/en/livestock");
+  await expect(page.getByTestId("season-tile")).toHaveCount(1);
+  await page.getByTestId("season-tile").click();
+  await expect(page).toHaveURL(/\/en\/seasonal\/eid-al-adha$/);
 });
 
 test("unknown pages return 404", async ({ page }) => {

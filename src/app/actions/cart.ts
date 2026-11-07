@@ -20,6 +20,15 @@ const clean = (v: unknown, max: number) => (typeof v === "string" ? v.trim().sli
 
 /** Adds one configured animal to the cart after checking every choice against the live catalogue. */
 export async function addToCart(raw: LineInput): Promise<AddResult> {
+  try {
+    return await addLine(raw);
+  } catch (e) {
+    console.error("addToCart failed", e);
+    return { ok: false, problem: "invalid" };
+  }
+}
+
+async function addLine(raw: LineInput): Promise<AddResult> {
   const occasion = s.occasions.includes(raw?.occasion) ? raw.occasion : "none";
   const input: LineInput = {
     breedOptionId: clean(raw?.breedOptionId, 40),
