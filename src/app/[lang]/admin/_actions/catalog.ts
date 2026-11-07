@@ -4,7 +4,7 @@ import { asc, count, eq, max } from "drizzle-orm";
 import { refresh } from "next/cache";
 import type { FormState } from "@/components/admin/form-state";
 import { audit } from "@/server/audit";
-import { aedToFils, flag, isSlug, isUuid, RESERVED_SLUGS, text, upload } from "@/server/admin-forms";
+import { aedToFils, flag, isSlug, isUuid, optInt, RESERVED_SLUGS, text, upload } from "@/server/admin-forms";
 import { can } from "@/server/auth/permissions";
 import { authorize, NotAllowedError } from "@/server/auth/staff";
 import { db, schema as s } from "@/server/db";
@@ -46,7 +46,10 @@ export async function saveCategory(_prev: FormState, data: FormData): Promise<Fo
     const v = names(data);
     const slug = text(data, "slug", 60);
     const status = text(data, "status") as "active" | "coming_soon" | "hidden";
+    const minAge = optInt(data, "sacrificeMinAgeMonths", 0, 120);
     const bad = [...(!v.nameEn ? ["nameEn"] : []), ...(!v.nameAr ? ["nameAr"] : [])];
+    if (full && minAge === "invalid") bad.push("sacrificeMinAgeMonths");
+    const sacrificeMinAgeMonths = minAge === "invalid" ? null : minAge;
     if (full && !isSlug(slug)) bad.push("slug");
     if (bad.length) return fail("invalid", bad);
     if (full && RESERVED_SLUGS.has(slug)) return fail("slugReserved", ["slug"]);
@@ -69,6 +72,7 @@ export async function saveCategory(_prev: FormState, data: FormData): Promise<Fo
           ...v,
           slug,
           status,
+          sacrificeMinAgeMonths,
           sortOrder: (next ?? 0) + 1,
           illustrationUrl: image?.ok ? image.url : null,
         })
@@ -85,7 +89,7 @@ export async function saveCategory(_prev: FormState, data: FormData): Promise<Fo
       : flag(data, "removeIllustration")
         ? null
         : before.illustrationUrl;
-    const update = { ...v, illustrationUrl, ...(full ? { slug, status } : {}) };
+    const update = { ...v, illustrationUrl, ...(full ? { slug, status, sacrificeMinAgeMonths } : {}) };
     await db.update(s.categories).set(update).where(eq(s.categories.id, id));
     if (illustrationUrl !== before.illustrationUrl) await deleteStoredFile(before.illustrationUrl);
     await audit(user, "update", "category", id, before, update);

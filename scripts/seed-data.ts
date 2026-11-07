@@ -15,6 +15,7 @@ export const categorySeed = [
     descriptionAr: "أغنام طازجة وصحية من سلالات محلية وإقليمية موثوقة.",
     illustrationUrl: "/illustrations/sheep.svg",
     status: "active" as const,
+    sacrificeMinAgeMonths: 6,
     sortOrder: 1,
   },
   {
@@ -25,6 +26,7 @@ export const categorySeed = [
     descriptionAr: "لحم ماعز طري، مختار بعناية ومجهز حسب طلبك.",
     illustrationUrl: "/illustrations/goats.svg",
     status: "active" as const,
+    sacrificeMinAgeMonths: 12,
     sortOrder: 2,
   },
   {

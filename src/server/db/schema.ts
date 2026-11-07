@@ -42,6 +42,8 @@ export const categories = pgTable("categories", {
   /** Illustration / vector image shown on the category tile. */
   illustrationUrl: text("illustration_url"),
   status: categoryStatus("status").notNull().default("active"),
+  /** Minimum age (months) for an Udhiyah or Aqiqah from this category, e.g. sheep 6, goats 12. Empty = no rule. */
+  sacrificeMinAgeMonths: integer("sacrifice_min_age_months"),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 });

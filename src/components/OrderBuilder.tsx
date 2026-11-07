@@ -8,6 +8,7 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { formatAed } from "@/lib/format";
 import { MAX_QUANTITY, unitFils } from "@/lib/pricing";
+import { ageRuleApplies, isTooYoung } from "@/lib/sacrifice";
 
 export type BuilderSize = {
   id: string;
@@ -17,6 +18,8 @@ export type BuilderSize = {
   priceFils: number | null;
   compareAtFils: number | null;
   available: boolean;
+  /** Youngest age of this size in months (for the Udhiyah / Aqiqah age rule). */
+  ageMin?: number | null;
 };
 export type BuilderChoice = {
   id: string;
@@ -41,6 +44,8 @@ type Props = {
   defaultOccasion?: (typeof occasions)[number];
   /** Occasion → message, for occasions whose orders can't include head, intestines, tripe … (e.g. Eid). */
   noExtras?: Record<string, string>;
+  /** Udhiyah / Aqiqah minimum age for this category, with the message to show (e.g. sheep 6+ months). */
+  ageRule?: { minMonths: number; message: string } | null;
 };
 
 const occasions = ["none", "udhiyah", "aqiqah", "sadaqah", "other"] as const;
@@ -177,6 +182,7 @@ export function OrderBuilder({
   packaging,
   defaultOccasion = "none",
   noExtras = {},
+  ageRule = null,
 }: Props) {
   const o = t.order;
   const [sizeId, setSizeId] = useState<string | null>(null);
@@ -198,6 +204,10 @@ export function OrderBuilder({
   const [pending, startTransition] = useTransition();
 
   const size = sizes.find((s) => s.id === sizeId) ?? null;
+  /** Udhiyah / Aqiqah chosen and this category has a minimum age. */
+  const ageRuleOn = !!ageRule && ageRuleApplies(occasion, ageRule.minMonths);
+  const tooYoung = (s: BuilderSize) => !!ageRule && isTooYoung(occasion, ageRule.minMonths, s.ageMin);
+  const sizeTooYoung = !!size && tooYoung(size);
   /** Message when the chosen occasion can't include head, intestines, tripe … (e.g. Eid sacrifices). */
   const occasionNote = noExtras[occasion] ?? null;
   const unit = useMemo(
@@ -218,7 +228,7 @@ export function OrderBuilder({
   /** Shows the message and scrolls to the step that still needs a choice. */
   function needs(
     step: "step-size" | "step-cutting" | "step-packaging",
-    problem: "chooseSize" | "chooseCutting" | "choosePackaging",
+    problem: "chooseSize" | "tooYoung" | "chooseCutting" | "choosePackaging",
   ) {
     setResult({ ok: false, problem } as AddResult);
     setMissing(step);
@@ -227,6 +237,7 @@ export function OrderBuilder({
 
   function submit() {
     if (!size) return needs("step-size", "chooseSize");
+    if (sizeTooYoung) return needs("step-size", "tooYoung");
     if (cutting.some((c) => c.available) && !cuttingId) return needs("step-cutting", "chooseCutting");
     if (packaging.some((p) => p.available) && !packagingId) return needs("step-packaging", "choosePackaging");
     setMissing(null);
@@ -270,11 +281,27 @@ export function OrderBuilder({
         id="step-size"
         title={o.stepSize}
         required={o.required}
-        missing={missing === "step-size" && !sizeId}
+        missing={missing === "step-size" && (!sizeId || sizeTooYoung)}
       >
+        {ageRuleOn && ageRule ? (
+          // Sharia age rule: shown as a hint, and in red once a size that is too young is chosen.
+          <p
+            className={`mb-3 rounded-brand border px-3 py-2 text-sm ${
+              sizeTooYoung
+                ? "border-danger/50 bg-danger/5 font-semibold text-danger"
+                : "border-gold/50 bg-gold/10 text-charcoal"
+            }`}
+            role={sizeTooYoung ? "alert" : undefined}
+            data-testid="age-rule"
+            data-error={sizeTooYoung}
+          >
+            {ageRule.message}
+          </p>
+        ) : null}
         <div className="grid gap-2" role="radiogroup" aria-label={o.stepSize}>
           {sizes.map((s) => {
             const can = s.available && s.priceFils != null;
+            const young = can && tooYoung(s);
             return (
               <button
                 key={s.id}
@@ -283,9 +310,14 @@ export function OrderBuilder({
                 aria-checked={sizeId === s.id}
                 disabled={!can}
                 onClick={() => setSizeId(s.id)}
-                className={`${cardClass(sizeId === s.id, can)} w-full`}
+                className={`${
+                  young && sizeId === s.id
+                    ? "relative flex items-center gap-3 border border-danger bg-danger/5 p-3 pe-8 text-start ring-2 ring-danger"
+                    : cardClass(sizeId === s.id, can)
+                } w-full`}
                 data-testid="option-row"
                 data-available={s.available}
+                data-too-young={young || undefined}
               >
                 {sizeId === s.id ? <Tick /> : null}
                 <span className="min-w-0 flex-1">
@@ -294,6 +326,14 @@ export function OrderBuilder({
                     {!s.available ? (
                       <span className="rounded-brand border border-danger/40 px-2 py-0.5 text-xs text-danger">
                         {t.catalog.outOfStock}
+                      </span>
+                    ) : null}
+                    {young ? (
+                      <span
+                        className="rounded-brand border border-danger/40 px-2 py-0.5 text-xs font-normal text-danger"
+                        data-testid="too-young-tag"
+                      >
+                        {o.tooYoungTag}
                       </span>
                     ) : null}
                   </span>
@@ -533,6 +573,11 @@ export function OrderBuilder({
                 </option>
               ))}
             </select>
+            {sizeTooYoung && ageRule ? (
+              <span className="mt-1 block text-sm font-semibold text-danger" data-testid="age-rule-occasion">
+                {ageRule.message}
+              </span>
+            ) : null}
           </label>
           {occasion !== "none" ? (
             <label className="block sm:col-span-2">
@@ -609,6 +654,8 @@ export function OrderBuilder({
               </>
             ) : result.problem === "chooseSize" ? (
               o.chooseSize
+            ) : result.problem === "tooYoung" && ageRule ? (
+              `${ageRule.message} ${o.problems.tooYoung}`
             ) : (
               o.problems[result.problem]
             )}

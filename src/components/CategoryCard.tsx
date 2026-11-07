@@ -6,6 +6,11 @@ import { ComingSoonBadge } from "./StockBadge";
 type Props = {
   locale: Locale;
   comingSoonLabel: string;
+  /** Link override (e.g. the Eid offer tile links to its seasonal page). */
+  href?: string;
+  /** Small gold tag next to the name (e.g. "Seasonal"). */
+  badge?: string;
+  testId?: string;
   category: {
     slug: string;
     nameEn: string;
@@ -17,14 +22,21 @@ type Props = {
   };
 };
 
-export function CategoryCard({ locale, category, comingSoonLabel }: Props) {
+export function CategoryCard({
+  locale,
+  category,
+  comingSoonLabel,
+  href,
+  badge,
+  testId = "category-card",
+}: Props) {
   const name = pick(locale, category.nameEn, category.nameAr);
   const soon = category.status === "coming_soon";
   return (
     <Link
-      href={`/${locale}/${category.slug}`}
+      href={href ?? `/${locale}/${category.slug}`}
       className={`group relative flex flex-col border border-line bg-white p-3 transition-colors sm:p-5 hover:border-gold ${soon ? "opacity-80" : ""}`}
-      data-testid="category-card"
+      data-testid={testId}
     >
       <div className="mb-2 h-0.5 w-10 bg-gold sm:mb-4 sm:w-16" aria-hidden />
       {category.illustrationUrl ? (
@@ -42,8 +54,13 @@ export function CategoryCard({ locale, category, comingSoonLabel }: Props) {
       <div className="mt-2 flex flex-wrap items-center justify-between gap-1 sm:mt-4 sm:gap-2">
         <h3 className="font-display text-lg text-green sm:text-xl">{name}</h3>
         {soon ? <ComingSoonBadge label={comingSoonLabel} /> : null}
+        {badge ? (
+          <span className="rounded-brand bg-gold px-2 py-0.5 text-[11px] font-semibold text-green-900">
+            {badge}
+          </span>
+        ) : null}
       </div>
-      <p className="mt-1 hidden text-sm text-muted sm:block">
+      <p className="mt-1 hidden text-sm text-muted sm:line-clamp-3">
         {pick(locale, category.descriptionEn, category.descriptionAr)}
       </p>
     </Link>

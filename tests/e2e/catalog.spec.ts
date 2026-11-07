@@ -89,6 +89,25 @@ test("coming-soon category and Eid page", async ({ page }) => {
   await expect(page.getByText("Coming soon").first()).toBeVisible();
   await page.goto("/en/seasonal/eid-al-adha");
   await expect(page.getByTestId("breed-card")).toHaveCount(8);
+  // breeds straight away, grouped under Sheep then Goats
+  const groups = page.getByTestId("season-group");
+  await expect(groups).toHaveCount(2);
+  await expect(groups.nth(0).getByRole("heading", { level: 2 })).toHaveText("Sheep");
+  await expect(groups.nth(0).getByTestId("breed-card")).toHaveCount(5);
+  await expect(groups.nth(1).getByRole("heading", { level: 2 })).toHaveText("Goats");
+  await expect(groups.nth(1).getByTestId("breed-card")).toHaveCount(3);
+});
+
+test("while Eid is on, it also shows first among the categories", async ({ page }) => {
+  await page.goto("/en");
+  const tile = page.getByTestId("season-tile");
+  await expect(tile).toHaveCount(1);
+  await expect(tile).toContainText("Eid Al-Adha");
+  await expect(tile).toContainText("Seasonal");
+  await page.goto("/en/livestock");
+  await expect(page.getByTestId("season-tile")).toHaveCount(1);
+  await page.getByTestId("season-tile").click();
+  await expect(page).toHaveURL(/\/en\/seasonal\/eid-al-adha$/);
 });
 
 test("unknown pages return 404", async ({ page }) => {

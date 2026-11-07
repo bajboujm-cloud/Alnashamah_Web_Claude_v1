@@ -280,7 +280,9 @@
       "active": "Active",
       "comingSoon": "Coming soon",
       "hidden": "Hidden",
-      "breedCount": "breeds"
+      "breedCount": "breeds",
+      "sacrificeMinAge": "Minimum age for Udhiyah / Aqiqah (months)",
+      "sacrificeMinAgeHelp": "Sizes younger than this can't be ordered as an Udhiyah or Aqiqah (e.g. sheep 6, goats 12). Leave empty for no rule."
     },
     "seasonal": {
       "title": "Seasonal offers",
@@ -451,6 +453,7 @@
     "problems": {
       "unavailable": "Sorry, this size is no longer available.",
       "noPrice": "This size has no price yet.",
+      "tooYoung": "This size is too young for an Udhiyah or Aqiqah. Please choose an older size.",
       "chooseCutting": "Please choose how to cut it.",
       "choosePackaging": "Please choose the packaging.",
       "choiceUnavailable": "One of your choices is no longer available. Please choose again.",
@@ -462,7 +465,9 @@
     "chooseThisCut": "Choose this cut",
     "close": "Close",
     "notAvailable": "Not available at the moment",
-    "zoomHint": "Tap 🔍 on a cut to see its photo larger."
+    "zoomHint": "Tap 🔍 on a cut to see its photo larger.",
+    "ageRule": "An Udhiyah or Aqiqah ({category}) must be {age} or older.",
+    "tooYoungTag": "Below the required age"
   },
   "cart": {
     "title": "Your cart",
@@ -493,6 +498,7 @@
     "checkoutSoon": "Checkout — sign-in or guest, delivery address and payment — opens in the next update.",
     "unavailableLine": "No longer available — please remove it.",
     "fixLines": "Remove the items marked above to continue.",
-    "none": "—"
+    "none": "—",
+    "tooYoungLine": "Too young for an Udhiyah or Aqiqah — remove it, or add an older size."
   }
 }

@@ -130,6 +130,18 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         <section aria-labelledby="categories">
           <SectionHeading id="categories" title={t.home.categoriesTitle} label={t.home.categoriesLabel} />
           <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+            {/* While an offer like Eid Al-Adha is switched on it also sits first among the categories. */}
+            {activeSeasons.map((s) => (
+              <CategoryCard
+                key={s.id}
+                locale={lang}
+                href={`/${lang}/seasonal/${s.slug}`}
+                badge={t.home.seasonalLabel}
+                testId="season-tile"
+                category={{ ...s, status: "active" }}
+                comingSoonLabel={t.catalog.comingSoon}
+              />
+            ))}
             {categories.map((c) => (
               <CategoryCard key={c.id} locale={lang} category={c} comingSoonLabel={t.catalog.comingSoon} />
             ))}

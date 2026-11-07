@@ -43,6 +43,17 @@ function CategoryForm({ t, c, full }: { t: Dictionary["admin"]; c: Cat | null; f
                 { value: "hidden", label: t.categories.hidden },
               ]}
             />
+            <TextInput
+              label={t.categories.sacrificeMinAge}
+              hint={t.categories.sacrificeMinAgeHelp}
+              name="sacrificeMinAgeMonths"
+              type="number"
+              min={0}
+              max={120}
+              inputMode="numeric"
+              defaultValue={c?.sacrificeMinAgeMonths ?? ""}
+              dir="ltr"
+            />
           </>
         ) : null}
         <TextArea

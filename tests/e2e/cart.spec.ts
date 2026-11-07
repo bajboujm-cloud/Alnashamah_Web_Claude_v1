@@ -78,7 +78,7 @@ test("coming from the Eid page pre-selects Udhiyah, and the cart works in Arabic
   await page.getByTestId("breed-card").filter({ hasText: "نعيمي" }).click();
   await expect(page.locator("select[name=occasion]")).toHaveValue("udhiyah");
   const builder = page.getByTestId("order-builder");
-  await builder.getByTestId("option-row").first().click();
+  await builder.getByTestId("option-row").nth(2).click(); // 6–8 months: old enough for an Udhiyah
   await builder.getByTestId("cutting-choice").first().click();
   await builder.getByTestId("packaging-choice").first().click(); // slaughterhouse bag, free
   await page.locator("input[name=onBehalfOf]").fill("محمد");
@@ -87,5 +87,5 @@ test("coming from the Eid page pre-selects Udhiyah, and the cart works in Arabic
   await page.goto("/ar/cart");
   await expect(page.getByTestId("cart-line")).toContainText("أضحية");
   await expect(page.getByTestId("cart-line")).toContainText("محمد");
-  await expect(page.getByTestId("cart-total")).toHaveText("1,143 د.إ");
+  await expect(page.getByTestId("cart-total")).toHaveText("1,240 د.إ");
 });

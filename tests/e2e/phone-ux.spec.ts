@@ -226,3 +226,71 @@ test("an extra switched off in the admin shows 'not available', never 'out of st
   await expect(builder.getByTestId("builder-message")).toContainText("تمت الإضافة");
   await sql`update extras set is_available = true`;
 });
+
+const SHEEP_RULE = "الأضحية أو العقيقة (غنم) يجب أن يكون عمرها 6 أشهر فأكثر.";
+
+test("Udhiyah: sizes under 6 months (sheep) turn red and can't be added", async ({ page }) => {
+  await page.goto("/ar/sheep/naeemi?occasion=udhiyah");
+  const builder = page.getByTestId("order-builder");
+  const rule = builder.getByTestId("age-rule");
+  await expect(rule).toHaveText(SHEEP_RULE);
+  await expect(rule).toHaveAttribute("data-error", "false");
+  const rows = builder.getByTestId("option-row");
+  await expect(rows.nth(0)).toHaveAttribute("data-too-young", "true"); // 2–4 months
+  await expect(rows.nth(1)).toHaveAttribute("data-too-young", "true"); // 4–6 months
+  await expect(rows.nth(2)).not.toHaveAttribute("data-too-young"); // 6–8 months
+
+  await rows.nth(0).click();
+  await expect(rule).toHaveAttribute("data-error", "true");
+  await expect(page.locator("#step-size")).toHaveAttribute("data-missing", "false");
+  await expect(builder.getByTestId("age-rule-occasion")).toHaveText(SHEEP_RULE);
+  await builder.getByTestId("cutting-choice").first().click();
+  await builder.getByTestId("packaging-choice").first().click();
+  await builder.getByTestId("add-to-cart").click();
+  await expect(builder.getByTestId("builder-message")).toContainText("أصغر من العمر المطلوب");
+  await expect(page.locator("#step-size")).toHaveAttribute("data-missing", "true");
+
+  await rows.nth(2).click();
+  await expect(rule).toHaveAttribute("data-error", "false");
+  await expect(builder.getByTestId("age-rule-occasion")).toHaveCount(0);
+  await builder.getByTestId("add-to-cart").click();
+  await expect(builder.getByTestId("builder-message")).toContainText("تمت الإضافة");
+});
+
+test("Aqiqah on goats needs 12+ months; normal orders have no age rule", async ({ page }) => {
+  await page.goto("/en/goats/somali");
+  const builder = page.getByTestId("order-builder");
+  await expect(builder.getByTestId("age-rule")).toHaveCount(0);
+  await page.goto("/en/goats/local");
+  await expect(builder.getByTestId("age-rule")).toHaveCount(0);
+  await expect(builder.locator("[data-too-young]")).toHaveCount(0);
+  await builder.getByTestId("option-row").first().click();
+
+  await page.locator("select[name=occasion]").selectOption("aqiqah");
+  await expect(builder.getByTestId("age-rule")).toHaveText(
+    "An Udhiyah or Aqiqah (Goats) must be 12 months or older.",
+  );
+  await expect(builder.getByTestId("age-rule")).toHaveAttribute("data-error", "true");
+  await expect(builder.getByTestId("too-young-tag")).toHaveCount(3); // local goats are all under 12 months
+
+  await page.goto("/en/goats/somali?occasion=udhiyah");
+  await expect(builder.locator("[data-too-young]")).toHaveCount(0); // 12–15 months is fine
+});
+
+test("the server refuses a too-young Udhiyah even if the page is bypassed", async ({ page }) => {
+  await page.goto("/ar/sheep/naeemi");
+  const builder = page.getByTestId("order-builder");
+  await builder.getByTestId("option-row").first().click();
+  await builder.getByTestId("cutting-choice").first().click();
+  await builder.getByTestId("packaging-choice").first().click();
+  await builder.getByTestId("add-to-cart").click();
+  await expect(builder.getByTestId("builder-message")).toContainText("تمت الإضافة");
+  // turn the saved line into an Udhiyah behind the page's back
+  const [{ id }] = await naeemiSmall;
+  const [line] =
+    await sql`select id from cart_items where breed_option_id = ${id} order by created_at desc limit 1`;
+  await sql`update cart_items set occasion = 'udhiyah' where id = ${line.id}`;
+  await page.goto("/ar/cart");
+  await expect(page.locator("[data-problem=tooYoung]").first()).toContainText("أصغر من العمر المطلوب");
+  await sql`delete from cart_items where id = ${line.id}`;
+});

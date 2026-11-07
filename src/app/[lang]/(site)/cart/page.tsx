@@ -89,7 +89,7 @@ export default async function CartPage({ params }: PageProps<"/[lang]/cart">) {
                   ) : null}
                   {l.problem ? (
                     <p className="mt-1 text-sm font-semibold text-danger" role="alert">
-                      {c.unavailableLine}
+                      {l.problem === "tooYoung" ? c.tooYoungLine : c.unavailableLine}
                     </p>
                   ) : null}
                   <div className="mt-2">

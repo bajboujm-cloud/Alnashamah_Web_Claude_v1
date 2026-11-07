@@ -198,6 +198,7 @@ test("one-tap hide for a category and for the Eid offer", async () => {
 
   await page.goto("/en");
   await expect(page.getByTestId("category-card")).toHaveCount(3);
+  await expect(page.getByTestId("season-tile")).toHaveCount(0);
   await expect(page.getByText("Eid Al-Adha Sacrifice / Qurban")).toHaveCount(0);
   await expect(page.locator('header a[href="/en/seasonal/eid-al-adha"]')).toHaveCount(0);
   expect((await page.goto("/en/seasonal/eid-al-adha"))?.status()).toBe(404);

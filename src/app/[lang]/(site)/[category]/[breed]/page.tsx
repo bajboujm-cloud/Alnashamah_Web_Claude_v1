@@ -117,6 +117,20 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
               lang={lang}
               t={{ order: t.order, catalog: t.catalog }}
               inStock={inStock}
+              ageRule={
+                category.sacrificeMinAgeMonths
+                  ? {
+                      minMonths: category.sacrificeMinAgeMonths,
+                      message: t.order.ageRule
+                        .replace("{category}", categoryName)
+                        .replace(
+                          "{age}",
+                          formatAge(category.sacrificeMinAgeMonths, category.sacrificeMinAgeMonths, lang) ??
+                            "",
+                        ),
+                    }
+                  : null
+              }
               defaultOccasion={occasionParam ?? "none"}
               noExtras={Object.fromEntries(
                 noExtraRules.map((r) => [r.occasion, pick(lang, r.noteEn, r.noteAr) || t.order.notAvailable]),
@@ -127,6 +141,7 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
                 age: formatAge(o.ageMinMonths, o.ageMaxMonths, lang) ?? t.catalog.tbc,
                 weight: formatWeight(o.weightMinKg, o.weightMaxKg, lang) ?? t.catalog.tbc,
                 priceFils: o.priceFils,
+                ageMin: o.ageMinMonths,
                 compareAtFils: o.compareAtPriceFils,
                 available: isOptionAvailable(breed, o),
               }))}

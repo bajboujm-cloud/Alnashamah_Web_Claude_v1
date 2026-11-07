@@ -2,6 +2,7 @@ import "server-only";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { isOptionAvailable } from "@/lib/availability";
+import { isTooYoung } from "@/lib/sacrifice";
 import { cartTotals, clampQuantity, lineFils, unitFils, type PricedLine } from "@/lib/pricing";
 import { db, schema as s } from "@/server/db";
 import { env } from "@/server/env";
@@ -74,7 +75,7 @@ export type LineInput = {
 };
 
 export type LineProblem =
-  "unavailable" | "noPrice" | "chooseCutting" | "choosePackaging" | "choiceUnavailable";
+  "unavailable" | "noPrice" | "tooYoung" | "chooseCutting" | "choosePackaging" | "choiceUnavailable";
 
 /** Checks a line against the live catalogue and prices it. */
 export async function resolveLine(input: LineInput) {
@@ -91,6 +92,9 @@ export async function resolveLine(input: LineInput) {
   if (breed.category.status !== "active" || !breed.isVisible || !isOptionAvailable(breed, option))
     problem = "unavailable";
   else if (option.priceFils == null) problem = "noPrice";
+  // Udhiyah / Aqiqah must reach the category's minimum age (e.g. sheep 6+ months, goats 12+ months).
+  else if (isTooYoung(input.occasion, breed.category.sacrificeMinAgeMonths, option.ageMinMonths))
+    problem = "tooYoung";
 
   const cutting = choices.cutting.find((c) => c.id === input.cuttingOptionId) ?? null;
   const packaging = choices.packaging.find((p) => p.id === input.packagingOptionId) ?? null;

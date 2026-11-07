@@ -28,6 +28,13 @@ export default async function SeasonalPage({ params }: PageProps<"/[lang]/season
   const [t, found] = await Promise.all([getDictionary(lang), getSeasonalCollection(slug)]);
   if (!found || !isSeasonVisible(found.collection)) notFound();
   const { collection, breeds } = found;
+  // breeds come sorted by category, then breed order
+  const groups: { category: (typeof breeds)[number]["category"]; items: typeof breeds }[] = [];
+  for (const b of breeds) {
+    const last = groups.at(-1);
+    if (last && last.category.id === b.category.id) last.items.push(b);
+    else groups.push({ category: b.category, items: [b] });
+  }
 
   return (
     <>
@@ -55,20 +62,29 @@ export default async function SeasonalPage({ params }: PageProps<"/[lang]/season
           ) : null}
         </Container>
       </section>
-      <Container className="py-12">
-        <SectionHeading title={t.catalog.eligibleBreeds} label={t.catalog.breedsIn} />
-        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-          {breeds.map((b) => (
-            <BreedCard
-              key={b.id}
-              locale={lang}
-              t={t.catalog}
-              href={`/${lang}/${b.category.slug}/${b.slug}${collection.occasion !== "none" ? `?occasion=${collection.occasion}` : ""}`}
-              breed={b}
-              categoryName={pick(lang, b.category.nameEn, b.category.nameAr)}
+      {/* Breeds straight away, grouped by category (Sheep, then Goats …). */}
+      <Container className="space-y-10 py-8 sm:space-y-14 sm:py-12">
+        {groups.map(({ category, items }) => (
+          <section key={category.id} aria-labelledby={`group-${category.slug}`} data-testid="season-group">
+            <SectionHeading
+              id={`group-${category.slug}`}
+              title={pick(lang, category.nameEn, category.nameAr)}
+              label={t.catalog.eligibleBreeds}
             />
-          ))}
-        </div>
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+              {items.map((b) => (
+                <BreedCard
+                  key={b.id}
+                  locale={lang}
+                  t={t.catalog}
+                  href={`/${lang}/${b.category.slug}/${b.slug}${collection.occasion !== "none" ? `?occasion=${collection.occasion}` : ""}`}
+                  breed={b}
+                  categoryName={pick(lang, b.category.nameEn, b.category.nameAr)}
+                />
+              ))}
+            </div>
+          </section>
+        ))}
       </Container>
     </>
   );
