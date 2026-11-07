@@ -124,6 +124,9 @@ export const cuttingOptions = pgTable("cutting_options", {
   videoUrl: text("video_url"),
   priceFils: integer("price_fils").notNull().default(0),
   isAvailable: boolean("is_available").notNull().default(true),
+  /** Shown to customers instead of "out of stock" when this is switched off (e.g. Eid slaughterhouse rules). */
+  unavailableNoteEn: text("unavailable_note_en").notNull().default(""),
+  unavailableNoteAr: text("unavailable_note_ar").notNull().default(""),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 });
@@ -151,6 +154,9 @@ export const extras = pgTable("extras", {
   priceFils: integer("price_fils").notNull().default(0),
   selectedByDefault: boolean("selected_by_default").notNull().default(false),
   isAvailable: boolean("is_available").notNull().default(true),
+  /** Shown to customers instead of "out of stock" when this is switched off (e.g. Eid slaughterhouse rules). */
+  unavailableNoteEn: text("unavailable_note_en").notNull().default(""),
+  unavailableNoteAr: text("unavailable_note_ar").notNull().default(""),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 });
@@ -165,6 +171,9 @@ export const packagingOptions = pgTable("packaging_options", {
   photoUrl: text("photo_url"),
   priceFils: integer("price_fils").notNull().default(0),
   isAvailable: boolean("is_available").notNull().default(true),
+  /** Shown to customers instead of "out of stock" when this is switched off (e.g. Eid slaughterhouse rules). */
+  unavailableNoteEn: text("unavailable_note_en").notNull().default(""),
+  unavailableNoteAr: text("unavailable_note_ar").notNull().default(""),
   sortOrder: integer("sort_order").notNull().default(0),
   ...timestamps,
 });

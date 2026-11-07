@@ -26,6 +26,8 @@ export type BuilderChoice = {
   priceFils: number;
   available: boolean;
   selectedByDefault?: boolean;
+  /** Shown instead of "out of stock" when switched off (e.g. Eid slaughterhouse rules). */
+  unavailableNote?: string;
 };
 
 type Props = {
@@ -320,6 +322,11 @@ export function OrderBuilder({
           title={o.stepCutting}
           required={cutting.some((c) => c.available) ? o.required : undefined}
         >
+          {cutting.some((c) => c.photoUrl) ? (
+            <p className="-mt-1 mb-2 text-xs text-muted" data-testid="zoom-hint">
+              {o.zoomHint}
+            </p>
+          ) : null}
           <div
             className="grid grid-cols-2 gap-2 sm:grid-cols-3"
             role="radiogroup"
@@ -351,7 +358,7 @@ export function OrderBuilder({
                   ) : null}
                   <span className="text-sm font-semibold text-green">{c.name}</span>
                   <span className="text-xs text-muted">
-                    {c.available ? plus(c.priceFils) : t.catalog.outOfStock}
+                    {c.available ? plus(c.priceFils) : c.unavailableNote || o.notAvailable}
                   </span>
                 </button>
                 {c.photoUrl ? (
@@ -408,6 +415,20 @@ export function OrderBuilder({
               </label>
             ))}
           </div>
+          {extras.some((e) => !e.available) ? (
+            <div
+              className="mt-2 rounded-brand border border-gold/60 bg-gold/10 p-3 text-sm text-charcoal"
+              data-testid="extras-note"
+            >
+              {[
+                ...new Set(
+                  extras.filter((e) => !e.available).map((e) => e.unavailableNote || o.notAvailable),
+                ),
+              ].map((note) => (
+                <p key={note}>{note}</p>
+              ))}
+            </div>
+          ) : null}
         </Step>
       ) : null}
 
@@ -444,7 +465,9 @@ export function OrderBuilder({
                   </span>
                 ) : null}
                 <span className="text-sm font-semibold leading-snug text-green">{p.name}</span>
-                <span className="text-xs">{p.available ? price(p.priceFils) : t.catalog.outOfStock}</span>
+                <span className="text-xs">
+                  {p.available ? price(p.priceFils) : p.unavailableNote || o.notAvailable}
+                </span>
               </button>
             ))}
           </div>
@@ -523,7 +546,7 @@ export function OrderBuilder({
         <PhotoDialog
           choice={zoom}
           labels={{ choose: o.chooseThisCut, close: o.close }}
-          price={zoom.available ? plus(zoom.priceFils) : t.catalog.outOfStock}
+          price={zoom.available ? plus(zoom.priceFils) : zoom.unavailableNote || o.notAvailable}
           onChoose={() => {
             setCuttingId(zoom.id);
             setZoom(null);

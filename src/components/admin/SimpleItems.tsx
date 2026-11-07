@@ -25,6 +25,8 @@ type Item = {
   priceFils: number;
   selectedByDefault?: boolean;
   isAvailable: boolean;
+  unavailableNoteEn: string;
+  unavailableNoteAr: string;
 };
 
 async function load(kind: Kind): Promise<Item[]> {
@@ -77,6 +79,19 @@ function ItemForm({
             dir="ltr"
           />
         ) : null}
+        <TextInput
+          label={t.simple.unavailableNoteEn}
+          hint={t.simple.unavailableNoteHelp}
+          name="unavailableNoteEn"
+          defaultValue={item?.unavailableNoteEn ?? ""}
+          dir="ltr"
+        />
+        <TextInput
+          label={t.simple.unavailableNoteAr}
+          name="unavailableNoteAr"
+          defaultValue={item?.unavailableNoteAr ?? ""}
+          dir="rtl"
+        />
         {kind === "cutting" ? (
           <TextInput
             label={t.simple.videoUrl}

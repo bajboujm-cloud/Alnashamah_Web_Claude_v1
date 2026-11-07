@@ -263,7 +263,12 @@ export async function saveSimple(_prev: FormState, data: FormData): Promise<Form
     if (full && (priceFils === "invalid" || priceFils === null)) bad.push("priceAed");
     if (bad.length) return fail("invalid", bad);
 
-    const content: Record<string, unknown> = { nameEn, nameAr };
+    const content: Record<string, unknown> = {
+      nameEn,
+      nameAr,
+      unavailableNoteEn: text(data, "unavailableNoteEn", 200),
+      unavailableNoteAr: text(data, "unavailableNoteAr", 200),
+    };
     if (kind !== "extras") {
       content.descriptionEn = text(data, "descriptionEn");
       content.descriptionAr = text(data, "descriptionAr");

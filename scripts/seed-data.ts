@@ -176,10 +176,16 @@ export const cuttingSeed = [
   ["mufattah", "Mufattah", "مفطّح"],
 ].map(([slug, nameEn, nameAr], i) => ({ slug, nameEn, nameAr, sortOrder: i + 1 }));
 
+/** Shown to customers when these are switched off (during Eid, government slaughterhouses keep them). */
+const eidNote = {
+  unavailableNoteEn: "Not available during Eid Al-Adha due to government slaughterhouse regulations.",
+  unavailableNoteAr: "غير متاح خلال عيد الأضحى حسب أنظمة وتعليمات المسالخ الحكومية.",
+};
+
 export const extrasSeed = [
-  { slug: "head", nameEn: "Head", nameAr: "الرأس", sortOrder: 1 },
-  { slug: "intestines", nameEn: "Intestines", nameAr: "المصران", sortOrder: 2 },
-  { slug: "tripe", nameEn: "Tripe", nameAr: "الكرش", sortOrder: 3 },
+  { slug: "head", nameEn: "Head", nameAr: "الرأس", sortOrder: 1, ...eidNote },
+  { slug: "intestines", nameEn: "Intestines", nameAr: "المصران", sortOrder: 2, ...eidNote },
+  { slug: "tripe", nameEn: "Tripe", nameAr: "الكرش", sortOrder: 3, ...eidNote },
 ];
 
 export const packagingSeed = [

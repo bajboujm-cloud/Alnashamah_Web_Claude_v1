@@ -300,7 +300,10 @@
       "packagingHelp": "Price per animal.",
       "defaultSelected": "Ticked by default",
       "videoUrl": "Video link (optional)",
-      "addItem": "Add option"
+      "addItem": "Add option",
+      "unavailableNoteEn": "Message to customers when switched off (English)",
+      "unavailableNoteAr": "Message to customers when switched off (Arabic)",
+      "unavailableNoteHelp": "Customers see this instead of \"Out of stock\", e.g. \"Not available during Eid due to government slaughterhouse regulations\". Empty = \"Not available at the moment\"."
     },
     "settings": {
       "title": "Business settings",
@@ -450,7 +453,9 @@
     "required": "Required",
     "viewPhoto": "View photo",
     "chooseThisCut": "Choose this cut",
-    "close": "Close"
+    "close": "Close",
+    "notAvailable": "Not available at the moment",
+    "zoomHint": "Tap 🔍 on a cut to see its photo larger."
   },
   "cart": {
     "title": "Your cart",

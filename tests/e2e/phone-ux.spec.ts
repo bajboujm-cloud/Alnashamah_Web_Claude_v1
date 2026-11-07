@@ -10,6 +10,7 @@ test.afterAll(async () => {
   const [{ id }] = await naeemiSmall;
   await sql`update breed_options set compare_at_price_fils = null where id = ${id}`;
   await sql`update cutting_options set photo_url = null where slug = 'arabic-8'`;
+  await sql`update extras set is_available = true`;
 });
 
 test("phones get the bottom menu bar; desktops don't", async ({ page }, info) => {
@@ -159,6 +160,7 @@ test("customers can optionally open a cutting photo and choose from it", async (
   await page.goto("/en/sheep/naeemi");
   const builder = page.getByTestId("order-builder");
   await expect(builder.getByTestId("cutting-zoom")).toHaveCount(1);
+  await expect(builder.getByTestId("zoom-hint")).toContainText("🔍");
   await builder.getByTestId("cutting-zoom").click();
   const dialog = page.getByTestId("cutting-dialog");
   await expect(dialog).toBeVisible();
@@ -171,4 +173,21 @@ test("customers can optionally open a cutting photo and choose from it", async (
   await builder.getByTestId("cutting-choice").nth(1).click();
   await expect(builder.getByTestId("cutting-choice").nth(1)).toHaveAttribute("aria-checked", "true");
   await expect(page.getByTestId("cutting-dialog")).toHaveCount(0);
+});
+
+test("switched-off 'Order includes' show the Eid message, never 'out of stock'", async ({ page }) => {
+  await sql`update extras set is_available = false`;
+  await page.goto("/ar/sheep/naeemi");
+  const builder = page.getByTestId("order-builder");
+  for (const box of await builder.getByTestId("extra-choice").all()) await expect(box).toBeDisabled();
+  const note = builder.getByTestId("extras-note");
+  await expect(note).toHaveText("غير متاح خلال عيد الأضحى حسب أنظمة وتعليمات المسالخ الحكومية.");
+  await expect(page.locator("#step-cutting").locator("..")).not.toContainText("نفدت الكمية");
+  // ordering still works without them
+  await builder.getByTestId("option-row").first().click();
+  await builder.getByTestId("cutting-choice").first().click();
+  await builder.getByTestId("packaging-choice").first().click();
+  await builder.getByTestId("add-to-cart").click();
+  await expect(builder.getByTestId("builder-message")).toContainText("تمت الإضافة");
+  await sql`update extras set is_available = true`;
 });

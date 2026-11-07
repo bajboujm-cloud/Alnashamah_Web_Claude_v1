@@ -123,6 +123,7 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
                 available: isOptionAvailable(breed, o),
               }))}
               cutting={choices.cutting.map((c) => ({
+                unavailableNote: pick(lang, c.unavailableNoteEn, c.unavailableNoteAr),
                 id: c.id,
                 name: pick(lang, c.nameEn, c.nameAr),
                 photoUrl: c.photoUrl,
@@ -130,6 +131,7 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
                 available: c.isAvailable,
               }))}
               extras={choices.extras.map((e) => ({
+                unavailableNote: pick(lang, e.unavailableNoteEn, e.unavailableNoteAr),
                 id: e.id,
                 name: pick(lang, e.nameEn, e.nameAr),
                 priceFils: e.priceFils,
@@ -137,6 +139,7 @@ export default async function BreedPage({ params, searchParams }: PageProps<"/[l
                 selectedByDefault: e.selectedByDefault,
               }))}
               packaging={choices.packaging.map((p) => ({
+                unavailableNote: pick(lang, p.unavailableNoteEn, p.unavailableNoteAr),
                 id: p.id,
                 name: pick(lang, p.nameEn, p.nameAr),
                 photoUrl: p.photoUrl,
