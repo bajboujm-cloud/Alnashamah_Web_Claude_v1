@@ -129,13 +129,23 @@ export default async function CartPage({ params }: PageProps<"/[lang]/cart">) {
           </dl>
           {cart.includesVat ? <p className="mt-1 text-xs text-muted">{c.vatIncluded}</p> : null}
           {!cart.canCheckout ? <p className="mt-4 text-sm text-danger">{c.fixLines}</p> : null}
-          <button
-            type="button"
-            disabled
-            className="mt-4 w-full rounded-brand bg-green px-5 py-3 font-semibold text-ivory opacity-60"
-          >
-            {c.checkout}
-          </button>
+          {cart.canCheckout ? (
+            <Link
+              href={`/${lang}/checkout`}
+              className="mt-4 block w-full rounded-brand bg-green px-5 py-3 text-center font-semibold text-ivory hover:bg-green-700"
+              data-testid="go-checkout"
+            >
+              {c.checkout}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="mt-4 w-full rounded-brand bg-green px-5 py-3 font-semibold text-ivory opacity-60"
+            >
+              {c.checkout}
+            </button>
+          )}
           <p className="mt-2 text-xs text-muted">{c.checkoutSoon}</p>
           <Link href={`/${lang}#categories`} className="mt-4 inline-block text-sm text-gold-deep underline">
             {c.continueShopping}

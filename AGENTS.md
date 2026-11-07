@@ -51,6 +51,14 @@ pnpm e2e                  # browser tests (tests/e2e), desktop + phone, needs th
 - `src/lib/pricing.ts` — pure price maths (unit/line totals, VAT) shared by the order builder and the server.
 - `src/server/cart.ts` + `src/app/actions/cart.ts` — cart in the database, id in an httpOnly cookie; `resolveLine()`
   re-checks every choice against the live catalogue. Never store or trust prices from the browser.
+- Customers (Phase 4): `src/server/customer/` — mobile + one-time code (`otp.ts`: HMAC-hashed 6-digit codes,
+  5-minute expiry, 5 tries then a 15-minute lock, 3 codes per 15 min per number, per-IP limit) and sessions
+  (`session.ts`: member 30 days / guest 4 hours, SHA-256 of the cookie stored, new token on every sign-in,
+  "sign out of all devices"). Providers: `src/server/otp/` (`OTP_PROVIDER=console|twilio`), bot check
+  `src/server/bot-check.ts` (Turnstile when keys are set), `src/lib/phone.ts` (UAE + GCC allow-list).
+  Pages: `checkout/`, `account/`, `account/login/`. Checkout choices (address, pick-up, date, slot) are saved
+  on the cart by `src/app/actions/checkout.ts`; totals with delivery in `src/server/checkout.ts` + `orderTotals()`.
+  Delivery rules (Dubai time, cut-off, blackout days) in `src/lib/delivery.ts`; admin screen `admin/(panel)/delivery`.
 - `src/lib/availability.ts` — stock rules (breed off ⇒ all its options out of stock; out-of-stock items are shown
   with a label, never hidden). Reuse these everywhere (pages, admin, checkout, API).
 - `scripts/seed.ts` + `scripts/seed-data.ts` — starting catalogue. The seed only adds missing rows and never

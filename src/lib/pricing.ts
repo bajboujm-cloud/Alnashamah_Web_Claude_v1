@@ -35,3 +35,28 @@ export function cartTotals(lines: PricedLine[], vatPercent: number, pricesInclud
 }
 
 export const clampQuantity = (q: number) => Math.min(MAX_QUANTITY, Math.max(1, Math.floor(q) || 1));
+
+export type OrderTotals = {
+  itemsFils: number;
+  deliveryFils: number;
+  subtotalFils: number;
+  vatFils: number;
+  totalFils: number;
+};
+
+/** Checkout totals: animals + delivery fee, VAT on both (VAT-inclusive or added on top, as set). */
+export function orderTotals(
+  lines: PricedLine[],
+  deliveryFils: number,
+  vatPercent: number,
+  pricesIncludeVat: boolean,
+): OrderTotals {
+  const itemsFils = lines.reduce((acc, l) => acc + lineFils(l), 0);
+  const sum = itemsFils + deliveryFils;
+  if (pricesIncludeVat) {
+    const vat = Math.round((sum * vatPercent) / (100 + vatPercent));
+    return { itemsFils, deliveryFils, subtotalFils: sum - vat, vatFils: vat, totalFils: sum };
+  }
+  const vat = Math.round((sum * vatPercent) / 100);
+  return { itemsFils, deliveryFils, subtotalFils: sum, vatFils: vat, totalFils: sum + vat };
+}

@@ -21,6 +21,8 @@ export default defineConfig({
     command: isCI ? `pnpm start --port ${PORT}` : `pnpm dev --port ${PORT}`,
     url: `http://localhost:${PORT}/ar`,
     reuseExistingServer: !isCI,
+    // The production build hides login codes; the tests read them from the laptop-only test box.
+    env: { OTP_SHOW_CODE: "true", OTP_IP_LIMIT_PER_HOUR: "1000" },
     timeout: 120_000,
   },
 });

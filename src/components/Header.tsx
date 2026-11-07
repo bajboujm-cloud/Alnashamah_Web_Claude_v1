@@ -77,6 +77,26 @@ export function Header({
               </span>
             ) : null}
           </Link>
+          <Link
+            href={`/${locale}/account`}
+            aria-label={t.nav.account}
+            title={t.nav.account}
+            className="hidden h-11 w-11 items-center justify-center rounded-brand border border-line text-green hover:border-gold md:flex"
+            data-testid="header-account"
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              aria-hidden
+            >
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21a8 8 0 0 1 16 0" strokeLinecap="round" />
+            </svg>
+          </Link>
           <LanguageSwitch
             locale={locale}
             label={t.nav.switchLanguage}

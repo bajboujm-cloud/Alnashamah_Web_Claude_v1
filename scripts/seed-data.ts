@@ -262,4 +262,19 @@ export const settingsSeed: Record<string, unknown> = {
   "company.email": "",
   "tax.vat_rate_percent": 5,
   "tax.prices_include_vat": true,
+  // Pick-up from the shop: off until the owner decides.
+  "delivery.pickup_enabled": false,
+  "delivery.pickup_address_en": "",
+  "delivery.pickup_address_ar": "",
 };
+
+/** One generic placeholder slot until the owner decides real slots, capacity and cut-off. */
+export const deliverySlotSeed = [
+  {
+    nameEn: "Any time (9 am – 9 pm)",
+    nameAr: "أي وقت (9 صباحاً – 9 مساءً)",
+    startTime: "09:00",
+    endTime: "21:00",
+    sortOrder: 1,
+  },
+];

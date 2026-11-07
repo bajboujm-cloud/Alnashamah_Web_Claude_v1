@@ -8,6 +8,7 @@ import {
   categorySeed,
   cuttingSeed,
   deliveryZoneSeed,
+  deliverySlotSeed,
   extrasSeed,
   optionLabels,
   packagingSeed,
@@ -87,6 +88,9 @@ async function main() {
   await db.insert(s.extras).values(extrasSeed).onConflictDoNothing();
   await db.insert(s.packagingOptions).values(packagingSeed).onConflictDoNothing();
   await db.insert(s.deliveryZones).values(deliveryZoneSeed).onConflictDoNothing();
+  // Slots have no natural key: only add the placeholder when there are none at all.
+  if (!(await db.select({ id: s.deliverySlots.id }).from(s.deliverySlots).limit(1)).length)
+    await db.insert(s.deliverySlots).values(deliverySlotSeed);
 
   for (const { categories: catSlugs, ...collection } of seasonalSeed) {
     await db.insert(s.seasonalCollections).values(collection).onConflictDoNothing();

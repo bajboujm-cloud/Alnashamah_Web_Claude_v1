@@ -32,6 +32,7 @@ export default async function PanelLayout({ children, params }: LayoutProps<"/[l
     { href: `${base}/texts`, label: t.nav.texts, perm: "catalog.content" },
     { href: `${base}/branding`, label: t.nav.branding, perm: "settings.edit" },
     { href: `${base}/promotions`, label: t.nav.promotions, perm: "catalog.content" },
+    { href: `${base}/delivery`, label: t.nav.delivery, perm: "settings.edit" },
     { href: `${base}/settings`, label: t.nav.settings, perm: "settings.edit" },
     { href: `${base}/staff`, label: t.nav.staff, perm: "staff.manage" },
     { href: `${base}/audit`, label: t.nav.audit, perm: "audit.view" },

@@ -1,4 +1,12 @@
-import { createCipheriv, createDecipheriv, createHash, hkdfSync, randomBytes } from "node:crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  createHmac,
+  hkdfSync,
+  randomBytes,
+  timingSafeEqual,
+} from "node:crypto";
 
 /** 32-byte key derived from AUTH_SECRET for a given purpose. */
 function key(secret: string, purpose: string) {
@@ -27,3 +35,14 @@ export function decrypt(payload: string, secret: string, purpose = "totp") {
 export const sha256 = (value: string) => createHash("sha256").update(value).digest("hex");
 
 export const randomToken = (bytes = 32) => randomBytes(bytes).toString("base64url");
+
+/** Keyed hash (HMAC-SHA256) — used for one-time codes so a database leak can't reveal them. */
+export const hmac = (value: string, secret: string, purpose: string) =>
+  createHmac("sha256", key(secret, purpose)).update(value).digest("hex");
+
+/** Constant-time comparison of two hex strings. */
+export function safeEqualHex(a: string, b: string) {
+  const x = Buffer.from(a, "hex");
+  const y = Buffer.from(b, "hex");
+  return x.length === y.length && x.length > 0 && timingSafeEqual(x, y);
+}

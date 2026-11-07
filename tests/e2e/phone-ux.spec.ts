@@ -18,8 +18,8 @@ test("phones get the bottom menu bar; desktops don't", async ({ page }, info) =>
   const phone = info.project.name === "phone";
   await expect(page.getByTestId("bottom-nav")).toBeVisible({ visible: phone });
   if (!phone) return;
-  await expect(page.getByTestId("bottom-nav").getByRole("link")).toHaveCount(3); // home, livestock, cart
-  await expect(page.getByTestId("bottom-nav")).toContainText("قريباً"); // orders + account come later
+  await expect(page.getByTestId("bottom-nav").getByRole("link")).toHaveCount(4); // home, livestock, cart, account
+  await expect(page.getByTestId("bottom-nav")).toContainText("قريباً"); // orders come with online payment
 });
 
 test("phone home: short welcome, then Eid banner, then categories on the first screen", async ({

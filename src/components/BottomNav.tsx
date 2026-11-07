@@ -82,7 +82,7 @@ export function BottomNav({
         />
       ),
     },
-    // Orders and account arrive with customer sign-in (Phase 4) and order tracking (Phase 6).
+    // Orders arrive with online payment and order tracking (Phases 5–6).
     {
       key: "orders",
       href: null,
@@ -100,7 +100,7 @@ export function BottomNav({
     },
     {
       key: "account",
-      href: null,
+      href: `/${locale}/account`,
       label: labels.account,
       icon: (
         <Icon

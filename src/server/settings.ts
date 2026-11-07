@@ -12,3 +12,10 @@ export const SETTING_KEYS = [
   "tax.vat_rate_percent",
   "tax.prices_include_vat",
 ] as const;
+
+/** Pick-up from the shop (edited on the admin "Delivery" screen). */
+export const PICKUP_KEYS = [
+  "delivery.pickup_enabled",
+  "delivery.pickup_address_en",
+  "delivery.pickup_address_ar",
+] as const;

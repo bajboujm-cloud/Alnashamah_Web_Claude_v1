@@ -248,7 +248,10 @@ database migrations, env vars or CI. After Phase 1, create one small GitHub issu
 - **Phase 3 ✅** — order builder (size, cutting, extras, packaging, quantity, occasion + "on behalf of",
   notes, live total), server-validated cart (cookie-based, prices re-checked on every view, unavailable
   items flagged and excluded), header cart badge, VAT shown.
-- **Phase 4** — customer phone-OTP login, guest checkout, addresses, delivery placeholder.
+- **Phase 4 ✅** — customer phone-OTP login (members) and verified-guest checkout, saved addresses and account
+  page, delivery or pick-up, date & time slot (cut-off, blackout days), delivery fee per emirate ("to be confirmed"
+  while empty), review step; admin "Delivery" screen. Payment button stays off until Phase 5.
+  Still to do later: change of phone number with re-verification, verified email as a backup, map pin.
 - **Phase 5** — mock payment + webhook, orders, VAT, PDF invoice, emails.
 - **Phase 6** — order tracking, admin order management, coupons, Eid Al-Adha collection, reports.
 - **Phase 7** — SEO, PWA, accessibility/performance/security hardening, go-live checklist and

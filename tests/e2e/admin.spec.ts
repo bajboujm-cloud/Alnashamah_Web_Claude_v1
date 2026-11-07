@@ -33,6 +33,10 @@ test.afterAll(async () => {
   await sql`update categories set status = 'coming_soon' where slug in ('cattle', 'camels')`;
   await sql`update seasonal_collections set is_active = true where slug = 'eid-al-adha'`;
   await sql`update seasonal_collections set no_extras = true where slug = 'eid-al-adha'`;
+  await sql`update delivery_zones set fee_fils = null, is_active = true`;
+  await sql`delete from delivery_blackout_dates`;
+  await sql`delete from delivery_slots where name_en = 'Evening'`;
+  await sql`update settings set value = 'false'::jsonb where key = 'delivery.pickup_enabled'`;
   await sql`delete from site_texts`;
   await sql`update breeds set is_visible = true`;
   await sql`delete from promotions`;
@@ -238,6 +242,41 @@ test("the Eid 'no head/intestines/tripe' rule can be switched off and on", async
   for (const box of await builder.getByTestId("extra-choice").all()) await expect(box).toBeDisabled();
 });
 
+test("delivery set-up: fee per emirate, extra time slot, day off and pick-up", async () => {
+  await page.goto("/en/admin/delivery");
+  const dubai = page.locator('[data-testid=admin-zone][data-slug="dubai"]');
+  await dubai.locator("input[name=feeAed]").fill("25");
+  await dubai.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByTestId("admin-zones").getByTestId("form-message").first()).toHaveText("Saved ✓");
+  const [zone] = await sql`select fee_fils from delivery_zones where slug = 'dubai'`;
+  expect(zone.fee_fils).toBe(2500);
+
+  const slots = page.getByTestId("admin-slots");
+  await slots.locator("summary").click();
+  const add = slots.locator("details form");
+  await add.locator("input[name=nameEn]").fill("Evening");
+  await add.locator("input[name=nameAr]").fill("مساءً");
+  await add.locator("input[name=startTime]").fill("17:00");
+  await add.locator("input[name=endTime]").fill("21:00");
+  await add.locator("input[name=cutoffHours]").fill("24");
+  await add.getByRole("button", { name: "Add" }).click();
+  await expect(slots.getByTestId("admin-slot")).toHaveCount(2);
+
+  const off = page.getByTestId("admin-blackouts");
+  await off.locator("input[name=date]").fill("2099-01-01");
+  await off.locator("input[name=noteEn]").fill("Holiday");
+  await off.getByRole("button", { name: "Add day" }).click();
+  await expect(off.locator("li")).toContainText("Holiday");
+
+  const pickup = page.getByTestId("admin-pickup");
+  await pickup.locator("input[name=enabled]").check();
+  await pickup.locator("input[name=addressEn]").fill("Al Aweer Market, Shop 12");
+  await pickup.getByRole("button", { name: "Save" }).click();
+  await expect(pickup.getByTestId("form-message")).toHaveText("Saved ✓");
+  const [p] = await sql`select value from settings where key = 'delivery.pickup_enabled'`;
+  expect(p.value).toBe(true);
+});
+
 test("website wording can be edited and reset", async () => {
   await page.goto("/en/admin/texts");
   const home = page.getByTestId("texts-home");
@@ -382,7 +421,7 @@ test("categories, breeds, cuts, order includes and packaging can be moved up and
 
 test("admin lists fit the phone screen (nothing cut off at the sides)", async ({}, info) => {
   test.skip(info.project.name !== "phone", "phone layout only");
-  for (const path of ["breeds", "categories", "cutting", "extras", "packaging"]) {
+  for (const path of ["breeds", "categories", "cutting", "extras", "packaging", "delivery"]) {
     await page.goto(`/en/admin/${path}`);
     const overflow = await page.evaluate(() => {
       const width = document.documentElement.clientWidth;

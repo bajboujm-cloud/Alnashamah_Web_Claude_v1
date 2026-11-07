@@ -2,6 +2,8 @@ import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  date,
+  index,
   integer,
   jsonb,
   numeric,
@@ -332,8 +334,16 @@ export const staffSessions = pgTable("staff_sessions", {
 
 export const occasions = ["none", "udhiyah", "aqiqah", "sadaqah", "other"] as const;
 
+export const fulfilments = ["delivery", "pickup"] as const;
+
 export const carts = pgTable("carts", {
   id: uuid("id").primaryKey().defaultRandom(),
+  /** Checkout choices, filled step by step (customer → address → date & time). */
+  customerId: uuid("customer_id").references(() => customers.id, { onDelete: "set null" }),
+  fulfilment: text("fulfilment", { enum: fulfilments }).notNull().default("delivery"),
+  addressId: uuid("address_id").references(() => customerAddresses.id, { onDelete: "set null" }),
+  deliveryDate: date("delivery_date"),
+  slotId: uuid("slot_id").references(() => deliverySlots.id, { onDelete: "set null" }),
   ...timestamps,
 });
 
@@ -357,6 +367,111 @@ export const cartItems = pgTable("cart_items", {
   notes: text("notes").notNull().default(""),
   ...timestamps,
 });
+
+/* ----------------------------------------------------------------------------------------------
+ * Customers: sign in with mobile number + one-time code (members), or verify the number and continue
+ * as a guest. Only a SHA-256 of the session cookie and an HMAC of each code are stored.
+ * -------------------------------------------------------------------------------------------- */
+
+export const customers = pgTable("customers", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  /** Verified mobile number in international format, e.g. +971501234567. */
+  phone: text("phone").notNull().unique(),
+  name: text("name").notNull().default(""),
+  email: text("email"),
+  /** "Email me the invoice". */
+  emailInvoices: boolean("email_invoices").notNull().default(false),
+  /** True once they signed in with an account (guests stay false). */
+  isMember: boolean("is_member").notNull().default(false),
+  lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+  ...timestamps,
+});
+
+export const customerSessions = pgTable(
+  "customer_sessions",
+  {
+    /** SHA-256 of the random token kept in the browser cookie. */
+    id: text("id").primaryKey(),
+    customerId: uuid("customer_id")
+      .notNull()
+      .references(() => customers.id, { onDelete: "cascade" }),
+    /** "member" = signed in (30 days); "guest" = verified number for one checkout (a few hours). */
+    kind: text("kind", { enum: ["member", "guest"] }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    userAgent: text("user_agent"),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [index("customer_sessions_customer_idx").on(t.customerId)],
+);
+
+export const otpChallenges = pgTable(
+  "otp_challenges",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    phone: text("phone").notNull(),
+    /** HMAC of the 6-digit code (null when the SMS provider checks the code itself). */
+    codeHash: text("code_hash"),
+    attempts: integer("attempts").notNull().default(0),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    ip: text("ip"),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [index("otp_challenges_phone_idx").on(t.phone, t.createdAt)],
+);
+
+export const customerAddresses = pgTable("customer_addresses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  customerId: uuid("customer_id")
+    .notNull()
+    .references(() => customers.id, { onDelete: "cascade" }),
+  zoneId: uuid("zone_id")
+    .notNull()
+    .references(() => deliveryZones.id, { onDelete: "restrict" }),
+  area: text("area").notNull(),
+  /** Street, building / villa, flat. */
+  street: text("street").notNull(),
+  landmark: text("landmark").notNull().default(""),
+  /** Optional map pin (Google Maps later). */
+  latitude: numeric("latitude", { precision: 9, scale: 6, mode: "number" }),
+  longitude: numeric("longitude", { precision: 9, scale: 6, mode: "number" }),
+  /** Shown in the member's address book ("Save this address"). */
+  isSaved: boolean("is_saved").notNull().default(false),
+  ...timestamps,
+});
+
+/** Delivery time slots (placeholder until the owner decides): capacity and order cut-off per slot. */
+export const deliverySlots = pgTable("delivery_slots", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  nameEn: text("name_en").notNull(),
+  nameAr: text("name_ar").notNull(),
+  /** "HH:MM", Dubai time. */
+  startTime: text("start_time").notNull().default("09:00"),
+  endTime: text("end_time").notNull().default("21:00"),
+  /** Animals per day for this slot; empty = no limit. */
+  capacity: integer("capacity"),
+  /** Orders close this many hours before the slot starts. */
+  cutoffHours: integer("cutoff_hours").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  ...timestamps,
+});
+
+/** Days with no deliveries (e.g. a public holiday). */
+export const deliveryBlackouts = pgTable("delivery_blackout_dates", {
+  date: date("date").primaryKey(),
+  noteEn: text("note_en").notNull().default(""),
+  noteAr: text("note_ar").notNull().default(""),
+});
+
+export const customersRelations = relations(customers, ({ many }) => ({
+  addresses: many(customerAddresses),
+}));
+
+export const customerAddressesRelations = relations(customerAddresses, ({ one }) => ({
+  customer: one(customers, { fields: [customerAddresses.customerId], references: [customers.id] }),
+  zone: one(deliveryZones, { fields: [customerAddresses.zoneId], references: [deliveryZones.id] }),
+}));
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
   breeds: many(breeds),
